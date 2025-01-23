@@ -8,9 +8,17 @@ import subprocess
 import multiprocessing as mp
 from numpy import random
 from time import sleep
+import argparse
+from pathlib import Path
 
-trace_folder = f"sample_traces"
-results_dir = f"processed_results"
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--trace_dir', help='path to trace directory', required= True)
+parser.add_argument('--results_dir', help='path to results directory', required= True)
+
+args = parser.parse_args()
+trace_dir = Path(args.trace_dir)
+results_dir = Path(args.results_dir)
 
 def get_trace_paths(start_path):
     ret_list = []
@@ -162,7 +170,7 @@ def process_run_op(pass_status, my_trace_path, my_run_name, op_file):
     }
     return retval
 
-my_traces = get_trace_paths(trace_folder)
+my_traces = get_trace_paths(trace_dir)
 
 print(f'Got {len(my_traces)} traces')
 
