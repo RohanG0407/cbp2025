@@ -17,6 +17,23 @@ The simulator comes with a sample branch-predictor in sample_branch_predictor(./
 
 `make clean && make`
 
+## Branch Predictor Interface
+
+The simulator provides multiple hooks that correspond to different events during the lifetime of an instruction. These hooks provide the contestants with the relevant state available at that pipeline stage. Summary of the available hooks:
+* beginCondDirPredictor - Intended for any predictor initialization steps.
+* get_cond_dir_prediction - invoke the predictor to get the prediction of the relevant branch. This is called only for conditional branches.
+* spec_update - Intended to help update history associated with the predictors(GHR/LHIST etc). This is called for all branches.
+* notify_instr_decode - Called when an instruction is decoded.
+* notify_instr_execute_resolve - Called when any instruction is executed.
+* notify_instr_commit - Called when any instruction is committed.
+* endCondDirPredictor - Called at the end of simulation to allow contestants to dump any specific state.
+  
+See [cbp.h](./cbp.h) and [cond_branch_predictor_interface.cc](./cond_branch_predictor_interface.cc) for more details.
+
+The [sample_predictor](sample_branch_predictor/my_cond_branch_predictor.h) leverages the same interface. It uses get_cond_dir_prediction for prediction, spec_update for history update and notify_instr_execute_resolve update for predictor update. It doesn't leverage decode/commit interfaces at the moment but contestants are free to exploit those. 
+
+Contestants are allowed to implement any interface within my_cond_branch_predictor.h and my_cond_branch_predictor.cc as long as they keep the interface above intact. Paricipants are free to update the implementation of these functions above to inteface with their own predictors.
+
 ## Examples
 See Simulator options:
 
@@ -46,16 +63,9 @@ The script executes all the traces inside the trace directory and creates a dire
 
 The script also parses all the logs to dump a csv with relevant stats.
 
-## Branch Predictor Interface
-
-See [cbp.h](./cbp.h) and [cond_branch_predictor_interface.cc](./cond_branch_predictor_interface.cc)
-
 ## Getting Traces
 
 TODO: Add wget calls
-
-## Prediction Interfaces
-TODO:: Elaborate about the interface
 
 ## Sample Output Per Run
 
