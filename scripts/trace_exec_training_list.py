@@ -61,7 +61,7 @@ def process_run_op(pass_status, my_trace_path, my_run_name, op_file):
     process_100perc_section = False
 
     _50perc_section_header = 'DIRECT CONDITIONAL BRANCH PREDICTION MEASUREMENTS (50 Perc instructions)'
-    _100perc_section_header = 'DIRECT CONDITIONAL BRANCH PREDICTION MEASUREMENTS (Full Simulation i.e. No Warmup)'
+    _100perc_section_header = 'DIRECT CONDITIONAL BRANCH PREDICTION MEASUREMENTS (Full Simulation i.e. Counts Not Reset When Warmup Ends)'
 
     found_50perc_line_to_process = False
     found_100perc_line_to_process = False

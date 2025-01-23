@@ -26,7 +26,7 @@
 extern void beginCondDirPredictor();
 
 //
-// get_cond_dir_prediction(uint64_t seq_no, uint8_t piece, uint64_t pc)
+// get_cond_dir_prediction(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t pred_cycle)
 // 
 // This function is called by the simulator for predicting conditional branches.
 // input values are unique identifying ids(seq_no, piece) and PC of the branch.
@@ -45,7 +45,7 @@ extern bool get_cond_dir_prediction(uint64_t seq_no, uint8_t piece, uint64_t pc,
 extern void spec_update(uint64_t seq_no, uint8_t piece, uint64_t pc, InstClass inst_class, const bool resolve_dir, const bool pred_dir, const uint64_t next_pc);
 
 //
-// notify_instr_decode(uint64_t seq_no, uint8_t piece, uint64_t pc, const DecodeInfo& _decode_info)
+// notify_instr_decode(uint64_t seq_no, uint8_t piece, uint64_t pc, const DecodeInfo& _decode_info, const uint64_t decode_cycle)
 // 
 // This function is called when any instructions(not just branches) gets decoded.
 // Along with the unique identifying ids(seq_no, piece), PC of the instruction, decode info and cycle are also provided as inputs
@@ -53,7 +53,7 @@ extern void spec_update(uint64_t seq_no, uint8_t piece, uint64_t pc, InstClass i
 extern void notify_instr_decode(uint64_t seq_no, uint8_t piece, uint64_t pc, const DecodeInfo& _decode_info, const uint64_t decode_cycle);
 
 //
-// notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool pred_dir, const ExecuteInfo& _exec_info)
+// notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool pred_dir, const ExecuteInfo& _exec_info, const uint64_t execute_cycle)
 // 
 // This function is called when any instructions(not just branches) gets executed.
 // Along with the unique identifying ids(seq_no, piece), PC of the instruction, execute info and cycle are also provided as inputs
@@ -61,7 +61,7 @@ extern void notify_instr_decode(uint64_t seq_no, uint8_t piece, uint64_t pc, con
 extern void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool pred_dir, const ExecuteInfo& _exec_info, const uint64_t execute_cycle);
 
 //
-// notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool pred_dir, const ExecuteInfo& _exec_info)
+// notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool pred_dir, const ExecuteInfo& _exec_info, const uint64_t commit_cycle)
 // 
 // This function is called when any instructions(not just branches) gets committed.
 // Along with the unique identifying ids(seq_no, piece), PC of the instruction, execute info and cycle are also provided as inputs
@@ -76,9 +76,3 @@ extern void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, con
 // It can be used by the contestant to print out other contestant-specific measurements.
 //
 extern void endCondDirPredictor();
-
-//
-// temp_predictor_update_hook()
-// 
-//
-extern void temp_predictor_update_hook(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool resolve_dir, const bool pred_dir, const uint64_t next_pc);

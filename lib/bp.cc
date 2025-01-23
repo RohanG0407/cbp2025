@@ -226,7 +226,7 @@ void bp_t::output()
 
    uint64_t num_inst = (meas_conddir_n + meas_jumpdir_n + meas_jumpind_n + meas_jumpret_n + meas_notctrl_n);
    uint64_t num_misp = (meas_conddir_m + meas_jumpind_m + meas_jumpret_m + meas_notctrl_m);
-   printf("\n-----------------------------------------------------------BRANCH PREDICTION MEASUREMENTS (Full Simulation i.e. No Warmup)----------------------------------------------------------\n");
+   printf("\n-----------------------------------------------BRANCH PREDICTION MEASUREMENTS (Full Simulation i.e. Counts Not Reset When Warmup Ends)----------------------------------------------\n");
    printf("Type                   NumBr     MispBr        mr     mpki\n");
    //BP_OUTPUT("All              ", num_inst, num_misp, num_inst);
    BP_OUTPUT("CondDirect       ", meas_conddir_n, meas_conddir_m, num_inst);
@@ -234,7 +234,7 @@ void bp_t::output()
    BP_OUTPUT("JumpIndirect     ", meas_jumpind_n, meas_jumpind_m, num_inst);
    BP_OUTPUT("JumpReturn       ", meas_jumpret_n, meas_jumpret_m, num_inst);
    BP_OUTPUT("Not control      ", meas_notctrl_n, meas_notctrl_m, num_inst);
-      printf("------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
+   printf("------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
 }
 
 void bp_t::output_periodic_info(const std::vector<uint64_t>&num_insts_per_epoch, const std::vector<uint64_t>&num_cycles_per_epoch)
@@ -326,7 +326,7 @@ void bp_t::output_periodic_info(const std::vector<uint64_t>&num_insts_per_epoch,
    {
       const uint64_t total_instr = std::accumulate(num_insts_per_epoch.begin(), num_insts_per_epoch.end(), 0);	// # mispredicted jumps, return
       const uint64_t target_instr_count = total_instr;
-      printf("\n-------------------------------------------------DIRECT CONDITIONAL BRANCH PREDICTION MEASUREMENTS (Full Simulation i.e. No Warmup)-------------------------------------------------\n");
+      printf("\n-------------------------------------DIRECT CONDITIONAL BRANCH PREDICTION MEASUREMENTS (Full Simulation i.e. Counts Not Reset When Warmup Ends)-------------------------------------\n");
       printf("       Instr       Cycles      IPC      NumBr     MispBr BrPerCyc MispBrPerCyc        MR     MPKI      CycWP   CycWPAvg   CycWPPKI\n");
       uint64_t my_instr_count = 0;
       uint64_t my_cycle_count = 0;

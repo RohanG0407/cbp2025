@@ -848,30 +848,29 @@ void uarchsim_t::output()
    printf("L3$: %ld %s, %ld-way set-assoc., %ldB block size, %ld-cycle search latency\n",
    	  SCALED_SIZE(L3_SIZE), SCALED_UNIT(L3_SIZE), L3_ASSOC, L3_BLOCKSIZE, L3_LATENCY);
    printf("Main Memory: %ld-cycle fixed search time\n", MAIN_MEMORY_LATENCY);
-   printf("STORE QUEUE MEASUREMENTS (Full Simulation i.e. No Warmup)---------------------------\n");
+   printf("---------------------------STORE QUEUE MEASUREMENTS (Full Simulation i.e. Counts Not Reset When Warmup Ends)---------------------------\n");
    printf("Number of loads: %ld\n", num_load);
    printf("Number of loads that miss in SQ: %ld (%.2f%%)\n", num_load_sqmiss, 100.0*(double)num_load_sqmiss/(double)num_load);
    printf("Number of PFs issued to the memory system %ld\n", stat_pfs_issued_to_mem);
-   printf("MEMORY HIERARCHY MEASUREMENTS (Full Simulation i.e. No Warmup)----------------------\n");
+   printf("---------------------------------------------------------------------------------------------------------------------------------------\n");
+   printf("------------------------MEMORY HIERARCHY MEASUREMENTS (Full Simulation i.e. Counts Not Reset When Warmup Ends)-------------------------\n");
    if (FETCH_MODEL_ICACHE) {
       printf("I$:\n"); IC.stats();
    }
    printf("L1$:\n"); L1.stats();
    printf("L2$:\n"); L2.stats();
    printf("L3$:\n"); L3.stats();
-   printf("Prefetcher (Full Simulation i.e. No Warmup)------------------------------------------\n");
+   printf("---------------------------------------------------------------------------------------------------------------------------------------\n");
+   printf("----------------------------------------------Prefetcher (Full Simulation i.e. No Warmup)----------------------------------------------\n");
    prefetcher.print_stats();
-   // Branch Prediction Measurements
-   printf("\n------------------------------------ILP LIMIT STUDY (Full Simulation i.e. No Warmup)------------------------------------\n");
+   printf("---------------------------------------------------------------------------------------------------------------------------------------\n");
+   printf("\n-------------------------------ILP LIMIT STUDY (Full Simulation i.e. Counts Not Reset When Warmup Ends)--------------------------------\n");
    printf("instructions = %ld\n", num_inst);
    printf("cycles       = %ld\n", cycle);
-   printf("WPCycles     = %ld\n", cycles_on_wrong_path);
+   printf("CycWP        = %ld\n", cycles_on_wrong_path);
    printf("IPC          = %.4f\n", ((double)num_inst/(double)cycle));
-   printf("------------------------------------------------------------------------------------------------------------------------\n");
+   printf("\n---------------------------------------------------------------------------------------------------------------------------------------\n");
+   // Branch Prediction Measurements
    BP.output();
    BP.output_periodic_info(num_insts_per_epoch, num_cycles_per_epoch);
-   //printf("CVP STUDY------------------------------------------\n");
-   //printf("prediction-eligible instructions = %ld\n", num_eligible);
-   //printf("correct predictions              = %ld (%.2f%%)\n", num_correct, (100.0*(double)num_correct/(double)num_eligible));
-   //printf("incorrect predictions            = %ld (%.2f%%)\n", num_incorrect, (100.0*(double)num_incorrect/(double)num_eligible));
 }
