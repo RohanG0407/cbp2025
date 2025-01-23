@@ -2,8 +2,9 @@
 Championship Branch Prediction 2025
 
 ## Build
-The simulator expects a branch predictor to be implemented in the files my_cond_branch_predictor.h/cc. The Makefile already accounts for these. Once these files are added run the following to build the simulator:
-The predictor is statically instantiated within the implemented file. For reference check [my_cond_branch_predictor.h](./sample_branch_predictor/my_cond_branch_predictor.h)
+The simulator expects a branch predictor to be implemented in the files my_cond_branch_predictor.h/cc. The Makefile already accounts for these. The predictor is statically instantiated within the implemented file. For reference check sample predictor file: [my_cond_branch_predictor.h](./sample_branch_predictor/my_cond_branch_predictor.h)
+
+To build the simulator once the predictor files are added:
 
 `make clean && make`
 
@@ -11,7 +12,9 @@ The predictor is statically instantiated within the implemented file. For refere
 The simulator comes with a sample branch-predictor in sample_branch_predictor(./sample_branch_predictor/). To build with the sample branch-predictor run:
 
 `ln -s sample_branch_predictor/my_cond_branch_predictor.cc .`
+
 `ln -s sample_branch_predictor/my_cond_branch_predictor.h .`
+
 `make clean && make`
 
 ## Examples
@@ -36,6 +39,7 @@ Sample traces are provided : [sample_traces](./sample_traces)
 Script to run all traces and dump a csv is also provided : [trace_exec_training_list](scripts/trace_exec_training_list.py)
 
 To run the script, update the trace_folder and  results dir inside the script and run:
+
 `python trace_exec_training_list.py`
 
 ## Branch Predictor Interface
@@ -46,6 +50,8 @@ See [cbp.h](./cbp.h) and [cond_branch_predictor_interface.cc](./cond_branch_pred
 
 TODO: Add wget calls
 
+## Prediction Interfaces
+TODO:: Elaborate about the interface
 
 ## Sample Output
 
@@ -163,5 +169,3 @@ Not control         1164572          0   0.0000%   0.0000
 
 ```
 
-## Prediction Interfaces
-TODO:: Elaborate about the interface
