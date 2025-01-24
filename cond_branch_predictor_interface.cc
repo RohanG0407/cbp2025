@@ -17,6 +17,7 @@
 // This file provides a sample predictor integration based on the interface provided.
 
 #include "lib/sim_common_structs.h"
+#include "cbp2016_tage_sc_l.h"
 #include "my_cond_branch_predictor.h"
 #include <cassert>
 
@@ -29,6 +30,7 @@
 void beginCondDirPredictor ()
 {
     // setup sample_predictor
+    cbp2016_tage_sc_l.setup();
     cond_predictor_impl.setup();
 }
 
@@ -41,7 +43,8 @@ void beginCondDirPredictor ()
 //
 bool get_cond_dir_prediction(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t pred_cycle)
 {
-    const bool my_prediction =  cond_predictor_impl.predict(seq_no, piece, pc);
+    const bool tage_sc_l_pred =  cbp2016_tage_sc_l.predict(seq_no, piece, pc);
+    const bool my_prediction = cond_predictor_impl.predict(seq_no, piece, pc, tage_sc_l_pred);
     return my_prediction;
 }
 
@@ -83,11 +86,12 @@ void spec_update(uint64_t seq_no, uint8_t piece, uint64_t pc, InstClass inst_cla
 
     if(inst_class == InstClass::condBranchInstClass)
     {
-        cond_predictor_impl.history_update(seq_no, piece, pc, br_type, resolve_dir, next_pc);
+        cbp2016_tage_sc_l.history_update(seq_no, piece, pc, br_type, resolve_dir, next_pc);
+        cond_predictor_impl.history_update(seq_no, piece, pc, resolve_dir, next_pc);
     }
     else
     {
-        cond_predictor_impl.TrackOtherInst(pc, br_type, resolve_dir, next_pc);
+        cbp2016_tage_sc_l.TrackOtherInst(pc, br_type, resolve_dir, next_pc);
     }
 
 }
@@ -120,6 +124,7 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
         {
             const bool _resolve_dir = _exec_info.taken.value();
             const uint64_t _next_pc = _exec_info.next_pc;
+            cbp2016_tage_sc_l.update(seq_no, piece, pc, _resolve_dir, pred_dir, _next_pc);
             cond_predictor_impl.update(seq_no, piece, pc, _resolve_dir, pred_dir, _next_pc);
         }
         else
@@ -148,5 +153,6 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
 //
 void endCondDirPredictor ()
 {
+    cbp2016_tage_sc_l.terminate();
     cond_predictor_impl.terminate();
 }

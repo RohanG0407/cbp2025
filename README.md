@@ -32,10 +32,10 @@ The interface is defined in cbp.h and must remain unchanged. The state exposed v
 
 See [cbp.h](./cbp.h) and [cond_branch_predictor_interface.cc](./cond_branch_predictor_interface.cc) for more details.
 
-The [sample_predictor](sample_branch_predictor/my_cond_branch_predictor.h) leverages the same interface. It uses get_cond_dir_prediction for prediction, spec_update for history update and notify_instr_execute_resolve update for predictor update. It doesn't leverage decode/commit interfaces at the moment but contestants are free to exploit those. 
-The predcitor is a slightly modified version of the CBP2016 winner(Tage-SC). The predictor checkpoints history in a map(pred_time_histories). When trying to update the predictor, it recovers the history using the instruction seq_no/piece. For the predictors that contestants implement, they are free to take a similar approach. The amount of state needed to checkpoint histories like this won't be counted towards the predictor budget.
+The CBP2016 winner(Tage-SC-L) is provided as base predictor. The predictor checkpoints history in a map(pred_time_histories). When trying to update the predictor, it recovers the history using the instruction seq_no/piece. For the predictors that contestants implement, they are free to take a similar approach. The amount of state needed to checkpoint histories like this won't be counted towards the predictor budget.
+[cond_branch_predictor_interface.cc](./cond_branch_predictor_interface.cc) also becomes the interface to combine the predictions from the cbp2016 tage-sc-l and the [sample branch predictor](sample_branch_predictor/my_cond_branch_predictor.h). It uses get_cond_dir_prediction for prediction, spec_update for history update and notify_instr_execute_resolve update for predictor update. At the moment, it just returns the prediction provided by cbp2016 tage-sc-l.
 
-Contestants are allowed to implement any interface within my_cond_branch_predictor.h and my_cond_branch_predictor.cc as long as they keep the interface above intact. Contestants are free to update the implementation of these functions above to inteface with their own predictors.
+Contestants are allowed to implement any interface within my_cond_branch_predictor.h and my_cond_branch_predictor.cc as long as they keep the interface above intact. Contestants are also free to update the implementation of these functions above to inteface with their own predictors and/or interface with provided tage-sc-l. Contestants are also allowed to update tage-sc-l implementation or completely disregard the tage-sc-l prediction.
 
 ## Examples
 See Simulator options:

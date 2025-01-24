@@ -45,31 +45,6 @@ int parseargs(int argc, char ** argv)
   // read optional flags
   while (i < argc)
   {
-     //if (!strcmp(argv[i], "-v"))
-     //{
-     //   VP_ENABLE = true;
-     //   i++;
-     //}
-     //else if (!strcmp(argv[i], "-p"))
-     //{
-     //   VP_PERFECT = true;
-     //   i++;
-     //}
-     //if (!strcmp(argv[i], "-t"))
-     //{
-     //   i++;
-     //   if (i < argc)
-     //   {
-     //      VP_TRACK = stoul(argv[i]);
-     //      assert(VP_TRACK <  static_cast<std::underlying_type<VPTracks>::type>(VPTracks::NumTracks));
-     //      i++;
-     //   }
-     //   else
-     //   {
-     //      printf("Usage: missing track number : -t <track_number>.\n");
-     //      exit(0);
-     //   }
-     //}
      if (!strcmp(argv[i], "-d"))
      {
         PERFECT_CACHE = true;

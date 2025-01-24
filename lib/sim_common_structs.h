@@ -22,13 +22,6 @@
 
 // Author: Eric Rotenberg (ericro@ncsu.edu)
 
-// Instruction type.
-// Example use:
-//
-// InstClass insn;
-// ...
-// if (insn == InstClass::aluInstClass) ...
-
 #include <optional>
 #include <vector>
 #include <cstdint>
