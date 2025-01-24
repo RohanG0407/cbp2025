@@ -28,11 +28,14 @@ The simulator provides multiple hooks that correspond to different events during
 * notify_instr_commit - Called when any instruction is committed.
 * endCondDirPredictor - Called at the end of simulation to allow contestants to dump any specific state.
   
+The interface is defined in cbp.h and must remain unchanged. The state exposed via this interface is defined in lib/sim_common_structs.h. This includes InstClass, DecodeInfo, ExecuteInfo etc.
+
 See [cbp.h](./cbp.h) and [cond_branch_predictor_interface.cc](./cond_branch_predictor_interface.cc) for more details.
 
 The [sample_predictor](sample_branch_predictor/my_cond_branch_predictor.h) leverages the same interface. It uses get_cond_dir_prediction for prediction, spec_update for history update and notify_instr_execute_resolve update for predictor update. It doesn't leverage decode/commit interfaces at the moment but contestants are free to exploit those. 
+The predcitor is a slightly modified version of the CBP2016 winner(Tage-SC). The predictor checkpoints history in a map(pred_time_histories). When trying to update the predictor, it recovers the history using the instruction seq_no/piece. For the predictors that contestants implement, they are free to take a similar approach. The amount of state needed to checkpoint histories like this won't be counted towards the predictor budget.
 
-Contestants are allowed to implement any interface within my_cond_branch_predictor.h and my_cond_branch_predictor.cc as long as they keep the interface above intact. Paricipants are free to update the implementation of these functions above to inteface with their own predictors.
+Contestants are allowed to implement any interface within my_cond_branch_predictor.h and my_cond_branch_predictor.cc as long as they keep the interface above intact. Contestants are free to update the implementation of these functions above to inteface with their own predictors.
 
 ## Examples
 See Simulator options:
