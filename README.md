@@ -59,7 +59,18 @@ The script also parses all the logs to dump a csv with relevant stats.
 
 ## Getting Traces
 
-TODO: Add wget calls
+[Link to Training Set105 traces](https://drive.google.com/drive/folders/10CL13RGDW3zn-Dx7L0ineRvl7EpRsZDW)
+
+Contestants can also use 'gdown' do download the traces:
+
+`pip install gdown`
+`gdown --folder //drive.google.com/drive/folders/10CL13RGDW3zn-Dx7L0ineRvl7EpRsZDW`
+
+To untar the traces:
+
+`tar -xvf foo.tar.xz`
+
+
 
 ## Sample Output Per Run
 
