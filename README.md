@@ -2,31 +2,34 @@
 Championship Branch Prediction 2025
 
 ## Build
-The simulator expects a branch predictor to be implemented in the files my_cond_branch_predictor.h/cc. The Makefile already accounts for these. The predictor is statically instantiated within the implemented file. For reference check sample predictor file: [my_cond_branch_predictor.h](./my_cond_branch_predictor.h)
+The simulator expects a branch predictor to be implemented in the files my_cond_branch_predictor.{h/cc}. The predictor gets statically instantiated. For reference, check sample predictor file: [my_cond_branch_predictor.h](./my_cond_branch_predictor.h)
 
-To build the simulator once the predictor files are added:
+To build the simulator:
 
 `make clean && make`
 
 ## Branch Predictor Interface
 
-The simulator provides multiple hooks that correspond to different events during the lifetime of an instruction. These hooks provide the contestants with the relevant state available at that pipeline stage. Summary of the available hooks:
+The simulator interacts with the branch predictor via the following interfaces:
 * beginCondDirPredictor - Intended for any predictor initialization steps.
 * get_cond_dir_prediction - invoke the predictor to get the prediction of the relevant branch. This is called only for conditional branches.
-* spec_update - Intended to help update history associated with the predictors(GHR/LHIST etc). This is called for all branches.
+* spec_update - Intended to help update the predictor's history (GHR/LHIST ..etc.) This is called for all branches.
 * notify_instr_decode - Called when an instruction is decoded.
 * notify_instr_execute_resolve - Called when any instruction is executed.
 * notify_instr_commit - Called when any instruction is committed.
-* endCondDirPredictor - Called at the end of simulation to allow contestants to dump any specific state.
-  
-The interface is defined in cbp.h and must remain unchanged. The state exposed via this interface is defined in lib/sim_common_structs.h. This includes InstClass, DecodeInfo, ExecuteInfo etc.
+* endCondDirPredictor - Called at the end of simulation to allow contestants to dump any additional state.
+
+These interfaces get exercised as the instruction flows through the cpu pipeline, and they provide the contestants with the relevant state available at that pipeline stage. The interfaces are defined in cbp.h and must remain unchanged. The structures exposed via the interfaces are defined in lib/sim_common_structs.h. This includes InstClass, DecodeInfo, ExecuteInfo ..etc.
 
 See [cbp.h](./cbp.h) and [cond_branch_predictor_interface.cc](./cond_branch_predictor_interface.cc) for more details.
 
-The CBP2016 winner(Tage-SC-L) is provided as base predictor. The predictor checkpoints history in a map(pred_time_histories). When trying to update the predictor, it recovers the history using the instruction seq_no/piece. For the predictors that contestants implement, they are free to take a similar approach. The amount of state needed to checkpoint histories like this won't be counted towards the predictor budget.
-[cond_branch_predictor_interface.cc](./cond_branch_predictor_interface.cc) also becomes the interface to combine the predictions from the cbp2016 tage-sc-l and the [sample branch predictor](my_cond_branch_predictor.h). It uses get_cond_dir_prediction for prediction, spec_update for history update and notify_instr_execute_resolve update for predictor update. At the moment, it just returns the prediction provided by cbp2016 tage-sc-l.
+### Contestant Developed Predictor
 
-Contestants are allowed to implement any interface within my_cond_branch_predictor.h and my_cond_branch_predictor.cc as long as they keep the interface above intact. Contestants are also free to update the implementation of these functions above to inteface with their own predictors and/or interface with provided tage-sc-l. Contestants are also allowed to update tage-sc-l implementation or completely disregard the tage-sc-l prediction.
+We provide the CBP2016 winner(64KB Tage-SC-L) as base predictor, not counted toward the predictor budget. In the provided implementation, the base predictor checkpoints history in an STL map(pred_time_histories) indexed by instruction id. At update time, that information is retrieved to perform the update. 
+For the predictors developed by the contestants, they are free to use a similar approach. The amount of state needed to checkpoint histories won't be counted towards the predictor budget.
+Contestants are free to update the implementation within
+[cond_branch_predictor_interface.cc](./cond_branch_predictor_interface.cc) as long as they keep the branch predictor interfaces (listed above) untouched. E.g., they can modify the file to combine the predictions from the cbp2016 tage-sc-l and their own developed predictor.
+Contestants are also allowed to update tage-sc-l implementation or completely disregard the tage-sc-l prediction.
 
 ## Examples
 See Simulator options:
