@@ -59,11 +59,12 @@ The script also parses all the logs to dump a csv with relevant stats.
 
 ## Getting Traces
 
-[Link to Training Set105 traces](https://drive.google.com/drive/folders/10CL13RGDW3zn-Dx7L0ineRvl7EpRsZDW)
+[Link to Training Set- 105 traces](https://drive.google.com/drive/folders/10CL13RGDW3zn-Dx7L0ineRvl7EpRsZDW)
 
 Contestants can also use 'gdown' do download the traces:
 
 `pip install gdown`
+
 `gdown --folder //drive.google.com/drive/folders/10CL13RGDW3zn-Dx7L0ineRvl7EpRsZDW`
 
 To untar the traces:
