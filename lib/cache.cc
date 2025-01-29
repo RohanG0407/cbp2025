@@ -48,7 +48,7 @@ cache_t::cache_t(uint64_t size, uint64_t assoc, uint64_t blocksize, uint64_t lat
       C[i] = new block_t[assoc];
       for (uint64_t j = 0; j < assoc; j++) {
          C[i][j].valid = false;
-	 C[i][j].lru = j;
+     C[i][j].lru = j;
       }
    }
 
@@ -77,13 +77,13 @@ bool cache_t::is_hit(uint64_t cycle, uint64_t addr) const {
 }
 
 uint64_t cache_t::access(uint64_t cycle, bool read, uint64_t addr, bool pf) {
-   uint64_t avail;		// return value: cycle that requested block is available
+   uint64_t avail;      // return value: cycle that requested block is available
    uint64_t tag = TAG(addr);
    uint64_t index = INDEX(addr);
    bool hit = false;
-   uint64_t way;		// if hit, this is the corresponding way
-   uint64_t max_lru_ctr = 0;	// for finding lru block
-   uint64_t victim_way;		// if miss, this is the lru/victim way
+   uint64_t way;        // if hit, this is the corresponding way
+   uint64_t max_lru_ctr = 0;    // for finding lru block
+   uint64_t victim_way;     // if miss, this is the lru/victim way
 
    accesses+=!pf;
    pf_accesses += pf;
@@ -102,13 +102,13 @@ uint64_t cache_t::access(uint64_t cycle, bool read, uint64_t addr, bool pf) {
       }
    }
 
-   if (hit) {	// hit
+   if (hit) {   // hit
       // determine when the requested block will be available
       avail = ((C[index][way].timestamp > (cycle + latency)) ? C[index][way].timestamp : (cycle + latency));
 
-      update_lru(index, way);	// make "way" the MRU way
+      update_lru(index, way);   // make "way" the MRU way
    }
-   else {	// miss
+   else {   // miss
       misses+= !pf;
       pf_misses += pf;
 

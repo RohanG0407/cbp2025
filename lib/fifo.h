@@ -25,22 +25,22 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 template <class T>
 class fifo_t {
 private:
-	T *q;
-	uint64_t size;
-	uint64_t head;
-	uint64_t tail;
-	uint64_t length;
+    T *q;
+    uint64_t size;
+    uint64_t head;
+    uint64_t tail;
+    uint64_t length;
 
 public:
-	fifo_t(uint64_t size);
-	~fifo_t();
-	bool empty();		// returns true if empty, false otherwise
-	bool full();		// returns true if full, false otherwise
-	T pop();		// pop and return head entry
-	void push(T value);	// push value at tail entry
+    fifo_t(uint64_t size);
+    ~fifo_t();
+    bool empty();       // returns true if empty, false otherwise
+    bool full();        // returns true if full, false otherwise
+    T pop();        // pop and return head entry
+    void push(T value); // push value at tail entry
   T peek();
-	T peektail();		// examine value at tail entry
-	T peekhead();		// examine value at head entry
+    T peektail();       // examine value at tail entry
+    T peekhead();       // examine value at head entry
 };
 
 template <class T>

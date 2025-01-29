@@ -33,22 +33,22 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 struct PredictionRequest
 {
-	// Instruction sequence number
-	uint64_t seq_no = -1;
-	// Instruction Program Counter
-	uint64_t pc = 0xdeadbeef;
-	// Instruction piece number (e.g., for SIMD instructions)
-	uint8_t piece = 0;
-	// Is candidate for VP in the current track
-	bool is_candidate = false;
-	// Data Cache hit/miss information
-	HitMissInfo cache_hit = HitMissInfo::Invalid;
+    // Instruction sequence number
+    uint64_t seq_no = -1;
+    // Instruction Program Counter
+    uint64_t pc = 0xdeadbeef;
+    // Instruction piece number (e.g., for SIMD instructions)
+    uint8_t piece = 0;
+    // Is candidate for VP in the current track
+    bool is_candidate = false;
+    // Data Cache hit/miss information
+    HitMissInfo cache_hit = HitMissInfo::Invalid;
 };
 
 struct PredictionResult
 {
-	uint64_t predicted_value = 0x0;
-	bool speculate = false;
+    uint64_t predicted_value = 0x0;
+    bool speculate = false;
 };
 
 //
@@ -96,21 +96,21 @@ PredictionResult getPrediction(const PredictionRequest& req);
 //   whether or not the prediction was correct.
 //
 extern
-void speculativeUpdate(uint64_t seq_no,    		// dynamic micro-instruction # (starts at 0 and increments indefinitely)
-                       bool eligible,			// true: instruction is eligible for value prediction. false: not eligible.
-		       uint8_t prediction_result,	// 0: incorrect, 1: correct, 2: unknown (not revealed)
-		       // Note: can assemble local and global branch history using pc, next_pc, and insn.
-		       uint64_t pc,			
-		       uint64_t next_pc,
-		       uint8_t insn_class_uint8,
-		       uint8_t piece,
-		       // Note: up to 3 logical source register specifiers, up to 1 logical destination register specifier.
-		       // 0xdeadbeef means that logical register does not exist.
-		       // May use this information to reconstruct architectural register file state (using log. reg. and value at updatePredictor()).
-		       uint64_t src1,
-		       uint64_t src2,
-		       uint64_t src3,
-		       uint64_t dst);
+void speculativeUpdate(uint64_t seq_no,         // dynamic micro-instruction # (starts at 0 and increments indefinitely)
+                       bool eligible,           // true: instruction is eligible for value prediction. false: not eligible.
+               uint8_t prediction_result,   // 0: incorrect, 1: correct, 2: unknown (not revealed)
+               // Note: can assemble local and global branch history using pc, next_pc, and insn.
+               uint64_t pc,         
+               uint64_t next_pc,
+               uint8_t insn_class_uint8,
+               uint8_t piece,
+               // Note: up to 3 logical source register specifiers, up to 1 logical destination register specifier.
+               // 0xdeadbeef means that logical register does not exist.
+               // May use this information to reconstruct architectural register file state (using log. reg. and value at updatePredictor()).
+               uint64_t src1,
+               uint64_t src2,
+               uint64_t src3,
+               uint64_t dst);
 
 //
 // updatePredictor()
@@ -124,10 +124,10 @@ void speculativeUpdate(uint64_t seq_no,    		// dynamic micro-instruction # (sta
 // After a value misprediction, the window is drained of all pending updatePredictor() calls before the next call to getPrediction()/speculativeUpdate().
 //
 extern
-void updatePredictor(uint64_t seq_no,		// dynamic micro-instruction #
-		     uint64_t actual_addr,	// load or store address (0xdeadbeef if not a load or store instruction)
-		     uint64_t actual_value,	// value of destination register (0xdeadbeef if instr. is not eligible for value prediction)
-		     uint64_t actual_latency);	// actual execution latency of instruction
+void updatePredictor(uint64_t seq_no,       // dynamic micro-instruction #
+             uint64_t actual_addr,  // load or store address (0xdeadbeef if not a load or store instruction)
+             uint64_t actual_value, // value of destination register (0xdeadbeef if instr. is not eligible for value prediction)
+             uint64_t actual_latency);  // actual execution latency of instruction
 
 //
 // beginPredictor()

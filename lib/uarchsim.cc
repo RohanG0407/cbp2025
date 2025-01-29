@@ -41,9 +41,9 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //uarchsim_t::uarchsim_t():window(WINDOW_SIZE),
 uarchsim_t::uarchsim_t()
       :window_capacity(WINDOW_SIZE)
-	  ,L3(L3_SIZE, L3_ASSOC, L3_BLOCKSIZE, L3_LATENCY, (cache_t *)NULL)
-	  ,L2(L2_SIZE, L2_ASSOC, L2_BLOCKSIZE, L2_LATENCY, &L3)
-	  ,L1(L1_SIZE, L1_ASSOC, L1_BLOCKSIZE, L1_LATENCY, &L2)
+      ,L3(L3_SIZE, L3_ASSOC, L3_BLOCKSIZE, L3_LATENCY, (cache_t *)NULL)
+      ,L2(L2_SIZE, L2_ASSOC, L2_BLOCKSIZE, L2_LATENCY, &L3)
+      ,L1(L1_SIZE, L1_ASSOC, L1_BLOCKSIZE, L1_LATENCY, &L2)
       ,BP()
       ,IC(IC_SIZE, IC_ASSOC, IC_BLOCKSIZE, 0, &L2) 
 {
@@ -473,7 +473,7 @@ void uarchsim_t::step(db_t *inst)
 
    if (inst->is_load) {
      
-      latency = exec_cycle;	// record start of execution
+      latency = exec_cycle; // record start of execution
 
       // AGEN takes 1 cycle.
       exec_cycle = (exec_cycle + 1);
@@ -515,14 +515,14 @@ void uarchsim_t::step(db_t *inst)
          }
       }
 
-      num_load++;					// stat
-      num_load_sqmiss += (inc_sqmiss ? 1 : 0);		// stat
+      num_load++;                   // stat
+      num_load_sqmiss += (inc_sqmiss ? 1 : 0);      // stat
 
       assert(temp_cycle >= exec_cycle);
       exec_cycle = temp_cycle;
 
-      latency = (exec_cycle - latency);	// end of execution minus start of execution
-      assert(latency >= 2);	// 2 cycles if all bytes hit in SQ
+      latency = (exec_cycle - latency); // end of execution minus start of execution
+      assert(latency >= 2); // 2 cycles if all bytes hit in SQ
    }
    else {
       // Determine the fixed execution latency based on ALU type.
@@ -626,7 +626,7 @@ void uarchsim_t::step(db_t *inst)
    //            seq_no,
    //            ((inst->is_load || inst->is_store) ? inst->addr : 0xDEADBEEF),
    //            ((inst->D.valid && (inst->D.log_reg != RFFLAGS)) ? inst->D.value : 0xDEADBEEF),
-	 //      latency});
+     //      latency});
    //window_t (uint64_t _seq_no, uint64_t _PC, uint64_t _fetch_cycle, uint64_t _decode_cycle, uint64_t _exec_cycle, ExecuteInfo _exec_info, uint64_t _retire_cycle, uint64_t _addr, uint64_t _value, uint64_t _latency)
    const uint64_t decode_cycle = fetch_cycle+DQ_LATENCY;
    populate_exec_info(inst);
@@ -642,7 +642,7 @@ void uarchsim_t::step(db_t *inst)
                MAX(exec_cycle, (window.empty() ? 0 : window.back().retire_cycle)), //retire_cycle
                ((inst->is_load || inst->is_store) ? inst->addr : 0xDEADBEEF), // addr
                ((inst->D.valid && (inst->D.log_reg != RFFLAGS)) ? inst->D.value : 0xDEADBEEF), //value
-	       latency}); //latency
+           latency}); //latency
    activity_trace<<fetch_cycle<<"::Fetched:"<<window.back()<<" Inst:"<<*inst<<"\n";
    activity_observed = true;
    assert(window.size() <= window_capacity);
@@ -658,8 +658,8 @@ void uarchsim_t::step(db_t *inst)
 
    const bool is_branch = is_br(inst->insn_class);
    if (squash) // control dependency on the retire cycle of the value-mispredicted instruction
-   {			
-      num_fetched = 0;			// new fetch bundle
+   {            
+      num_fetched = 0;          // new fetch bundle
       //assert(!window.empty() && (fetch_cycle < window.peektail().retire_cycle));
       //fetch_cycle = window.peektail().retire_cycle;
       assert(!window.empty() && (fetch_cycle < window.back().retire_cycle));
@@ -669,11 +669,11 @@ void uarchsim_t::step(db_t *inst)
    {
       if (fetch_cycle < window.front().retire_cycle) 
       {
-         num_fetched = 0;		// new fetch bundle
+         num_fetched = 0;       // new fetch bundle
          fetch_cycle = window.front().retire_cycle;
       }
    }
-   else {				// fetch bundle constraints
+   else {               // fetch bundle constraints
        bool stop = false;
 
        // Finite fetch bundle.
@@ -787,10 +787,10 @@ void uarchsim_t::step(db_t *inst)
 
 
 
-#define KILOBYTE	(1<<10)
-#define MEGABYTE	(1<<20)
-#define SCALED_SIZE(size)	((size/KILOBYTE >= KILOBYTE) ? (size/MEGABYTE) : (size/KILOBYTE))
-#define SCALED_UNIT(size)	((size/KILOBYTE >= KILOBYTE) ? "MB" : "KB")
+#define KILOBYTE    (1<<10)
+#define MEGABYTE    (1<<20)
+#define SCALED_SIZE(size)   ((size/KILOBYTE >= KILOBYTE) ? (size/MEGABYTE) : (size/KILOBYTE))
+#define SCALED_UNIT(size)   ((size/KILOBYTE >= KILOBYTE) ? "MB" : "KB")
 
 
 uint64_t uarchsim_t::get_current_fetch_cycle() const {
@@ -838,14 +838,14 @@ void uarchsim_t::output()
    printf("\t* the store's data as they would from the SQ.\n");
    if (FETCH_MODEL_ICACHE) {
       printf("I$: %lu %s, %lu-way set-assoc., %luB block size\n",
-   	     SCALED_SIZE(IC_SIZE), SCALED_UNIT(IC_SIZE), IC_ASSOC, IC_BLOCKSIZE);
+         SCALED_SIZE(IC_SIZE), SCALED_UNIT(IC_SIZE), IC_ASSOC, IC_BLOCKSIZE);
    }
    printf("L1$: %lu %s, %lu-way set-assoc., %luB block size, %lu-cycle search latency\n",
-   	  SCALED_SIZE(L1_SIZE), SCALED_UNIT(L1_SIZE), L1_ASSOC, L1_BLOCKSIZE, L1_LATENCY);
+      SCALED_SIZE(L1_SIZE), SCALED_UNIT(L1_SIZE), L1_ASSOC, L1_BLOCKSIZE, L1_LATENCY);
    printf("L2$: %lu %s, %lu-way set-assoc., %luB block size, %lu-cycle search latency\n",
-   	  SCALED_SIZE(L2_SIZE), SCALED_UNIT(L2_SIZE), L2_ASSOC, L2_BLOCKSIZE, L2_LATENCY);
+      SCALED_SIZE(L2_SIZE), SCALED_UNIT(L2_SIZE), L2_ASSOC, L2_BLOCKSIZE, L2_LATENCY);
    printf("L3$: %lu %s, %lu-way set-assoc., %luB block size, %lu-cycle search latency\n",
-   	  SCALED_SIZE(L3_SIZE), SCALED_UNIT(L3_SIZE), L3_ASSOC, L3_BLOCKSIZE, L3_LATENCY);
+      SCALED_SIZE(L3_SIZE), SCALED_UNIT(L3_SIZE), L3_ASSOC, L3_BLOCKSIZE, L3_LATENCY);
    printf("Main Memory: %lu-cycle fixed search time\n", MAIN_MEMORY_LATENCY);
    printf("---------------------------STORE QUEUE MEASUREMENTS (Full Simulation i.e. Counts Not Reset When Warmup Ends)---------------------------\n");
    printf("Number of loads: %lu\n", num_load);

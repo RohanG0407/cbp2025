@@ -142,7 +142,7 @@ bool bp_t::predict(uint64_t seq_no, uint8_t piece, InstClass inst_class, uint64_
       meas_jumpret_n_per_epoch.back() += is_ret;
       if (PERFECT_INDIRECT_PRED)
       {
-	      misp = false;
+          misp = false;
          // Update measurements.
       }
       else
@@ -181,21 +181,21 @@ bool bp_t::predict(uint64_t seq_no, uint8_t piece, InstClass inst_class, uint64_
 
 void bp_t::notify_begin_new_epoch()
 {
-    meas_conddir_n_per_epoch.emplace_back(0);	// # conditional branches
-	meas_conddir_m_per_epoch.emplace_back(0);	// # mispredicted conditional branches
+    meas_conddir_n_per_epoch.emplace_back(0);   // # conditional branches
+    meas_conddir_m_per_epoch.emplace_back(0);   // # mispredicted conditional branches
 
-	meas_jumpdir_n_per_epoch.emplace_back(0);	// # jumps, direct
+    meas_jumpdir_n_per_epoch.emplace_back(0);   // # jumps, direct
 
-	meas_jumpind_n_per_epoch.emplace_back(0);	// # jumps, indirect
-	meas_jumpind_m_per_epoch.emplace_back(0);	// # mispredicted jumps, indirect
+    meas_jumpind_n_per_epoch.emplace_back(0);   // # jumps, indirect
+    meas_jumpind_m_per_epoch.emplace_back(0);   // # mispredicted jumps, indirect
 
-	meas_jumpret_n_per_epoch.emplace_back(0);	// # jumps, return
-	meas_jumpret_m_per_epoch.emplace_back(0);	// # mispredicted jumps, return
+    meas_jumpret_n_per_epoch.emplace_back(0);   // # jumps, return
+    meas_jumpret_m_per_epoch.emplace_back(0);   // # mispredicted jumps, return
 
-	meas_notctrl_n_per_epoch.emplace_back(0);	// # non-control transfer instructions
-	meas_notctrl_m_per_epoch.emplace_back(0);	// # non-control transfer instructions for which: next_pc != pc + 4
+    meas_notctrl_n_per_epoch.emplace_back(0);   // # non-control transfer instructions
+    meas_notctrl_m_per_epoch.emplace_back(0);   // # non-control transfer instructions for which: next_pc != pc + 4
 
-	meas_cycles_on_wrong_path_per_epoch.emplace_back(0);	// cycles_on_wrong_path
+    meas_cycles_on_wrong_path_per_epoch.emplace_back(0);    // cycles_on_wrong_path
 }
 
 void bp_t::update_cycles_on_wrong_path(const uint64_t cycles_on_wrong_path)
@@ -204,23 +204,23 @@ void bp_t::update_cycles_on_wrong_path(const uint64_t cycles_on_wrong_path)
 }
 
 #define BP_OUTPUT(str, n, m, i) \
-	printf("%s%10ld %10ld %8.4lf%% %8.4lf\n", (str), (n), (m), 100.0*((double)(m)/(double)(n)), 1000.0*((double)(m)/(double)(i)))
+    printf("%s%10ld %10ld %8.4lf%% %8.4lf\n", (str), (n), (m), 100.0*((double)(m)/(double)(n)), 1000.0*((double)(m)/(double)(i)))
 
 void bp_t::output()
 {
-   const uint64_t meas_conddir_n = std::accumulate(meas_conddir_n_per_epoch.begin(), meas_conddir_n_per_epoch.end(), 0);	// # conditional branches
-   const uint64_t meas_conddir_m = std::accumulate(meas_conddir_m_per_epoch.begin(), meas_conddir_m_per_epoch.end(), 0);	// # mispredicted conditional branches
+   const uint64_t meas_conddir_n = std::accumulate(meas_conddir_n_per_epoch.begin(), meas_conddir_n_per_epoch.end(), 0);    // # conditional branches
+   const uint64_t meas_conddir_m = std::accumulate(meas_conddir_m_per_epoch.begin(), meas_conddir_m_per_epoch.end(), 0);    // # mispredicted conditional branches
                                    
-   const uint64_t meas_jumpdir_n = std::accumulate(meas_jumpdir_n_per_epoch.begin(), meas_jumpdir_n_per_epoch.end(), 0);	// # jumps, direct
+   const uint64_t meas_jumpdir_n = std::accumulate(meas_jumpdir_n_per_epoch.begin(), meas_jumpdir_n_per_epoch.end(), 0);    // # jumps, direct
                                    
-   const uint64_t meas_jumpind_n = std::accumulate(meas_jumpind_n_per_epoch.begin(), meas_jumpind_n_per_epoch.end(), 0);	// # jumps, indirect
-   const uint64_t meas_jumpind_m = std::accumulate(meas_jumpind_m_per_epoch.begin(), meas_jumpind_m_per_epoch.end(), 0);	// # mispredicted jumps, indirect
+   const uint64_t meas_jumpind_n = std::accumulate(meas_jumpind_n_per_epoch.begin(), meas_jumpind_n_per_epoch.end(), 0);    // # jumps, indirect
+   const uint64_t meas_jumpind_m = std::accumulate(meas_jumpind_m_per_epoch.begin(), meas_jumpind_m_per_epoch.end(), 0);    // # mispredicted jumps, indirect
                                    
-   const uint64_t meas_jumpret_n = std::accumulate(meas_jumpret_n_per_epoch.begin(), meas_jumpret_n_per_epoch.end(), 0);	// # jumps, return
-   const uint64_t meas_jumpret_m = std::accumulate(meas_jumpret_m_per_epoch.begin(), meas_jumpret_m_per_epoch.end(), 0);	// # mispredicted jumps, return
+   const uint64_t meas_jumpret_n = std::accumulate(meas_jumpret_n_per_epoch.begin(), meas_jumpret_n_per_epoch.end(), 0);    // # jumps, return
+   const uint64_t meas_jumpret_m = std::accumulate(meas_jumpret_m_per_epoch.begin(), meas_jumpret_m_per_epoch.end(), 0);    // # mispredicted jumps, return
                                    
-   const uint64_t meas_notctrl_n = std::accumulate(meas_notctrl_n_per_epoch.begin(), meas_notctrl_n_per_epoch.end(), 0);	// # non-control transfer instructions
-   const uint64_t meas_notctrl_m = std::accumulate(meas_notctrl_m_per_epoch.begin(), meas_notctrl_m_per_epoch.end(), 0);	// # non-control transfer instructions for which: next_pc != pc + 4
+   const uint64_t meas_notctrl_n = std::accumulate(meas_notctrl_n_per_epoch.begin(), meas_notctrl_n_per_epoch.end(), 0);    // # non-control transfer instructions
+   const uint64_t meas_notctrl_m = std::accumulate(meas_notctrl_m_per_epoch.begin(), meas_notctrl_m_per_epoch.end(), 0);    // # non-control transfer instructions for which: next_pc != pc + 4
 
    //const uint64_t meas_cycles_on_wrong_path = std::accumulate(meas_cycles_on_wrong_path_per_epoch.begin(), meas_cycles_on_wrong_path_per_epoch.end(), 0);
 
@@ -295,7 +295,7 @@ void bp_t::output_periodic_info(const std::vector<uint64_t>&num_insts_per_epoch,
       printf("-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
    }
 
-   const uint64_t total_instr = std::accumulate(num_insts_per_epoch.begin(), num_insts_per_epoch.end(), 0);	// # mispredicted jumps, return
+   const uint64_t total_instr = std::accumulate(num_insts_per_epoch.begin(), num_insts_per_epoch.end(), 0); // # mispredicted jumps, return
    {
       const uint64_t target_instr_count = total_instr/2;
       printf("\n---------------------------------------------------------DIRECT CONDITIONAL BRANCH PREDICTION MEASUREMENTS (50 Perc instructions)---------------------------------------------------\n");
@@ -324,7 +324,7 @@ void bp_t::output_periodic_info(const std::vector<uint64_t>&num_insts_per_epoch,
    }
 
    {
-      const uint64_t total_instr = std::accumulate(num_insts_per_epoch.begin(), num_insts_per_epoch.end(), 0);	// # mispredicted jumps, return
+      const uint64_t total_instr = std::accumulate(num_insts_per_epoch.begin(), num_insts_per_epoch.end(), 0);  // # mispredicted jumps, return
       const uint64_t target_instr_count = total_instr;
       printf("\n-------------------------------------DIRECT CONDITIONAL BRANCH PREDICTION MEASUREMENTS (Full Simulation i.e. Counts Not Reset When Warmup Ends)-------------------------------------\n");
       printf("       Instr       Cycles      IPC      NumBr     MispBr BrPerCyc MispBrPerCyc        MR     MPKI      CycWP   CycWPAvg   CycWPPKI\n");

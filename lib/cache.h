@@ -23,44 +23,44 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 struct block_t {
-	bool valid;
-	//bool dirty;	// TO DO
-	uint64_t tag;
-	uint64_t timestamp;
-	uint64_t lru;
+    bool valid;
+    //bool dirty;   // TO DO
+    uint64_t tag;
+    uint64_t timestamp;
+    uint64_t lru;
 };
 
-#define IsPow2(x)	(((x) & (x-1)) == 0)
+#define IsPow2(x)   (((x) & (x-1)) == 0)
 
-#define TAG(addr)	((addr) >> (num_index_bits + num_offset_bits))
-#define INDEX(addr)	(((addr) >> num_offset_bits) & index_mask)
+#define TAG(addr)   ((addr) >> (num_index_bits + num_offset_bits))
+#define INDEX(addr) (((addr) >> num_offset_bits) & index_mask)
 
 class cache_t {
 private:
-	block_t **C;
-	uint64_t num_index_bits;
-	uint64_t num_offset_bits;
-	uint64_t index_mask;
-	uint64_t assoc;
+    block_t **C;
+    uint64_t num_index_bits;
+    uint64_t num_offset_bits;
+    uint64_t index_mask;
+    uint64_t assoc;
 
-	// latency to search this cache for requested block
-	uint64_t latency;
+    // latency to search this cache for requested block
+    uint64_t latency;
 
-	// pointer to next cache level if applicable
-	cache_t *next_level;
+    // pointer to next cache level if applicable
+    cache_t *next_level;
 
-	// measurements
-	uint64_t accesses;
-	uint64_t pf_accesses;
-	uint64_t misses;
-	uint64_t pf_misses;
+    // measurements
+    uint64_t accesses;
+    uint64_t pf_accesses;
+    uint64_t misses;
+    uint64_t pf_misses;
 
-	void update_lru(uint64_t index, uint64_t mru_way);
+    void update_lru(uint64_t index, uint64_t mru_way);
 
 public:
-	cache_t(uint64_t size, uint64_t assoc, uint64_t blocksize, uint64_t latency, cache_t *next_level);
-	~cache_t();
-	uint64_t access(uint64_t cycle, bool read, uint64_t addr, bool pf = false);
+    cache_t(uint64_t size, uint64_t assoc, uint64_t blocksize, uint64_t latency, cache_t *next_level);
+    ~cache_t();
+    uint64_t access(uint64_t cycle, bool read, uint64_t addr, bool pf = false);
     bool is_hit(uint64_t cycle, uint64_t addr) const;
-	void stats();
+    void stats();
 };

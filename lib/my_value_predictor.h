@@ -114,18 +114,18 @@ static uint64_t gtargeth = 0;
 //entry in the stride predictor
 struct strdata
 {
-  uint64_t LastValue;		//64 bits
-  uint64_t Stride;		// LOGSTRIDE bits
-  uint8_t conf;			// WIDTHCONFIDSTR bits
-  uint16_t tag;			//TAGWIDTHSTR bits
-  uint16_t NotFirstOcc;		//1 bits
-  int u;			// 2 bits
+  uint64_t LastValue;       //64 bits
+  uint64_t Stride;      // LOGSTRIDE bits
+  uint8_t conf;         // WIDTHCONFIDSTR bits
+  uint16_t tag;         //TAGWIDTHSTR bits
+  uint16_t NotFirstOcc;     //1 bits
+  int u;            // 2 bits
   //67 + LOGSTRIDE + WIDTHCONFIDSTR + TAGWIDTHSTR bits 
 };
 //static strdata STR[NBWAYSTR * (1 << LOGSTR)];
 
 
-//static int SafeStride = 0;	// 16 bits
+//static int SafeStride = 0;    // 16 bits
 
 /////////////////////////////////// For E-VTAGE
 //the data values
@@ -141,18 +141,18 @@ struct longdata
 //VTAGE
 struct vtentry
 {
-  uint64_t hashpt;		// hash of the value + number of way in the value array ; LOGLDATA + 2 bits 
-  uint8_t conf;			//WIDTHCONFID bits
-  uint16_t tag;			// TAGWIDTH bits
-  uint8_t u;			//2 bits
+  uint64_t hashpt;      // hash of the value + number of way in the value array ; LOGLDATA + 2 bits 
+  uint8_t conf;         //WIDTHCONFID bits
+  uint16_t tag;         // TAGWIDTH bits
+  uint8_t u;            //2 bits
   //LOGLDATA +4 +WIDTHCONFID +TAGWIDTH bits
 };
 
 //static vtentry Vtage[PREDSIZE];
 
 #define  MAXTICK 1024
-//static int TICK;		//10 bits // for managing replacement on the VTAGE entries
-//static int LastMispVT = 0;	//8 bits //for tracking the last misprediction on VTAGE
+//static int TICK;      //10 bits // for managing replacement on the VTAGE entries
+//static int LastMispVT = 0;    //8 bits //for tracking the last misprediction on VTAGE
 
 
  //index function for VTAGE (use the global path history): just a complex hash function
@@ -187,22 +187,22 @@ gi (int i, uint64_t pc)
       int PT = 1;
 
       while (REMAIN > 0)
-	{
+    {
 
 
-	  inter ^= ((hl < 64) ? (((1 << hl) - 1) & gpath[PT]) : gpath[PT]);
-	  for (int t = 0; t < 8; t++)
-	    {
-	      res ^= inter;
-	      inter ^= ((inter & 15) << 16);
+      inter ^= ((hl < 64) ? (((1 << hl) - 1) & gpath[PT]) : gpath[PT]);
+      for (int t = 0; t < 8; t++)
+        {
+          res ^= inter;
+          inter ^= ((inter & 15) << 16);
 
-	      inter >>= (LOGBANK -
-			 ((NHIST - i + LOGBANK - 1) % (LOGBANK - 1)));
+          inter >>= (LOGBANK -
+             ((NHIST - i + LOGBANK - 1) % (LOGBANK - 1)));
 
-	    }
-	  REMAIN = REMAIN - 64;
-	  PT++;
-	}
+        }
+      REMAIN = REMAIN - 64;
+      PT++;
+    }
     }
   return ((uint32_t) res & (BANKSIZE - 1));
 }
@@ -240,21 +240,21 @@ gtag (int i, uint64_t pc)
       int PT = 1;
 
       while (REMAIN > 0)
-	{
+    {
 
 
-	  inter ^= ((hl < 64) ? (((1 << hl) - 1) & gpath[PT]) : gpath[PT]);
-	  for (int t = 0; t < 8; t++)
-	    {
-	      res ^= inter;
-	      inter ^= ((inter & 31) << 14);
-	      inter >>= (TAGWIDTH - (NHIST - i - 1));
+      inter ^= ((hl < 64) ? (((1 << hl) - 1) & gpath[PT]) : gpath[PT]);
+      for (int t = 0; t < 8; t++)
+        {
+          res ^= inter;
+          inter ^= ((inter & 31) << 14);
+          inter >>= (TAGWIDTH - (NHIST - i - 1));
 
 
-	    }
-	  REMAIN = REMAIN - 64;
-	  PT++;
-	}
+        }
+      REMAIN = REMAIN - 64;
+      PT++;
+    }
     }
 
   return ((uint32_t) res & ((1 << TAGWIDTH) - 1));
@@ -285,4 +285,4 @@ struct ForUpdate
 };
 
 #define MAXINFLIGHT 512
-//static ForUpdate Update[MAXINFLIGHT];	// there may be 512 instructions inflight
+//static ForUpdate Update[MAXINFLIGHT]; // there may be 512 instructions inflight

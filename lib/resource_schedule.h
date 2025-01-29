@@ -23,7 +23,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #define SCHED_DEPTH_INCREMENT 256
-#define MOD_S(x,y)		((x) & ((y)-1))
+#define MOD_S(x,y)      ((x) & ((y)-1))
 
 constexpr uint64_t MAX_CYCLE = ~0lu;
 

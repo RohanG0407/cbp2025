@@ -109,7 +109,7 @@ int parseargs(int argc, char ** argv)
      }
      //else if (!strcmp(argv[i], "-s")) {
      //   WRITE_ALLOCATE = true;
-     //	i++;
+     // i++;
      //}
      else if (!strcmp(argv[i], "-F"))
      {

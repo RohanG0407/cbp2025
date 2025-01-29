@@ -34,9 +34,9 @@ using namespace std;
 #ifndef _RISCV_UARCHSIM_H
 #define _RISCV_UARCHSIM_H
 
-#define RFSIZE 66	// integer: r0-r31.  fp/simd: r32-r63. flags: r64.
-#define RFFLAGS 64	// flags register is r64 (65th register)
-#define RFZERO 65	// zero register is r65 (66th register)
+#define RFSIZE 66   // integer: r0-r31.  fp/simd: r32-r63. flags: r64.
+#define RFFLAGS 64  // flags register is r64 (65th register)
+#define RFZERO 65   // zero register is r65 (66th register)
 
 struct window_t {
    uint64_t seq_no;
@@ -104,8 +104,8 @@ struct window_t {
 };
 
 struct store_queue_t {
-   uint64_t exec_cycle;	// store's execution cycle
-   uint64_t ret_cycle;	// store's commit cycle
+   uint64_t exec_cycle; // store's execution cycle
+   uint64_t ret_cycle;  // store's commit cycle
 };
 
 // Class for a microarchitectural simulator.

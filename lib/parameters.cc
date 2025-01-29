@@ -29,7 +29,7 @@ bool VP_PERFECT = false;
 uint64_t VP_TRACK = 0;
 uint64_t WINDOW_SIZE = 1024; //old_value = 512;
 uint64_t FETCH_WIDTH = 16;
-uint64_t FETCH_NUM_BRANCH = 16;		// 0: unlimited; >0: finite
+uint64_t FETCH_NUM_BRANCH = 16;     // 0: unlimited; >0: finite
 bool FETCH_STOP_AT_INDIRECT = true;
 bool FETCH_STOP_AT_TAKEN = true;
 bool FETCH_MODEL_ICACHE = true;

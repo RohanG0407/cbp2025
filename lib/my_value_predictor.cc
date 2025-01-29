@@ -46,7 +46,7 @@ PredictionResult getPrediction(const PredictionRequest& req)
 // function determining whether to  update or not confidence on a correct prediction
 bool
 strideupdateconf (ForUpdate * U, uint64_t actual_value, int actual_latency,
-		  int stride)
+          int stride)
 {
     return false;
 }
@@ -83,7 +83,7 @@ VtageUpdateU (ForUpdate * U, uint64_t actual_value, int actual_latency)
 
 bool
 VtageAllocateOrNot (ForUpdate * U, uint64_t actual_value, int actual_latency,
-		    bool MedConf)
+            bool MedConf)
 {
     return false;
 }
@@ -96,9 +96,9 @@ UpdateVtagePred (ForUpdate * U, uint64_t actual_value, int actual_latency)
 
 void
 updatePredictor (uint64_t
-		 seq_no,
-		 uint64_t
-		 actual_addr, uint64_t actual_value, uint64_t actual_latency)
+         seq_no,
+         uint64_t
+         actual_addr, uint64_t actual_value, uint64_t actual_latency)
 {
 }
 
@@ -106,16 +106,16 @@ updatePredictor (uint64_t
 
 
 void
-speculativeUpdate (uint64_t seq_no,	// dynamic micro-instruction # (starts at 0 and increments indefinitely)
-		   bool eligible,	// true: instruction is eligible for value prediction. false: not eligible.
-		   uint8_t prediction_result,	// 0: incorrect, 1: correct, 2: unknown (not revealed)
-		   // Note: can assemble local and global branch history using pc, next_pc, and insn.
-		   uint64_t
-		   pc, uint64_t next_pc, uint8_t insn_class_uint8, uint8_t piece,
-		   // Note: up to 3 logical source register specifiers, up to 1 logical destination register specifier.
-		   // 0xdeadbeef means that logical register does not exist.
-		   // May use this information to reconstruct architectural register file state (using log. reg. and value at updatePredictor()).
-		   uint64_t src1, uint64_t src2, uint64_t src3, uint64_t dst)
+speculativeUpdate (uint64_t seq_no, // dynamic micro-instruction # (starts at 0 and increments indefinitely)
+           bool eligible,   // true: instruction is eligible for value prediction. false: not eligible.
+           uint8_t prediction_result,   // 0: incorrect, 1: correct, 2: unknown (not revealed)
+           // Note: can assemble local and global branch history using pc, next_pc, and insn.
+           uint64_t
+           pc, uint64_t next_pc, uint8_t insn_class_uint8, uint8_t piece,
+           // Note: up to 3 logical source register specifiers, up to 1 logical destination register specifier.
+           // 0xdeadbeef means that logical register does not exist.
+           // May use this information to reconstruct architectural register file state (using log. reg. and value at updatePredictor()).
+           uint64_t src1, uint64_t src2, uint64_t src3, uint64_t dst)
 {}
 
 void
