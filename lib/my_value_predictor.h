@@ -122,10 +122,10 @@ struct strdata
   int u;			// 2 bits
   //67 + LOGSTRIDE + WIDTHCONFIDSTR + TAGWIDTHSTR bits 
 };
-static strdata STR[NBWAYSTR * (1 << LOGSTR)];
+//static strdata STR[NBWAYSTR * (1 << LOGSTR)];
 
 
-static int SafeStride = 0;	// 16 bits
+//static int SafeStride = 0;	// 16 bits
 
 /////////////////////////////////// For E-VTAGE
 //the data values
@@ -134,7 +134,7 @@ struct longdata
   uint64_t data;
   uint8_t u;
 };
-static longdata LDATA[3 * BANKDATA];
+//static longdata LDATA[3 * BANKDATA];
 //  managed as a a skewed associative array
 //each entry is 64-LOGLDATA bits for the data (since the other bits can be deduced from the index) + 2 bits for u
 
@@ -148,11 +148,11 @@ struct vtentry
   //LOGLDATA +4 +WIDTHCONFID +TAGWIDTH bits
 };
 
-static vtentry Vtage[PREDSIZE];
+//static vtentry Vtage[PREDSIZE];
 
 #define  MAXTICK 1024
-static int TICK;		//10 bits // for managing replacement on the VTAGE entries
-static int LastMispVT = 0;	//8 bits //for tracking the last misprediction on VTAGE
+//static int TICK;		//10 bits // for managing replacement on the VTAGE entries
+//static int LastMispVT = 0;	//8 bits //for tracking the last misprediction on VTAGE
 
 
  //index function for VTAGE (use the global path history): just a complex hash function
@@ -285,4 +285,4 @@ struct ForUpdate
 };
 
 #define MAXINFLIGHT 512
-static ForUpdate Update[MAXINFLIGHT];	// there may be 512 instructions inflight
+//static ForUpdate Update[MAXINFLIGHT];	// there may be 512 instructions inflight

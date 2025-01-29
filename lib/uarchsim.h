@@ -114,6 +114,15 @@ class uarchsim_t {
    private:
       // Add your class member variables here to facilitate your limit study.
 
+      // Modeling resources: (1) finite fetch bundle, (2) finite window, and (3) finite execution lanes.
+      uint64_t num_fetched;
+      uint64_t num_fetched_branch;
+      //fifo_t<window_t> window;
+      std::deque<window_t> window;
+      uint64_t window_capacity;
+      resource_schedule *alu_lanes;
+      resource_schedule *ldst_lanes;
+
       // register timestamps
       uint64_t RF[RFSIZE];
 
@@ -124,23 +133,14 @@ class uarchsim_t {
       std::list<std::tuple<uint64_t/*seq_no*/, uint8_t/*piece*/, uint64_t/*exec_cycle*/>> EQ;
 
       // memory block timestamps
-      cache_t L1;
-      cache_t L2;
       cache_t L3;
+      cache_t L2;
+      cache_t L1;
 
       // fetch timestamp
       uint64_t fetch_cycle;
       uint64_t previous_fetch_cycle = 0;
    
-      // Modeling resources: (1) finite fetch bundle, (2) finite window, and (3) finite execution lanes.
-      uint64_t num_fetched;
-      uint64_t num_fetched_branch;
-      //fifo_t<window_t> window;
-      std::deque<window_t> window;
-      uint64_t window_capacity;
-      resource_schedule *alu_lanes;
-      resource_schedule *ldst_lanes;
-
       // Branch predictor.
       bp_t BP;
 

@@ -40,12 +40,13 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //uarchsim_t::uarchsim_t():window(WINDOW_SIZE),
 uarchsim_t::uarchsim_t()
-      :BP(),
-      window_capacity(WINDOW_SIZE),
-			 L3(L3_SIZE, L3_ASSOC, L3_BLOCKSIZE, L3_LATENCY, (cache_t *)NULL),
-			 L2(L2_SIZE, L2_ASSOC, L2_BLOCKSIZE, L2_LATENCY, &L3),
-			 L1(L1_SIZE, L1_ASSOC, L1_BLOCKSIZE, L1_LATENCY, &L2),
-                         IC(IC_SIZE, IC_ASSOC, IC_BLOCKSIZE, 0, &L2) {
+      :window_capacity(WINDOW_SIZE)
+	  ,L3(L3_SIZE, L3_ASSOC, L3_BLOCKSIZE, L3_LATENCY, (cache_t *)NULL)
+	  ,L2(L2_SIZE, L2_ASSOC, L2_BLOCKSIZE, L2_LATENCY, &L3)
+	  ,L1(L1_SIZE, L1_ASSOC, L1_BLOCKSIZE, L1_LATENCY, &L2)
+      ,BP()
+      ,IC(IC_SIZE, IC_ASSOC, IC_BLOCKSIZE, 0, &L2) 
+{
    assert(WINDOW_SIZE != 0);
    //assert(FETCH_WIDTH);
 
@@ -219,7 +220,6 @@ void uarchsim_t::populate_exec_info(db_t *inst)
         _current_execute_info.mem_sz.emplace(inst->size);
     }
 
-    std::optional<uint64_t> dst_reg_value = std::nullopt;
     if (inst->D.valid)
     {
         assert(inst->D.log_reg < RFSIZE);
@@ -359,9 +359,9 @@ void uarchsim_t::step(db_t *inst)
 
    // Preliminary step: determine which piece of the instruction this is.
    static uint8_t piece = UINT8_MAX;
-   static uint64_t prev_pc = 0xdeadbeef;
+   //static uint64_t prev_pc = 0xdeadbeef;
    piece = (piece == UINT8_MAX) ? 0 : (piece + 1);
-   prev_pc = inst->pc;
+   //prev_pc = inst->pc;
 
    assert(previous_fetch_cycle <= fetch_cycle);
    // advancing the pipe for the cycles skipped due to mispred/flush etc
@@ -594,7 +594,6 @@ void uarchsim_t::step(db_t *inst)
       if (inst->D.log_reg != RFZERO)
       {
          squash = (pred.speculate && (pred.predicted_value != inst->D.value));         
-         auto old_ready_ts = RF[inst->D.log_reg];
          RF[inst->D.log_reg] = ((pred.speculate && (pred.predicted_value == inst->D.value)) ? fetch_cycle : exec_cycle);
          activity_observed = true;
       }
@@ -801,15 +800,15 @@ uint64_t uarchsim_t::get_current_fetch_cycle() const {
 void uarchsim_t::output() 
 {
    end_current_begin_new_epoch(false/*first_epoch*/, true/*last_epoch*/, cycle);
-   auto get_track_name = [] (uint64_t track){
-      static std::string track_names [] = {
-         "ALL",
-         "LoadsOnly",
-         "LoadsOnlyHitMiss",
-      };
-      //return track_names[static_cast<std::underlying_type<VPTracks>::type>(t)].c_str();
-      return track_names[track].c_str();
-   };
+   //auto get_track_name = [] (uint64_t track){
+   //   static std::string track_names [] = {
+   //      "ALL",
+   //      "LoadsOnly",
+   //      "LoadsOnlyHitMiss",
+   //   };
+   //   //return track_names[static_cast<std::underlying_type<VPTracks>::type>(t)].c_str();
+   //   return track_names[track].c_str();
+   //};
    //printf("VP_ENABLE = %d\n", (VP_ENABLE ? 1 : 0));
    //printf("VP_PERFECT = %s\n", (VP_ENABLE ? (VP_PERFECT ? "1" : "0") : "n/a"));
    //printf("VP_TRACK = %s\n", (VP_ENABLE ? get_track_name(VP_TRACK) : "n/a"));

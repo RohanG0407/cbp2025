@@ -66,7 +66,6 @@ uint64_t resource_schedule::schedule(uint64_t start_cycle, uint64_t max_delta)
 {
    assert(start_cycle >= base_cycle);
 
-   uint64_t i;
    uint64_t limit_cycle = max_delta == MAX_CYCLE ? MAX_CYCLE : start_cycle + max_delta;
    bool found = false;
 
@@ -96,7 +95,6 @@ uint64_t resource_schedule::try_schedule(uint64_t try_cycle)
    // Calling this assumes all previous events to schedule have been scheduled.
    assert(try_cycle >= base_cycle);
 
-   uint64_t i;;
    bool found = false;
 
    while (!found) {

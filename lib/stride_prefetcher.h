@@ -47,6 +47,8 @@ static std::ostream& operator<<(std::ostream& stream, const PrefetcherState& s)
      DEF_ENUM(PrefetcherState, Transient)
      DEF_ENUM(PrefetcherState, SteadyState)
      DEF_ENUM(PrefetcherState, NoPrediction)
+    default:
+      assert(false);
     };
     return stream;
 }
@@ -120,7 +122,7 @@ class StridePrefetcher
    public:
     void init(const uint64_t n)
     {
-        for(auto i = 0; i < n; i++)
+        for(uint64_t i = 0; i < n; i++)
         {
             //Initialize LRU
             rpt[i].index = i;
@@ -266,6 +268,9 @@ class StridePrefetcher
                     assert(false && "Unpexted state");
                 }
                 break;
+                default:
+                  assert(false);
+                  break;
             };
             if(entry->stride != 0)
             {

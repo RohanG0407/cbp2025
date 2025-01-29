@@ -93,7 +93,7 @@ bool bp_t::predict(uint64_t seq_no, uint8_t piece, InstClass inst_class, uint64_
       
       if(MISP_REDUCTION_PERC != 0 && misp)
       {
-          const bool flip_mispred = (MISP_REDUCTION_PERC == 100) ? true : ((rand_r(&mispred_correction_seed)%100) < MISP_REDUCTION_PERC);
+          const bool flip_mispred = (MISP_REDUCTION_PERC == 100) ? true : (static_cast<uint64_t>(rand_r(&mispred_correction_seed)%100) < MISP_REDUCTION_PERC);
           if(flip_mispred)
           {
               misp = false;
@@ -225,7 +225,7 @@ void bp_t::output()
    //const uint64_t meas_cycles_on_wrong_path = std::accumulate(meas_cycles_on_wrong_path_per_epoch.begin(), meas_cycles_on_wrong_path_per_epoch.end(), 0);
 
    uint64_t num_inst = (meas_conddir_n + meas_jumpdir_n + meas_jumpind_n + meas_jumpret_n + meas_notctrl_n);
-   uint64_t num_misp = (meas_conddir_m + meas_jumpind_m + meas_jumpret_m + meas_notctrl_m);
+   //uint64_t num_misp = (meas_conddir_m + meas_jumpind_m + meas_jumpret_m + meas_notctrl_m);
    printf("\n-----------------------------------------------BRANCH PREDICTION MEASUREMENTS (Full Simulation i.e. Counts Not Reset When Warmup Ends)----------------------------------------------\n");
    printf("Type                   NumBr     MispBr        mr     mpki\n");
    //BP_OUTPUT("All              ", num_inst, num_misp, num_inst);

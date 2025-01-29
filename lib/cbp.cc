@@ -295,11 +295,11 @@ int main(int argc, char ** argv)
   //   beginCondDirPredictor(0, (char **)NULL);
   beginCondDirPredictor();
 
-  db_t *inst = nullptr; 
+  db_t *inst = reader.get_inst(); 
 
   //bool dump_activity = true;
   //uint64_t current_fetch_cycle = 0;
-  while (inst = reader.get_inst()) 
+  while (inst != nullptr) 
   {
       //const bool logging_activated = (LOG_LEVEL != 0) && (current_fetch_cycle>= LOG_START_CYCLE) && (current_fetch_cycle<=LOG_END_CYCLE);
       //if(logging_activated && dump_activity)
@@ -318,6 +318,7 @@ int main(int argc, char ** argv)
       //}
       //current_fetch_cycle = next_fetch_cycle;
       delete inst;
+      inst = reader.get_inst();
   }
 
   endPredictor();
