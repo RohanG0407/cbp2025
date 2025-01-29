@@ -354,7 +354,7 @@ void bp_t::output_periodic_info(const std::vector<uint64_t>&num_insts_per_epoch,
 
    if(PRINT_PER_EPOCH_STATS)
    {
-      printf("EPOCH COUNT  = %ld\n", num_insts_per_epoch.size());
+      printf("EPOCH COUNT  = %lu\n", num_insts_per_epoch.size());
       printf("\n-------------------------------------------------------------DIRECT CONDITIONAL BRANCH PREDICTION PER EPOCH MEASUREMENTS------------------------------------------------------------\n");
       printf("EPOCH       Instr       Cycles      IPC      NumBr     MispBr BrPerCyc MispBrPerCyc        MR     MPKI      CycWP   CycWPAvg   CycWPPKI\n");
       for(uint64_t epoch_index = 0; epoch_index < num_insts_per_epoch.size(); epoch_index++)

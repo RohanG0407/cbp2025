@@ -812,17 +812,17 @@ void uarchsim_t::output()
    //printf("VP_ENABLE = %d\n", (VP_ENABLE ? 1 : 0));
    //printf("VP_PERFECT = %s\n", (VP_ENABLE ? (VP_PERFECT ? "1" : "0") : "n/a"));
    //printf("VP_TRACK = %s\n", (VP_ENABLE ? get_track_name(VP_TRACK) : "n/a"));
-   printf("WINDOW_SIZE = %ld\n", WINDOW_SIZE);
-   printf("FETCH_WIDTH = %ld\n", FETCH_WIDTH);
-   printf("FETCH_NUM_BRANCH = %ld\n", FETCH_NUM_BRANCH);
+   printf("WINDOW_SIZE = %lu\n", WINDOW_SIZE);
+   printf("FETCH_WIDTH = %lu\n", FETCH_WIDTH);
+   printf("FETCH_NUM_BRANCH = %lu\n", FETCH_NUM_BRANCH);
    printf("FETCH_STOP_AT_INDIRECT = %s\n", (FETCH_STOP_AT_INDIRECT ? "1" : "0"));
    printf("FETCH_STOP_AT_TAKEN = %s\n", (FETCH_STOP_AT_TAKEN ? "1" : "0"));
    printf("FETCH_MODEL_ICACHE = %s\n", (FETCH_MODEL_ICACHE ? "1" : "0"));
    printf("PERFECT_BRANCH_PRED = %s\n", (PERFECT_BRANCH_PRED ? "1" : "0"));
    printf("PERFECT_INDIRECT_PRED = %s\n", (PERFECT_INDIRECT_PRED ? "1" : "0"));
-   printf("PIPELINE_FILL_LATENCY = %ld\n", PIPELINE_FILL_LATENCY);
-   printf("NUM_LDST_LANES = %ld%s", NUM_LDST_LANES, ((NUM_LDST_LANES > 0) ? "\n" : " (unbounded)\n"));
-   printf("NUM_ALU_LANES = %ld%s", NUM_ALU_LANES, ((NUM_ALU_LANES > 0) ? "\n" : " (unbounded)\n"));
+   printf("PIPELINE_FILL_LATENCY = %lu\n", PIPELINE_FILL_LATENCY);
+   printf("NUM_LDST_LANES = %lu%s", NUM_LDST_LANES, ((NUM_LDST_LANES > 0) ? "\n" : " (unbounded)\n"));
+   printf("NUM_ALU_LANES = %lu%s", NUM_ALU_LANES, ((NUM_ALU_LANES > 0) ? "\n" : " (unbounded)\n"));
    //BP.output();
    printf("MEMORY HIERARCHY CONFIGURATION---------------------\n");
    printf("STRIDE Prefetcher = %s\n", PREFETCHER_ENABLE ? "1" : "0");
@@ -837,20 +837,20 @@ void uarchsim_t::output()
    printf("\t* performed in the L1$. While buffered, conflicting loads get\n");
    printf("\t* the store's data as they would from the SQ.\n");
    if (FETCH_MODEL_ICACHE) {
-      printf("I$: %ld %s, %ld-way set-assoc., %ldB block size\n",
+      printf("I$: %lu %s, %lu-way set-assoc., %luB block size\n",
    	     SCALED_SIZE(IC_SIZE), SCALED_UNIT(IC_SIZE), IC_ASSOC, IC_BLOCKSIZE);
    }
-   printf("L1$: %ld %s, %ld-way set-assoc., %ldB block size, %ld-cycle search latency\n",
+   printf("L1$: %lu %s, %lu-way set-assoc., %luB block size, %lu-cycle search latency\n",
    	  SCALED_SIZE(L1_SIZE), SCALED_UNIT(L1_SIZE), L1_ASSOC, L1_BLOCKSIZE, L1_LATENCY);
-   printf("L2$: %ld %s, %ld-way set-assoc., %ldB block size, %ld-cycle search latency\n",
+   printf("L2$: %lu %s, %lu-way set-assoc., %luB block size, %lu-cycle search latency\n",
    	  SCALED_SIZE(L2_SIZE), SCALED_UNIT(L2_SIZE), L2_ASSOC, L2_BLOCKSIZE, L2_LATENCY);
-   printf("L3$: %ld %s, %ld-way set-assoc., %ldB block size, %ld-cycle search latency\n",
+   printf("L3$: %lu %s, %lu-way set-assoc., %luB block size, %lu-cycle search latency\n",
    	  SCALED_SIZE(L3_SIZE), SCALED_UNIT(L3_SIZE), L3_ASSOC, L3_BLOCKSIZE, L3_LATENCY);
-   printf("Main Memory: %ld-cycle fixed search time\n", MAIN_MEMORY_LATENCY);
+   printf("Main Memory: %lu-cycle fixed search time\n", MAIN_MEMORY_LATENCY);
    printf("---------------------------STORE QUEUE MEASUREMENTS (Full Simulation i.e. Counts Not Reset When Warmup Ends)---------------------------\n");
-   printf("Number of loads: %ld\n", num_load);
-   printf("Number of loads that miss in SQ: %ld (%.2f%%)\n", num_load_sqmiss, 100.0*(double)num_load_sqmiss/(double)num_load);
-   printf("Number of PFs issued to the memory system %ld\n", stat_pfs_issued_to_mem);
+   printf("Number of loads: %lu\n", num_load);
+   printf("Number of loads that miss in SQ: %lu (%.2f%%)\n", num_load_sqmiss, 100.0*(double)num_load_sqmiss/(double)num_load);
+   printf("Number of PFs issued to the memory system %lu\n", stat_pfs_issued_to_mem);
    printf("---------------------------------------------------------------------------------------------------------------------------------------\n");
    printf("------------------------MEMORY HIERARCHY MEASUREMENTS (Full Simulation i.e. Counts Not Reset When Warmup Ends)-------------------------\n");
    if (FETCH_MODEL_ICACHE) {
@@ -864,9 +864,9 @@ void uarchsim_t::output()
    prefetcher.print_stats();
    printf("---------------------------------------------------------------------------------------------------------------------------------------\n");
    printf("\n-------------------------------ILP LIMIT STUDY (Full Simulation i.e. Counts Not Reset When Warmup Ends)--------------------------------\n");
-   printf("instructions = %ld\n", num_inst);
-   printf("cycles       = %ld\n", cycle);
-   printf("CycWP        = %ld\n", cycles_on_wrong_path);
+   printf("instructions = %lu\n", num_inst);
+   printf("cycles       = %lu\n", cycle);
+   printf("CycWP        = %lu\n", cycles_on_wrong_path);
    printf("IPC          = %.4f\n", ((double)num_inst/(double)cycle));
    printf("\n---------------------------------------------------------------------------------------------------------------------------------------\n");
    // Branch Prediction Measurements
