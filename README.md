@@ -19,17 +19,17 @@ The simulator interacts with the branch predictor via the following interfaces:
 * notify_instr_commit - Called when any instruction is committed.
 * endCondDirPredictor - Called at the end of simulation to allow contestants to dump any additional state.
 
-These interfaces get exercised as the instruction flows through the cpu pipeline, and they provide the contestants with the relevant state available at that pipeline stage. The interfaces are defined in cbp.h and must remain unchanged. The structures exposed via the interfaces are defined in lib/sim_common_structs.h. This includes InstClass, DecodeInfo, ExecuteInfo ..etc.
+These interfaces get exercised as the instruction flows through the cpu pipeline, and they provide the contestants with the relevant state available at that pipeline stage. The interfaces are defined in [cbp.h](./cbp.h) and must remain unchanged. The structures exposed via the interfaces are defined in [sim_common_structs.h](lib/sim_common_structs.h). This includes InstClass, DecodeInfo, ExecuteInfo ..etc.
 
 See [cbp.h](./cbp.h) and [cond_branch_predictor_interface.cc](./cond_branch_predictor_interface.cc) for more details.
 
 ### Contestant Developed Predictor
 
-We provide the CBP2016 winner(64KB Tage-SC-L) as base predictor, not counted toward the predictor budget. In the provided implementation, the base predictor checkpoints history in an STL map(pred_time_histories) indexed by instruction id. At update time, that information is retrieved to perform the update. 
-For the predictors developed by the contestants, they are free to use a similar approach. The amount of state needed to checkpoint histories won't be counted towards the predictor budget.
-Contestants are free to update the implementation within
-[cond_branch_predictor_interface.cc](./cond_branch_predictor_interface.cc) as long as they keep the branch predictor interfaces (listed above) untouched. E.g., they can modify the file to combine the predictions from the cbp2016 tage-sc-l and their own developed predictor.
-Contestants are also allowed to update tage-sc-l implementation or completely disregard the tage-sc-l prediction.
+The simulator comes with CBP2016 winner([64KB Tage-SC-L](./cbp2016_tage_sc_l.h)) as the conditional branch predictor. Contestants may retain the Tage-SC-L and add upto 128KB of additional prediction components, or discard it and use the entire 192KB for their own components. Contestants are also allowed to update tage-sc-l implementation.
+Contestants are free to update the implementation within [cond_branch_predictor_interface.cc](./cond_branch_predictor_interface.cc) as long as they keep the branch predictor interfaces (listed above) untouched. E.g., they can modify the file to combine the predictions from the cbp2016 tage-sc-l and their own developed predictor.
+
+In a processor, it is typical to have a structure that records prediction-time information that can be used later to update the predictor once the branch resolves. In the provided Tage-SC-L implementation, the predictor checkpoints history in an STL map(pred_time_histories) indexed by instruction id to serve this pirpose. At update time, the same information is retrieved to update the predictor. 
+For the predictors developed by the contestants, they are free to use a similar approach. The amount of state needed to checkpoint histories will NOT be counted towards the predictor budget. For any questions, contestants are encouraged to email the CBP2025 Organizing Committee.
 
 ## Examples
 See Simulator options:
