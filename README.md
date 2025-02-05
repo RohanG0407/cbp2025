@@ -13,7 +13,7 @@ To build the simulator:
 The simulator interacts with the branch predictor via the following interfaces:
 * beginCondDirPredictor - Intended for any predictor initialization steps.
 * get_cond_dir_prediction - invoke the predictor to get the prediction of the relevant branch. This is called only for conditional branches.
-* spec_update - Intended to help update the predictor's history (GHR/LHIST ..etc.) This is called for all branches.
+* spec_update - Intended to help update the predictor's history (GHR/LHIST ..etc.) This is called for all branches right after a prediction is made.
 * notify_instr_decode - Called when an instruction is decoded.
 * notify_instr_execute_resolve - Called when any instruction is executed.
 * notify_instr_commit - Called when any instruction is committed.
@@ -28,7 +28,7 @@ See [cbp.h](./cbp.h) and [cond_branch_predictor_interface.cc](./cond_branch_pred
 The simulator comes with CBP2016 winner([64KB Tage-SC-L](./cbp2016_tage_sc_l.h)) as the conditional branch predictor. Contestants may retain the Tage-SC-L and add upto 128KB of additional prediction components, or discard it and use the entire 192KB for their own components. Contestants are also allowed to update tage-sc-l implementation.
 Contestants are free to update the implementation within [cond_branch_predictor_interface.cc](./cond_branch_predictor_interface.cc) as long as they keep the branch predictor interfaces (listed above) untouched. E.g., they can modify the file to combine the predictions from the cbp2016 tage-sc-l and their own developed predictor.
 
-In a processor, it is typical to have a structure that records prediction-time information that can be used later to update the predictor once the branch resolves. In the provided Tage-SC-L implementation, the predictor checkpoints history in an STL map(pred_time_histories) indexed by instruction id to serve this pirpose. At update time, the same information is retrieved to update the predictor. 
+In a processor, it is typical to have a structure that records prediction-time information that can be used later to update the predictor once the branch resolves. In the provided Tage-SC-L implementation, the predictor checkpoints history in an STL map(pred_time_histories) indexed by instruction id to serve this purpose. At update time, the same information is retrieved to update the predictor.
 For the predictors developed by the contestants, they are free to use a similar approach. The amount of state needed to checkpoint histories will NOT be counted towards the predictor budget. For any questions, contestants are encouraged to email the CBP2025 Organizing Committee.
 
 ## Examples

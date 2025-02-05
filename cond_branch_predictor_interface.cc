@@ -27,7 +27,7 @@
 // This function is called by the simulator before the start of simulation.
 // It can be used for arbitrary initialization steps for the contestant's code.
 //
-void beginCondDirPredictor ()
+void beginCondDirPredictor()
 {
     // setup sample_predictor
     cbp2016_tage_sc_l.setup();
@@ -113,7 +113,7 @@ void notify_instr_decode(uint64_t seq_no, uint8_t piece, uint64_t pc, const Deco
 // This function is called when any instructions(not just branches) gets executed.
 // Along with the unique identifying ids(seq_no, piece), PC of the instruction, execute info and cycle are also provided as inputs
 //
-// For conditional branches,  we use this information to update the predictor.
+// For conditional branches, we use this information to update the predictor.
 // At the moment, we do not consider updating any other structure, but the contestants are allowed to  update any other predictor state.
 void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool pred_dir, const ExecuteInfo& _exec_info, const uint64_t execute_cycle)
 {
@@ -146,7 +146,7 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
 }
 
 //
-// endPredictor()
+// endCondDirPredictor()
 //
 // This function is called by the simulator at the end of simulation.
 // It can be used by the contestant to print out other contestant-specific measurements.

@@ -70,7 +70,7 @@ extern void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, con
 
 
 //
-// endPredictor()
+// endCondDirPredictor()
 //
 // This function is called by the simulator at the end of simulation.
 // It can be used by the contestant to print out other contestant-specific measurements.
