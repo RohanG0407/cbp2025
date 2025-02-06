@@ -74,7 +74,9 @@ To untar the traces:
 
 `tar -xvf foo.tar.xz`
 
+### Data Dependent conditional branch characterization
 
+[Data Dependent Conditional Branch Characterization](https://ericrotenberg.wordpress.ncsu.edu/files/2025/02/CBP2025-data-dependent-branch-profiles.pdf) for the training traces is available. This may be leveraged to pursue interesting directions for the branch predictor design.
 
 ## Sample Output Per Run
 
