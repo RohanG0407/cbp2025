@@ -322,5 +322,6 @@ int main(int argc, char ** argv)
   }
 
   endPredictor();
+  endCondDirPredictor();
   sim->output();
 }
