@@ -198,7 +198,7 @@ Not control         1164572          0   0.0000%   0.0000
 ## Sample Output if using python script for all the traces:
 
 ```
-python trace_exec_training_list.py  --trace_dir sample_traces/ --results_dir  sample_results
+python scripts/trace_exec_training_list.py  --trace_dir sample_traces/ --results_dir  sample_results
 Got 2 traces
 Begin processing run:fp/sample_fp_trace
 Begin processing run:int/sample_int_trace
