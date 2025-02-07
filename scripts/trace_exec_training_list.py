@@ -187,7 +187,7 @@ def execute_trace(my_trace_path):
     run_name = run_split[-1].split(".")[-2]
     if not os.path.exists(f'{results_dir}/{my_wl}'):
         if not os.path.exists(f'{results_dir}/{my_wl}'):
-            os.mkdir(f'{results_dir}/{my_wl}')
+            os.makedirs(f'{results_dir}/{my_wl}', exist_ok=True)
 
     do_process = True
     my_run_name = f'{my_wl}/{run_name}'
