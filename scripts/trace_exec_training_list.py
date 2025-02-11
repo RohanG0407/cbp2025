@@ -10,6 +10,7 @@ from numpy import random
 from time import sleep
 import argparse
 from pathlib import Path
+#from scipy.stats import gmean
 
 
 parser = argparse.ArgumentParser()
@@ -234,3 +235,23 @@ for my_result in results:
         df = my_df.copy()
 print(df)
 df.to_csv(f'{results_dir}/results.csv', index=False)
+
+
+unique_wls = df['Workload'].unique()
+
+print('\n\n----------------------------------Aggregate Metrics Per Workload Category----------------------------------\n')
+for my_wl in unique_wls:
+    my_wl_br_misp_pki_amean = df[df['Workload'] == my_wl]['50PercMPKI'].astype(float).mean()
+    my_wl_cyc_wp_pki_amean = df[df['Workload'] == my_wl]['50PercCycWPPKI'].astype(float).mean()
+    print(f'WL:{my_wl:<10} Branch Misprediction PKI(BrMisPKI) AMean : {my_wl_br_misp_pki_amean}')
+    print(f'WL:{my_wl:<10} Cycles On Wrong-Path PKI(CycWpPKI) AMean : {my_wl_cyc_wp_pki_amean}')
+print('-----------------------------------------------------------------------------------------------------------')
+
+br_misp_pki_amean = df['50PercMPKI'].astype(float).mean()
+cyc_wp_pki_amean = df['50PercCycWPPKI'].astype(float).mean()
+#ipc_geomean = df['50PercIPC'].astype(float).apply(gmean)
+
+print('\n\n---------------------------------------------Aggregate Metrics---------------------------------------------\n')
+print(f'Branch Misprediction PKI(BrMisPKI) AMean : {br_misp_pki_amean}')
+print(f'Cycles On Wrong-Path PKI(CycWpPKI) AMean : {cyc_wp_pki_amean}')
+print('-----------------------------------------------------------------------------------------------------------')
