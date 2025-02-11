@@ -198,15 +198,29 @@ Not control         1164572          0   0.0000%   0.0000
 ## Sample Output if using python script for all the traces:
 
 ```
-python scripts/trace_exec_training_list.py  --trace_dir sample_traces/ --results_dir  sample_results
+python scripts/trace_exec_training_list.py  --trace_dir ./sample_traces/ --results_dir  sample_results
 Got 2 traces
 Begin processing run:fp/sample_fp_trace
 Begin processing run:int/sample_int_trace
 Extracting data from : sample_results/fp/sample_fp_trace.log |  WL:fp | Run:sample_fp_trace
 Extracting data from : sample_results/int/sample_int_trace.log |  WL:int | Run:sample_int_trace
-  Workload               Run  TraceSize Status           ExecTime   Instr  Cycles     IPC   NumBr MispBr BrPerCyc  ... 50PercCycles 50PercIPC 50PercNumBr 50PercMispBr 50PercBrPerCyc 50PercMispBrPerCyc 50PercMR 50PercMPKI 50PercCycWP 50PercCycWPAvg 50PercCycWPPKI
-0       fp   sample_fp_trace   1.178618   Pass  5.313465356826782  997741  193123  5.1663  111265   1140   0.5761  ...       193123    5.1663      111265         1140         0.5761             0.0059  1.0246%     1.1426       61660        54.0877        61.7996
-1      int  sample_int_trace   1.334165   Pass  4.488162040710449  997301  338310  2.9479  128874    264   0.3809  ...       338310    2.9479      128874          264         0.3809             0.0008  0.2049%     0.2647       33348       126.3182        33.4382
+  Workload               Run  TraceSize Status            ExecTime   Instr  Cycles     IPC   NumBr MispBr BrPerCyc MispBrPerCyc       MR    MPKI  CycWP  CycWPAvg CycWPPKI 50PercInstr 50PercCycles 50PercIPC 50PercNumBr 50PercMispBr 50PercBrPerCyc 50PercMispBrPerCyc 50PercMR 50PercMPKI 50PercCycWP 50PercCycWPAvg 50PercCycWPPKI
+0       fp   sample_fp_trace   1.178618   Pass   6.901926040649414  997741  193123  5.1663  111265   1140   0.5761       0.0059  1.0246%  1.1426  61660   54.0877  61.7996      997741       193123    5.1663      111265         1140         0.5761             0.0059  1.0246%     1.1426       61660        54.0877        61.7996
+1      int  sample_int_trace   1.334165   Pass  5.5803234577178955  997301  338310  2.9479  128874    264   0.3809       0.0008  0.2049%  0.2647  33348  126.3182  33.4382      997301       338310    2.9479      128874          264         0.3809             0.0008  0.2049%     0.2647       33348       126.3182        33.4382
 
-[2 rows x 29 columns]
+
+----------------------------------Aggregate Metrics Per Workload Category----------------------------------
+
+WL:fp         Branch Misprediction PKI(BrMisPKI) AMean : 1.1426
+WL:fp         Cycles On Wrong-Path PKI(CycWpPKI) AMean : 61.7996
+WL:int        Branch Misprediction PKI(BrMisPKI) AMean : 0.2647
+WL:int        Cycles On Wrong-Path PKI(CycWpPKI) AMean : 33.4382
+-----------------------------------------------------------------------------------------------------------
+
+
+---------------------------------------------Aggregate Metrics---------------------------------------------
+
+Branch Misprediction PKI(BrMisPKI) AMean : 0.70365
+Cycles On Wrong-Path PKI(CycWpPKI) AMean : 47.6189
+-----------------------------------------------------------------------------------------------------------
 ```
