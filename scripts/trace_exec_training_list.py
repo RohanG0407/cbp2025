@@ -217,41 +217,48 @@ def execute_trace(my_trace_path):
 
 
 
-with mp.Pool() as pool:
-    results = pool.map(execute_trace, my_traces)
-
-df = pd.DataFrame(columns=['Workload', 'Run', 'TraceSize', 'ExecTime', 'Instr', 'Cycles', 'IPC', 'NumBr', 'MispBr', 'BrPerCyc', 'MispBrPerCyc', 'MR', 'MPKI', 'CycWP',  'CycWPAvg', 'CycWPPKI', '50PercInstr', '50PercCycles', '50PercIPC', '50PercNumBr', '50PercMispBr', '50PercBrPerCyc', '50PercMispBrPerCyc', '50PercMR', '50PercMPKI', '50PercCycWP', '50PercCycWPAvg', '50PercCycWPPKI'])
-for my_result in results:
-    pass_status = my_result[0]
-    trace_path = my_result[1]
-    op_file = my_result[2]
-    my_run_name = my_result[3]
-    run_dict = {}
-    run_dict = process_run_op(pass_status, trace_path, my_run_name, op_file)
-    my_df = pd.DataFrame([run_dict])
-    if not df.empty:
-        df = pd.concat([df, my_df], ignore_index=True)
-    else:
-        df = my_df.copy()
-print(df)
-df.to_csv(f'{results_dir}/results.csv', index=False)
-
-
-unique_wls = df['Workload'].unique()
-
-print('\n\n----------------------------------Aggregate Metrics Per Workload Category----------------------------------\n')
-for my_wl in unique_wls:
-    my_wl_br_misp_pki_amean = df[df['Workload'] == my_wl]['50PercMPKI'].astype(float).mean()
-    my_wl_cyc_wp_pki_amean = df[df['Workload'] == my_wl]['50PercCycWPPKI'].astype(float).mean()
-    print(f'WL:{my_wl:<10} Branch Misprediction PKI(BrMisPKI) AMean : {my_wl_br_misp_pki_amean}')
-    print(f'WL:{my_wl:<10} Cycles On Wrong-Path PKI(CycWpPKI) AMean : {my_wl_cyc_wp_pki_amean}')
-print('-----------------------------------------------------------------------------------------------------------')
-
-br_misp_pki_amean = df['50PercMPKI'].astype(float).mean()
-cyc_wp_pki_amean = df['50PercCycWPPKI'].astype(float).mean()
-#ipc_geomean = df['50PercIPC'].astype(float).apply(gmean)
-
-print('\n\n---------------------------------------------Aggregate Metrics---------------------------------------------\n')
-print(f'Branch Misprediction PKI(BrMisPKI) AMean : {br_misp_pki_amean}')
-print(f'Cycles On Wrong-Path PKI(CycWpPKI) AMean : {cyc_wp_pki_amean}')
-print('-----------------------------------------------------------------------------------------------------------')
+if __name__ == '__main__':
+    # For parallel runs:
+    with mp.Pool() as pool:
+        results = pool.map(execute_trace, my_traces)
+    
+    # For serial runs:
+    #results = []
+    #for my_trace in my_traces:
+    #    results.append(execute_trace(my_trace))
+    
+    df = pd.DataFrame(columns=['Workload', 'Run', 'TraceSize', 'ExecTime', 'Instr', 'Cycles', 'IPC', 'NumBr', 'MispBr', 'BrPerCyc', 'MispBrPerCyc', 'MR', 'MPKI', 'CycWP',  'CycWPAvg', 'CycWPPKI', '50PercInstr', '50PercCycles', '50PercIPC', '50PercNumBr', '50PercMispBr', '50PercBrPerCyc', '50PercMispBrPerCyc', '50PercMR', '50PercMPKI', '50PercCycWP', '50PercCycWPAvg', '50PercCycWPPKI'])
+    for my_result in results:
+        pass_status = my_result[0]
+        trace_path = my_result[1]
+        op_file = my_result[2]
+        my_run_name = my_result[3]
+        run_dict = {}
+        run_dict = process_run_op(pass_status, trace_path, my_run_name, op_file)
+        my_df = pd.DataFrame([run_dict])
+        if not df.empty:
+            df = pd.concat([df, my_df], ignore_index=True)
+        else:
+            df = my_df.copy()
+    print(df)
+    df.to_csv(f'{results_dir}/results.csv', index=False)
+    
+    
+    unique_wls = df['Workload'].unique()
+    
+    print('\n\n----------------------------------Aggregate Metrics Per Workload Category----------------------------------\n')
+    for my_wl in unique_wls:
+        my_wl_br_misp_pki_amean = df[df['Workload'] == my_wl]['50PercMPKI'].astype(float).mean()
+        my_wl_cyc_wp_pki_amean = df[df['Workload'] == my_wl]['50PercCycWPPKI'].astype(float).mean()
+        print(f'WL:{my_wl:<10} Branch Misprediction PKI(BrMisPKI) AMean : {my_wl_br_misp_pki_amean}')
+        print(f'WL:{my_wl:<10} Cycles On Wrong-Path PKI(CycWpPKI) AMean : {my_wl_cyc_wp_pki_amean}')
+    print('-----------------------------------------------------------------------------------------------------------')
+    
+    br_misp_pki_amean = df['50PercMPKI'].astype(float).mean()
+    cyc_wp_pki_amean = df['50PercCycWPPKI'].astype(float).mean()
+    #ipc_geomean = df['50PercIPC'].astype(float).apply(gmean)
+    
+    print('\n\n---------------------------------------------Aggregate Metrics---------------------------------------------\n')
+    print(f'Branch Misprediction PKI(BrMisPKI) AMean : {br_misp_pki_amean}')
+    print(f'Cycles On Wrong-Path PKI(CycWpPKI) AMean : {cyc_wp_pki_amean}')
+    print('-----------------------------------------------------------------------------------------------------------')
