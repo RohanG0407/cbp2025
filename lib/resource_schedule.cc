@@ -59,7 +59,7 @@ void resource_schedule::resize(uint64_t new_depth) {
    for (i = old_depth; i < depth; i++)
       sched[i] = 0;
 
-   delete old;
+   delete[] old;
 }
 
 uint64_t resource_schedule::schedule(uint64_t start_cycle, uint64_t max_delta) 
