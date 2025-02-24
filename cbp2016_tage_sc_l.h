@@ -240,7 +240,7 @@ int8_t BIM;
 int TICK;           // for the reset of the u counter
 //uint8_t ghist[HISTBUFFERLENGTH];
 //int ptghist;
-//long long phist;      //path history
+//uint64_t phist;      //path history
 //folded_history ch_i[NHIST + 1];   //utility for computing TAGE indices
 //folded_history ch_t[2][NHIST + 1];    //utility for computing TAGE tags
 
@@ -275,7 +275,7 @@ int m[NHIST + 1];
 int TB[NHIST + 1];
 int logg[NHIST + 1];
 
-int Seed;           // for the pseudo-random number generator
+uint64_t Seed;           // for the pseudo-random number generator
 
 
 class folded_history
@@ -314,19 +314,19 @@ using tage_tag_t = std::array<folded_history, NHIST+1>;
 struct cbp_hist_t
 {
       // Begin Conventional Histories
-      long long GHIST;
+      uint64_t GHIST;
       std::array<uint8_t, HISTBUFFERLENGTH> ghist;
-      long long phist;      //path history
+      uint64_t phist;      //path history
       int ptghist;
       tage_index_t ch_i;
       std::array<tage_tag_t, 2> ch_t;
 
-      std::array<long long, NLOCAL> L_shist;
-      std::array<long long, NSECLOCAL> S_slhist;
-      std::array<long long, NTLOCAL> T_slhist;
+      std::array<uint64_t, NLOCAL> L_shist;
+      std::array<uint64_t, NSECLOCAL> S_slhist;
+      std::array<uint64_t, NTLOCAL> T_slhist;
 
-      std::array<long long, 256> IMHIST;
-      long long IMLIcount;      // use to monitor the iteration number
+      std::array<uint64_t, 256> IMHIST;
+      uint64_t IMLIcount;      // use to monitor the iteration number
 };
 
 
@@ -335,6 +335,7 @@ int predictorsize ()
 {
     int STORAGESIZE = 0;
     int inter = 0;
+
 
 
     STORAGESIZE +=
@@ -481,7 +482,6 @@ class CBP2016_TAGE_SC_L
 
         CBP2016_TAGE_SC_L (void)
         {
-
             init_histories (active_hist);
 #ifdef PRINTSIZE
             predictorsize ();
@@ -789,7 +789,7 @@ class CBP2016_TAGE_SC_L
 
         // the index functions for the tagged tables uses path history as in the OGEHL predictor
         //F serves to mix path history: not very important impact
-        int F (long long A, int size, int bank) const
+        int F (uint64_t A, int size, int bank) const
         {
             int   A1, A2;
             A = A & ((1 << size) - 1);
@@ -808,8 +808,8 @@ class CBP2016_TAGE_SC_L
         }
 
         // gindex computes a full hash of PC, ghist and phist
-        //int gindex (unsigned int PC, int bank, long long hist, const folded_history * ch_i) const
-        int gindex (unsigned int PC, int bank, long long hist, const tage_index_t& ch_i) const
+        //int gindex (unsigned int PC, int bank, uint64_t hist, const folded_history * ch_i) const
+        int gindex (unsigned int PC, int bank, uint64_t hist, const tage_index_t& ch_i) const
         {
             int index;
             int M = (m[bank] > PHISTWIDTH) ? PHISTWIDTH : m[bank];
@@ -872,9 +872,9 @@ class CBP2016_TAGE_SC_L
             Seed++;
             Seed ^= active_hist.phist;
             Seed = (Seed >> 21) + (Seed << 11);
-            Seed ^= active_hist.ptghist;
+            Seed ^= (int64_t)active_hist.ptghist;
             Seed = (Seed >> 10) + (Seed << 22);
-            return (Seed);
+            return (Seed & 0xFFFFFFFF);
         };
 
 
@@ -890,7 +890,7 @@ class CBP2016_TAGE_SC_L
                 GTAG[i + 1] = GTAG[i];
                 GI[i + 1] = GI[i] ^ (GTAG[i] & ((1 << LOGG) - 1));
             }
-            int T = (PC ^ (hist_to_use.phist & ((1 << m[BORN]) - 1))) % NBANKHIGH;
+            int T = (PC ^ (hist_to_use.phist & ((1ULL << m[BORN]) - 1))) % NBANKHIGH;
             //int T = (PC ^ phist) % NBANKHIGH;
             for (int i = BORN; i <= NHIST; i++)
                 if (NOSKIP[i])
@@ -1153,7 +1153,7 @@ class CBP2016_TAGE_SC_L
                     if (taken)
                     {
 
-                        if (active_hist.IMLIcount < ((1 << Im[0]) - 1))
+                        if (active_hist.IMLIcount < ((1ULL << Im[0]) - 1))
                             active_hist.IMLIcount++;
                     }
                 }
@@ -1541,14 +1541,14 @@ class CBP2016_TAGE_SC_L
 
         }//END PREDICTOR UPDATE
 
-#define GINDEX (((long long) PC) ^ bhist ^ (bhist >> (8 - i)) ^ (bhist >> (16 - 2 * i)) ^ (bhist >> (24 - 3 * i)) ^ (bhist >> (32 - 3 * i)) ^ (bhist >> (40 - 4 * i))) & ((1 << (logs - (i >= (NBR - 2)))) - 1)
-        int Gpredict (UINT64 PC, long long BHIST, int *length, int8_t ** tab, int NBR, int logs, int8_t * W)
+#define GINDEX (((uint64_t) PC) ^ bhist ^ (bhist >> (8 - i)) ^ (bhist >> (16 - 2 * i)) ^ (bhist >> (24 - 3 * i)) ^ (bhist >> (32 - 3 * i)) ^ (bhist >> (40 - 4 * i))) & ((1 << (logs - (i >= (NBR - 2)))) - 1)
+        int Gpredict (UINT64 PC, uint64_t BHIST, int *length, int8_t ** tab, int NBR, int logs, int8_t * W)
         {
             int PERCSUM = 0;
             for (int i = 0; i < NBR; i++)
             {
-                long long bhist = BHIST & ((long long) ((1 << length[i]) - 1));
-                long long index = GINDEX;
+                uint64_t bhist = BHIST & ((uint64_t) ((1ULL << length[i]) - 1));
+                uint64_t index = GINDEX;
 
                 int8_t ctr = tab[i][index];
 
@@ -1559,7 +1559,7 @@ class CBP2016_TAGE_SC_L
 #endif
             return ((PERCSUM));
         }
-        void Gupdate (UINT64 PC, bool taken, long long BHIST, int *length,
+        void Gupdate (UINT64 PC, bool taken, uint64_t BHIST, int *length,
                 int8_t ** tab, int NBR, int logs, int8_t * W)
         {
 
@@ -1567,8 +1567,8 @@ class CBP2016_TAGE_SC_L
 
             for (int i = 0; i < NBR; i++)
             {
-                long long bhist = BHIST & ((long long) ((1 << length[i]) - 1));
-                long long index = GINDEX;
+                uint64_t bhist = BHIST & ((uint64_t) ((1ULL << length[i]) - 1));
+                uint64_t index = GINDEX;
 
                 PERCSUM += (2 * tab[i][index] + 1);
                 ctrupdate (tab[i][index], taken, PERCWIDTH);
