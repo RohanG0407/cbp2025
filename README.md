@@ -52,7 +52,7 @@ Sample traces are provided : [sample_traces](./sample_traces)
 
 Script to run all traces and dump a csv is also provided : [trace_exec_training_list](scripts/trace_exec_training_list.py)
 
-Reference results from the training set are included here : [reference_results][reference_results_training_set.csv]
+Reference results from the training set are included here : [reference_results](reference_results_training_set.csv)
 
 To run the script, update the trace_folder and results dir inside the script and run:
 
