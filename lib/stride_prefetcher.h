@@ -306,7 +306,15 @@ class StridePrefetcher
             // Make extra sure PF are sorted by generation order from oldest to youngest
             std::sort(queue.begin(), queue.end(), [](const Prefetch & lhs, const Prefetch & rhs)
             {
-                return lhs.cycle_generated < rhs.cycle_generated;
+                if(lhs.cycle_generated != rhs.cycle_generated)
+                {
+                    return lhs.cycle_generated < rhs.cycle_generated;
+                }
+                if(lhs.address != rhs.address)
+                {
+                    return lhs.address < rhs.address;
+                }
+                return false;
             });
 
             ++stat_generated;
