@@ -5,7 +5,7 @@
 
 struct SampleHist
 {
-      long long ghist;
+      uint64_t ghist;
       bool tage_pred;
       //
       SampleHist()

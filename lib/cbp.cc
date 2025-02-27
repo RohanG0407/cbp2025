@@ -117,7 +117,7 @@ int parseargs(int argc, char ** argv)
         if (i < argc)
         {
            unsigned int temp1, temp2, temp3, temp4, temp5;
-           if (sscanf(argv[i], "%d,%d,%d,%d,%d", &temp1, &temp2, &temp3, &temp4, &temp5) == 5)
+           if (sscanf(argv[i], "%u,%u,%u,%u,%u", &temp1, &temp2, &temp3, &temp4, &temp5) == 5)
            {
               FETCH_WIDTH = (uint64_t)temp1;
               FETCH_NUM_BRANCH = (uint64_t)temp2;
@@ -144,7 +144,7 @@ int parseargs(int argc, char ** argv)
         if (i < argc)
         {
            unsigned int temp1, temp2, temp3;
-           if (sscanf(argv[i], "%d,%d,%d", &temp1, &temp2, &temp3) == 3)
+           if (sscanf(argv[i], "%u,%u,%u", &temp1, &temp2, &temp3) == 3)
            {
               IC_SIZE = (uint64_t)(1 << temp1);
               IC_ASSOC = (uint64_t)temp2;
@@ -169,7 +169,7 @@ int parseargs(int argc, char ** argv)
         if (i < argc)
         {
            unsigned int temp1, temp2, temp3, temp4, temp5, temp6, temp7, temp8, temp9, temp10, temp11, temp12, temp13;
-           if (sscanf(argv[i], "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",
+           if (sscanf(argv[i], "%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u",
                       &temp1, &temp2, &temp3, &temp4,
                       &temp5, &temp6, &temp7, &temp8,
                       &temp9, &temp10, &temp11, &temp12,
@@ -212,7 +212,7 @@ int parseargs(int argc, char ** argv)
         if (i < argc)
         {
            uint64_t epoch_size_insts;
-           if (sscanf(argv[i], "%ld", &epoch_size_insts) == 1)
+           if (sscanf(argv[i], "%lu", &epoch_size_insts) == 1)
            {
               EPOCH_SIZE_INSTS = epoch_size_insts;
            }
