@@ -647,6 +647,8 @@ void uarchsim_t::step(db_t *inst)
    activity_observed = true;
    assert(window.size() <= window_capacity);
 
+   notify_instr_fetch(seq_no, piece, inst->pc, fetch_cycle);
+
    DQ.push_back(std::make_tuple(seq_no, piece, decode_cycle));
    EQ.push_back(std::make_tuple(seq_no, piece, exec_cycle));
 

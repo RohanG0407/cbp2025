@@ -35,6 +35,16 @@ void beginCondDirPredictor()
 }
 
 //
+// notify_instr_fetch(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t fetch_cycle)
+// 
+// This function is called when any instructions(not just branches) gets fetched.
+// Along with the unique identifying ids(seq_no, piece), PC of the instruction and fetch_cycle are also provided as inputs
+//
+void notify_instr_fetch(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t fetch_cycle)
+{
+}
+
+//
 // get_cond_dir_prediction(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t pred_cycle)
 // 
 // This function is called by the simulator for predicting conditional branches.
