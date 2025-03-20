@@ -12,6 +12,7 @@ To build the simulator:
 
 The simulator interacts with the branch predictor via the following interfaces:
 * beginCondDirPredictor - Intended for any predictor initialization steps.
+* notify_instr_fetch - Called when an instruction is fetched.
 * get_cond_dir_prediction - invoke the predictor to get the prediction of the relevant branch. This is called only for conditional branches.
 * spec_update - Intended to help update the predictor's history (GHR/LHIST ..etc.) This is called for all branches right after a prediction is made.
 * notify_instr_decode - Called when an instruction is decoded.
