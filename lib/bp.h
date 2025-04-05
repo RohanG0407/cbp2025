@@ -23,6 +23,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Modified by A. Seznec (andre.seznec@inria.fr) to include TAGE-SC-L predictor and the ITTAGE indirect branch predictor
 
 #include "ittage.h"
+#include <unordered_map>
 
 class ras_t {
 private:
@@ -97,6 +98,7 @@ private:
     std::vector<uint64_t> meas_notctrl_m_per_epoch; // # non-control transfer instructions for which: next_pc != pc + 4
 
     std::vector<uint64_t> meas_cycles_on_wrong_path_per_epoch;
+    std::unordered_map<uint64_t, int> mispred_per_pc;
 
 public:
     bp_t();

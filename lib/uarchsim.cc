@@ -383,6 +383,7 @@ void uarchsim_t::eval_retire(std::ostream& activity_trace, bool& activity_observ
 void uarchsim_t::step(db_t *inst) 
 {
    spdlog::debug("Stepping, FC: {}",fetch_cycle);
+   //inst->printInst(fetch_cycle);
    bool activity_observed = false;
    std::ostringstream activity_trace;
 
@@ -821,6 +822,8 @@ void uarchsim_t::step(db_t *inst)
    {
        end_current_begin_new_epoch(false/*first_epoch*/, false/*last_epoch*/, predict_cycle);
    }
+
+   //inst->printInst(fetch_cycle);
 
 }
 #endif

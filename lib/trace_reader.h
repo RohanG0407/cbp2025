@@ -154,7 +154,11 @@ struct db_t
 
     void printInst(uint64_t fetch_cycle) const
     {
-        std::cout << fetch_cycle<<"::uOP:: "<<*this<<std::endl;
+        //if(is_cond_br(insn_class) || is_mem(insn_class))
+        // uint64_t bottom = 281474722490000;
+        // uint64_t top = 281474722500000;
+        // if(pc > bottom && pc < top)
+          std::cout << fetch_cycle<<"::uOP:: "<<*this<<std::endl;
     }
 };
 

@@ -14,6 +14,18 @@ struct SampleHist
       }
 };
 
+struct BranchTableEntry
+{
+  uint64_t src_reg;
+  uint64_t sat_counter;
+};
+
+struct StoreTableEntry
+{
+  bool is_valid;
+  bool is_zero;
+};
+
 
 class SampleCondPredictor
 {

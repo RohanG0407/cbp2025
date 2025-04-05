@@ -27,6 +27,9 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assert.h>
 #include <iostream>
 #include <numeric>
+#include <algorithm>
+#include <queue>
+#include <optional>
 #include <cstdlib>
 #include "sim_common_structs.h"
 #include "bp.h"
@@ -63,6 +66,7 @@ bp_t::bp_t()
    meas_notctrl_n_per_epoch.clear();
    meas_notctrl_m_per_epoch.clear();
    meas_cycles_on_wrong_path_per_epoch.clear();
+   mispred_per_pc.clear();
 }
 
 bp_t::~bp_t() {
@@ -90,6 +94,7 @@ bool bp_t::predict(uint64_t seq_no, uint8_t piece, InstClass inst_class, uint64_
       
       // Determine if mispredicted or not.
       misp = (pred_taken != taken);
+      if(misp) mispred_per_pc[pc] += 1;
       
       if(MISP_REDUCTION_PERC != 0 && misp)
       {
@@ -206,6 +211,29 @@ void bp_t::update_cycles_on_wrong_path(const uint64_t cycles_on_wrong_path)
 #define BP_OUTPUT(str, n, m, i) \
     printf("%s%10ld %10ld %8.4lf%% %8.4lf\n", (str), (n), (m), 100.0*((double)(m)/(double)(n)), 1000.0*((double)(m)/(double)(i)))
 
+// Function to find the PC (index) with the highest value
+// Function to find the top 10 PCs with the highest counts
+std::vector<std::pair<uint64_t, int>> findTop(const std::unordered_map<uint64_t, int>& data) {
+    using Entry = std::pair<int, uint64_t>; // (count, index) for sorting
+    std::priority_queue<Entry, std::vector<Entry>, std::greater<>> minHeap; // Min-heap (smallest at top)
+
+    for (const auto& [index, value] : data) {
+        minHeap.push({value, index});
+        if (minHeap.size() > 10) {
+            minHeap.pop(); // Keep only the top 10
+        }
+    }
+
+    std::vector<std::pair<uint64_t, int>> top10;
+    while (!minHeap.empty()) {
+        top10.push_back({minHeap.top().second, minHeap.top().first});
+        minHeap.pop();
+    }
+
+    std::reverse(top10.begin(), top10.end()); // Sort in descending order
+    return top10;
+}
+
 void bp_t::output(const uint64_t num_inst)
 {
    const uint64_t meas_conddir_n = std::accumulate(meas_conddir_n_per_epoch.begin(), meas_conddir_n_per_epoch.end(), 0);    // # conditional branches
@@ -223,6 +251,13 @@ void bp_t::output(const uint64_t num_inst)
    const uint64_t meas_notctrl_m = std::accumulate(meas_notctrl_m_per_epoch.begin(), meas_notctrl_m_per_epoch.end(), 0);    // # non-control transfer instructions for which: next_pc != pc + 4
 
    //const uint64_t meas_cycles_on_wrong_path = std::accumulate(meas_cycles_on_wrong_path_per_epoch.begin(), meas_cycles_on_wrong_path_per_epoch.end(), 0);
+
+    auto top10 = findTop(mispred_per_pc);
+    std::cout << "Top 10 highest count indices:\n";
+    for (const auto& [index, count] : top10) {
+        std::cout << "Index: 0x" << std::hex << std::uppercase << index
+                  << ", Count: " << std::dec << count << std::endl;
+    }
 
    //uint64_t num_misp = (meas_conddir_m + meas_jumpind_m + meas_jumpret_m + meas_notctrl_m);
    printf("\n-----------------------------------------------BRANCH PREDICTION MEASUREMENTS (Full Simulation i.e. Counts Not Reset When Warmup Ends)----------------------------------------------\n");
