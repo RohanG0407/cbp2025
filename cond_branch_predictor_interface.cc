@@ -21,6 +21,7 @@
 #include "my_cond_branch_predictor.h"
 #include <cassert>
 #include <unordered_set>
+#include <deque>
 
 //
 // beginCondDirPredictor()
@@ -34,6 +35,10 @@
 #define BT_SAT_COUNTER_MAX 31
 BranchTableEntry BT[BT_SIZE]; // 2^16 entries - 1
 std::unordered_set<uint64_t> high_mispred_pc;
+
+// RetireOp Queue
+std::deque<RetireOp> retire_op_queue;
+#define RETIRE_OP_QUEUE_SIZE 64
 
 // Store Table Info
 #define ST_SIZE 65535
@@ -213,17 +218,14 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
     //               << std::endl;
     // }
 
-    // if inst_count hits max decrement sat counters by 15
-
-    const bool is_branch = is_br(_exec_info.dec_info.insn_class);
-    if(is_branch)
+    if (is_cond_br(_exec_info.dec_info.insn_class))
     {
-      if (is_cond_br(_exec_info.dec_info.insn_class))
-      {
-        const bool _resolve_dir = _exec_info.taken.value();
-        const uint64_t target_pc = 0xFFFFF0D8F2CC;
+      const bool _resolve_dir = _exec_info.taken.value();
+      const uint64_t target_pc = 0xFFFFF0D8F2CC;
 
-        uint16_t pc_index = pc & 0xFFFF;
+      uint16_t pc_index = pc & 0xFF;
+      // print num src regs
+      if(_exec_info.dec_info.src_reg_info.size() > 0) {
         if(BT[pc_index].src_reg == _exec_info.dec_info.src_reg_info[0]) {
           if(_resolve_dir != pred_dir) {
             if (BT[pc_index].sat_counter < BT_SAT_COUNTER_MAX) {
@@ -236,52 +238,50 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
             BT[pc_index].sat_counter = 1;
           }
         }
-
-
-        // append to misprediction list of pc's where entry saturation counter = max
-        if(BT[pc_index].sat_counter == BT_SAT_COUNTER_MAX) {
-          // append full 64-bit pc to misprediction list
-          high_mispred_pc.insert(pc);
-        }
-
-        if(branch_inst_count == 1000) {
-          // std::cout << "\nFinal unique PC list:\n";
-          // for (uint64_t pc : high_mispred_pc) {
-          //     std::cout << "0x" << std::hex << std::uppercase << pc << std::endl;
-          // }
-          for(int i = 0; i < BT_SIZE; i++) {
-            if(BT[i].sat_counter < 15) {
-              BT[i].sat_counter = 0;
-            } else {
-              BT[i].sat_counter -= 15;
-            }
-          }
-          branch_inst_count = 0;
-        } else {
-          branch_inst_count++;
-        }
-        
-        // print the branch table for target_pc
-        // if(pc == target_pc) {
-        //   std::cout << "Branch Table for PC: 0x" << std::hex << pc << std::dec << std::endl;
-        //   if(_resolve_dir != pred_dir) {
-        //     std::cout << "Misprediction: " << " | Resolve Dir: " << _resolve_dir << " | Pred Dir: " << pred_dir << std::endl;
-        //   }
-        //   if(BT[0xF2CC].sat_counter > 0) {
-        //     std::cout << "Index: " << 0xF2CC << " | Src Reg: " << BT[0xF2CC].src_reg << " | Sat Counter: " << BT[0xF2CC].sat_counter << std::endl;
-        //   }
-        // }
       }
-    }
 
-    uint64_t target_mem_pc = 0xffffefd1e6d8;
+      // append to misprediction list of pc's where entry saturation counter = max
+      if(BT[pc_index].sat_counter == BT_SAT_COUNTER_MAX) {
+        // append full 64-bit pc to misprediction list
+        high_mispred_pc.insert(pc);
+      }
+
+      if(branch_inst_count == 1000) {
+        // std::cout << "\nFinal unique PC list:\n";
+        // for (uint64_t pc : high_mispred_pc) {
+        //     std::cout << "0x" << std::hex << std::uppercase << pc << std::endl;
+        // }
+        for(int i = 0; i < BT_SIZE; i++) {
+          if(BT[i].sat_counter < 15) {
+            BT[i].sat_counter = 0;
+          } else {
+            BT[i].sat_counter -= 15;
+          }
+        }
+        branch_inst_count = 0;
+      } else {
+        branch_inst_count++;
+      }
+      
+      // print the branch table for target_pc
+      // if(pc == target_pc) {
+      //   std::cout << "Branch Table for PC: 0x" << std::hex << pc << std::dec << std::endl;
+      //   if(_resolve_dir != pred_dir) {
+      //     std::cout << "Misprediction: " << " | Resolve Dir: " << _resolve_dir << " | Pred Dir: " << pred_dir << std::endl;
+      //   }
+      //   if(BT[0xF2CC].sat_counter > 0) {
+      //     std::cout << "Index: " << 0xF2CC << " | Src Reg: " << BT[0xF2CC].src_reg << " | Sat Counter: " << BT[0xF2CC].sat_counter << std::endl;
+      //   }
+      // }
+    }
 
     if(_exec_info.dec_info.insn_class == InstClass::storeInstClass) {
       uint64_t addr = _exec_info.mem_va.value();
-      uint64_t addr_index = addr & 0xFFFF;
+      uint64_t addr_index = addr & 0xFF;
       uint64_t src_reg_data_idx = _exec_info.dec_info.src_reg_info[1];
       uint64_t dest_val = RegFile[src_reg_data_idx];
       ST[addr_index].is_valid = true;
+      ST[addr_index].pc = pc;
       if(dest_val != 0) {
         ST[addr_index].is_zero = false;
       } else {
@@ -293,9 +293,21 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
       //   std::cout << "Src Reg: " << src_reg_data_idx << " | Dest Val: 0x" << std::hex << dest_val << << std::dec std::endl;
       //   std::cout << "Index: " << addr_index << " | Valid: " << ST[addr_index].is_valid << " | Zero: " << ST[addr_index].is_zero << std::endl;
       // }
-
     }
 
+    // Update RetireOp Queue
+    RetireOp retire_op;
+    retire_op.pc = pc;
+    retire_op.exec_info = _exec_info;
+
+    if(retire_op_queue.size() == RETIRE_OP_QUEUE_SIZE) {
+      retire_op_queue.pop_back();
+    }
+
+    retire_op_queue.push_front(retire_op);
+
+
+    // Update RegFile
     if(_exec_info.dst_reg_value.has_value()) {
       uint64_t dest_val = _exec_info.dst_reg_value.value();
       uint64_t dest_reg = _exec_info.dec_info.dst_reg_info.value();
@@ -303,6 +315,7 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
         RegFile[dest_reg] = dest_val;
       }
     }
+
 }
 
 //
