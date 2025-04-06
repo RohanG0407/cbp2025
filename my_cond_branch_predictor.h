@@ -20,10 +20,17 @@ struct BranchTableEntry
   uint64_t sat_counter;
 };
 
+struct RetireOp
+{
+  uint64_t pc;
+  ExecuteInfo exec_info;
+};
+
 struct StoreTableEntry
 {
   bool is_valid;
   bool is_zero;
+  uint64_t pc;
 };
 
 
