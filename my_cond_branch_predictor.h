@@ -16,8 +16,16 @@ struct SampleHist
 
 struct BranchTableEntry
 {
+  uint16_t tag_entry;  
   uint64_t src_reg;
   uint64_t sat_counter;
+  bool hard_to_predict;
+};
+
+struct LoadTableEntry
+{
+    uint64_t consumer_address;
+    bool addr;
 };
 
 struct RetireOp
@@ -31,6 +39,7 @@ struct StoreTableEntry
   bool is_valid;
   bool is_zero;
   uint64_t pc;
+  uint64_t store_tag;
 };
 
 

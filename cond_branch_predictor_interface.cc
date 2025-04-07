@@ -32,7 +32,7 @@
 
 // Branch Table Info
 #define BT_SIZE 65535
-#define BT_SAT_COUNTER_MAX 31
+#define BT_SAT_COUNTER_MAX 5
 BranchTableEntry BT[BT_SIZE]; // 2^16 entries - 1
 std::unordered_set<uint64_t> high_mispred_pc;
 
@@ -44,7 +44,8 @@ std::deque<RetireOp> retire_op_queue;
 #define ST_SIZE 65535
 StoreTableEntry ST[ST_SIZE]; // 2^16 entries - 1
 
-uint64_t RegFile[66];
+LoadTableEntry LT[66]; //load table
+uint64_t RegFile[66];  
 void beginCondDirPredictor()
 {
     // setup sample_predictor
@@ -54,12 +55,19 @@ void beginCondDirPredictor()
     for (int i = 0; i < BT_SIZE; i++) {
         BT[i].src_reg = 0;
         BT[i].sat_counter = 0;
+        BT[i].tag_entry = 0;
+        BT[i].hard_to_predict = 0;
     }
 
     // initial ST setup
     for (int i = 0; i < ST_SIZE; i++) {
         ST[i].is_valid = false;
         ST[i].is_zero = true;
+    }
+    //initial LT setup 
+    for (int i = 0; i < 66; i++) {
+        LT[i].consumer_address = 0;
+        LT[i].addr = 0;
     }
 
     // initial RegFile setp
@@ -89,6 +97,46 @@ bool get_cond_dir_prediction(uint64_t seq_no, uint8_t piece, uint64_t pc, const 
 {
     const bool tage_sc_l_pred =  cbp2016_tage_sc_l.predict(seq_no, piece, pc);
     const bool my_prediction = cond_predictor_impl.predict(seq_no, piece, pc, tage_sc_l_pred);
+
+    
+    //is the pc hart to predict? 
+    uint16_t pc_ind = pc & 0xFFFF;
+    uint16_t tag_entry = (pc & 0xFFFF0000) >> 16;
+    if(BT[pc_ind].tag_entry == tag_entry)
+    {
+      if (BT[pc_ind].hard_to_predict){
+        std::cout << "hard to predict entered\n";
+        uint16_t reg_ind = BT[pc_ind].src_reg;    
+        std::cout << LT[reg_ind].addr << "lt check"<< LT[reg_ind].consumer_address <<"\n";
+        if(LT[reg_ind].addr){
+          std::cout << "load table lookup\n";
+          uint64_t store_addr = LT[reg_ind].consumer_address;
+          uint64_t st_addr_index = store_addr & 0xFFFF;
+          uint16_t st_addr_tag = (store_addr & 0xFFFF0000) >> 16;
+
+          if(ST[st_addr_index].store_tag == st_addr_tag)
+          std::cout << "store table lookup\n";
+          {
+            if(ST[st_addr_index].is_valid)
+            {
+              if(ST[st_addr_index].is_zero)
+              {
+                return false;
+              }
+              else
+              {
+                return true;
+              }
+            }
+
+          }
+        }
+
+      }
+    }
+    //3 table lookup
+
+    //value;
     return my_prediction;
 }
 
@@ -223,27 +271,43 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
       const bool _resolve_dir = _exec_info.taken.value();
       const uint64_t target_pc = 0xFFFFF0D8F2CC;
 
-      uint16_t pc_index = pc & 0xFF;
+      uint16_t pc_index = pc & 0xFFFF;
+      uint16_t tag_entry = (pc & 0xFFFF0000) >> 16; 
       // print num src regs
       if(_exec_info.dec_info.src_reg_info.size() > 0) {
-        if(BT[pc_index].src_reg == _exec_info.dec_info.src_reg_info[0]) {
-          if(_resolve_dir != pred_dir) {
-            if (BT[pc_index].sat_counter < BT_SAT_COUNTER_MAX) {
-              BT[pc_index].sat_counter += 1;
+          if(BT[pc_index].tag_entry == tag_entry) {  //Future work : if flag is 0, and tag not match, replace entry
+            if(BT[pc_index].src_reg == _exec_info.dec_info.src_reg_info[0]) {
+              if(_resolve_dir != pred_dir) {
+                if (BT[pc_index].sat_counter < BT_SAT_COUNTER_MAX) {
+                  BT[pc_index].sat_counter += 1;
+                }
+              }
+            }
+           else {
+            if(BT[pc_index].sat_counter == 0) {
+              BT[pc_index].src_reg = _exec_info.dec_info.src_reg_info[0];
+              BT[pc_index].sat_counter = 1;
+              BT[pc_index].hard_to_predict = 0;
             }
           }
-        } else {
-          if(BT[pc_index].sat_counter == 0) {
+          } 
+          else if(BT[pc_index].tag_entry == 0)
+          {
+            BT[pc_index].sat_counter == 0;
             BT[pc_index].src_reg = _exec_info.dec_info.src_reg_info[0];
             BT[pc_index].sat_counter = 1;
+            BT[pc_index].tag_entry = tag_entry;
+            BT[pc_index].hard_to_predict = 0;
+
           }
-        }
       }
 
       // append to misprediction list of pc's where entry saturation counter = max
       if(BT[pc_index].sat_counter == BT_SAT_COUNTER_MAX) {
         // append full 64-bit pc to misprediction list
         high_mispred_pc.insert(pc);
+        BT[pc_index].hard_to_predict = 1;
+        std::cout << "hard to predict branch added vin" << pc << std::endl;
       }
 
       if(branch_inst_count == 1000) {
@@ -254,6 +318,7 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
         for(int i = 0; i < BT_SIZE; i++) {
           if(BT[i].sat_counter < 15) {
             BT[i].sat_counter = 0;
+            BT[i].hard_to_predict = 0;
           } else {
             BT[i].sat_counter -= 15;
           }
@@ -277,16 +342,33 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
 
     if(_exec_info.dec_info.insn_class == InstClass::storeInstClass) {
       uint64_t addr = _exec_info.mem_va.value();
-      uint64_t addr_index = addr & 0xFF;
-      uint64_t src_reg_data_idx = _exec_info.dec_info.src_reg_info[1];
+      uint64_t addr_index = addr & 0xFFFF;
+      uint64_t st_addr_tag = (addr & 0xFFFF0000) >> 16;
+      uint64_t src_reg_data_idx = _exec_info.dec_info.src_reg_info[1];  //bug?
       uint64_t dest_val = RegFile[src_reg_data_idx];
       ST[addr_index].is_valid = true;
       ST[addr_index].pc = pc;
+      ST[addr_index].store_tag = st_addr_tag;
       if(dest_val != 0) {
         ST[addr_index].is_zero = false;
       } else {
         ST[addr_index].is_zero = true;
       }
+      // print pc and reg file values
+      // if(pc == target_mem_pc) {
+      //   std::cout << "Store Table for PC: 0x" << std::hex << pc << std::dec << std::endl;
+      //   std::cout << "Src Reg: " << src_reg_data_idx << " | Dest Val: 0x" << std::hex << dest_val << << std::dec std::endl;
+      //   std::cout << "Index: " << addr_index << " | Valid: " << ST[addr_index].is_valid << " | Zero: " << ST[addr_index].is_zero << std::endl;
+      // }
+    }
+
+        if(_exec_info.dec_info.insn_class == InstClass::loadInstClass) {
+      uint64_t ld_addr = _exec_info.mem_va.value();
+      uint64_t ld_addr_index = ld_addr & 0xFFFF;
+      uint64_t dst_reg_data_idx = _exec_info.dec_info.dst_reg_info.value();
+      uint64_t dest_val = RegFile[dst_reg_data_idx];
+      LT[dst_reg_data_idx].consumer_address = ld_addr;
+      LT[dst_reg_data_idx].addr = 1;    //Future work add additional logic to directly get value if alu op
       // print pc and reg file values
       // if(pc == target_mem_pc) {
       //   std::cout << "Store Table for PC: 0x" << std::hex << pc << std::dec << std::endl;
