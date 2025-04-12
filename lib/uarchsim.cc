@@ -383,6 +383,7 @@ void uarchsim_t::eval_retire(std::ostream& activity_trace, bool& activity_observ
 void uarchsim_t::step(db_t *inst) 
 {
    spdlog::debug("Stepping, FC: {}",fetch_cycle);
+   // akhilesh - comment this line if uOp trace is not required
    //inst->printInst(fetch_cycle);
    bool activity_observed = false;
    std::ostringstream activity_trace;

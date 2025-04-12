@@ -33,6 +33,78 @@ struct StoreTableEntry
   uint64_t pc;
 };
 
+struct ProducerConsumer_Entry
+{
+    uint64_t producer_pc;
+    uint64_t consumer_pc;
+    bool valid_pair;
+};
+
+class Producer_Consumer_Pairs
+{
+        ProducerConsumer_Entry* ProdCons_Table;
+        uint16_t num_entries;   // max number of pc->uid mappings which can be tracked
+    public:
+        Producer_Consumer_Pairs (uint16_t num_entries) {
+            ProdCons_Table = new ProducerConsumer_Entry[num_entries];
+
+            // Mark all entries as invalid
+            for (int i = 0; i < num_entries; i++) {
+                ProdCons_Table[i].valid_pair = false;
+            }
+        }
+
+        ~Producer_Consumer_Pairs () {
+            if (ProdCons_Table)
+                delete[] ProdCons_Table;
+        }
+
+        uint64_t get_producerPC (uint8_t src_reg) {
+            return ProdCons_Table[src_reg].producer_pc;
+        }
+        
+        void record_producer(uint8_t src_reg, uint64_t pc) {
+            ProdCons_Table[src_reg].producer_pc = pc;
+            ProdCons_Table[src_reg].valid_pair = false;
+        }
+
+        void record_consumer(uint8_t dst_reg, uint64_t pc) {
+            ProdCons_Table[dst_reg].consumer_pc = pc;
+            ProdCons_Table[dst_reg].valid_pair = true;
+        }
+
+        void printState(uint8_t reg) {
+            //printf("r%d | Producer - 0x%x | Consumer - 0x%x | Valid - %d", reg, ProdCons_Table[reg].producer_pc, ProdCons_Table[reg].consumer_pc, ProdCons_Table[reg].valid_pair);
+            std::cout << "r" << unsigned(reg)
+                    << " | Producer - 0x" << std::hex << ProdCons_Table[reg].producer_pc
+                    << " | Consumer - 0x" << std::hex << ProdCons_Table[reg].consumer_pc
+                    << " | Valid - " << ProdCons_Table[reg].valid_pair << "\n";
+        }
+};
+
+class PC_2_uid_map
+{
+        std::unordered_map<uint64_t, uint16_t> uid;
+        uint16_t num_entries;   // max number of pc->uid mappings which can be tracked
+        uint16_t next_uid;  // uid given to next new pc
+    public:
+        PC_2_uid_map (uint16_t num_entries) {
+            this->num_entries = num_entries;
+        }
+
+        uint16_t get_uid(uint64_t pc) {
+            if (uid.count(pc)) {
+                return uid[pc];
+            } else { // Allocate a uid to this unknown pc
+                // Allocation is like a circular buffer. Overwrite oldest allocations once full
+                uint16_t new_uid = next_uid;
+                uid.insert({pc, new_uid});
+                next_uid = (next_uid + 1) >= num_entries ? 0 : (next_uid + 1);
+
+                return new_uid;
+            }
+        }
+};
 
 class SampleCondPredictor
 {

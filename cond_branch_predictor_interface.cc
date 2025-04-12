@@ -44,6 +44,13 @@ std::deque<RetireOp> retire_op_queue;
 #define ST_SIZE 65535
 StoreTableEntry ST[ST_SIZE]; // 2^16 entries - 1
 
+// Seeker Buffer - An unordered list of PCs from where we need to build the DFG backwards
+std::unordered_set<uint64_t> seeker_buffer;
+// PC -> uid mapping
+PC_2_uid_map uid_map(256);
+// Track Producer-Consumer relationship for registers
+Producer_Consumer_Pairs prodCons_reg(65);
+
 uint64_t RegFile[66];
 void beginCondDirPredictor()
 {
@@ -209,6 +216,18 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
 uint64_t branch_inst_count = 0; // max to 1000
 void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool pred_dir, const ExecuteInfo& _exec_info, const uint64_t commit_cycle)
 {
+    // akhilesh - comment this block if commit instruction stream is not required
+    bool log_instruction;
+    log_instruction = true;
+    //log_instruction = commit_cycle < 1000;
+    log_instruction = commit_cycle < 5000;
+    //log_instruction = commit_cycle > 4000 && commit_cycle < 5000;
+    if (log_instruction) {
+      std::cout << "PC: 0x" << std::hex << pc << std::dec
+                    << " | Cycle: " << commit_cycle
+                    << " | " << _exec_info  // Use the overloaded operator<< for ExecuteInfo
+                    << std::endl;
+    }
     // if(_exec_info.dec_info.insn_class == InstClass::loadInstClass || _exec_info.dec_info.insn_class == InstClass::storeInstClass) {
     //   uint64_t target_addr = 0xffffefd1e6d8;
     //   if(_exec_info.mem_va && _exec_info.mem_va == target_addr) 
@@ -218,10 +237,37 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
     //               << std::endl;
     // }
 
+    // Update producer-consumer tracking tables
+      /* FIXME - If the same pc is consumer as well as producer then the logic and usage of the producer-consumer tracking mechanism is flawed. Need to do something about that situation.
+          In the current implementation, the table is guaranteed to give the correct picture only if the register entry is checked when the instruction is a consumer of the register. Otherwise, can't say.
+          The simulation trick to handle this situation is to record a pc as producer after all required accesses to this table are done... i.e. towards the end of the simulation of this cycle
+          Of course this won't directly translate to hardware but a simple solution would be to have a 1-bit signal indicating if a PC is simultaneously the producer and consumer of a register.
+          Or delay the update to producer PC by one cycle. Good luck doing this with multi-fetch architectures
+      */
+    if (pc == 0x402694) {
+      std::cout << "At pc - 0x" << std::hex << pc;
+      std::cout << " | #src_reg = " << _exec_info.dec_info.src_reg_info.size()
+                << ", src_reg[0] - " << _exec_info.dec_info.src_reg_info[0]
+                << ", src_reg[1] - " << _exec_info.dec_info.src_reg_info[1] << "\n";
+    }
+
+    for (int i = 0; i < _exec_info.dec_info.src_reg_info.size(); i++) {
+      prodCons_reg.record_consumer(_exec_info.dec_info.src_reg_info[i], pc);
+    }
+
+    if (pc == 0x800002f0) {
+    //  std::cout << "\tSource reg info: " << _exec_info.dec_info.src_reg_info.size()
+    //             << "\n\tDest. reg info: " << _exec_info.dec_info.dst_reg_info.has_value() << "\n";
+      prodCons_reg.printState(0);
+      prodCons_reg.printState(3);
+    }
+
     if (is_cond_br(_exec_info.dec_info.insn_class))
     {
       const bool _resolve_dir = _exec_info.taken.value();
-      const uint64_t target_pc = 0xFFFFF0D8F2CC;
+      //const uint64_t target_pc = 0xFFFFF0D8F2CC;
+      // from sample_traces/fp/sample_fp_trace.gz
+      const uint64_t target_pc = 0x449d9c;
 
       uint16_t pc_index = pc & 0xFF;
       // print num src regs
@@ -244,6 +290,18 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
       if(BT[pc_index].sat_counter == BT_SAT_COUNTER_MAX) {
         // append full 64-bit pc to misprediction list
         high_mispred_pc.insert(pc);
+        std::cout << "akhilesh - Marked as highly_mispredicted: " << pc << "\n";
+      }
+
+      // append highly mispredicted branch to seeker buffer
+      if(pc == target_pc) {
+        //std::cout << "akhilesh - assuming branch at " << pc << " is highly mispredicted\n";
+        seeker_buffer.insert(pc);
+
+        // std::cout << "Seeker Buffer State:\n";
+        // for (uint64_t pc : seeker_buffer) {
+        //     std::cout << "0x" << std::hex << std::uppercase << pc << std::endl;
+        // }
       }
 
       if(branch_inst_count == 1000) {
@@ -316,6 +374,39 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
       }
     }
 
+    // check if current PC is sought to learn the DFG
+    if (seeker_buffer.count(pc)) {
+        //std::cout << "akhilesh - Learn DFG before current pc " << pc << "\n";
+        
+        if (is_load(_exec_info.dec_info.insn_class)) {
+            std::cout << "akhilesh - Load instruction detected at pc 0x" << std::hex << pc << "\n";
+        } else {
+            // std::cout << "akhilesh - Non load instruction detected at pc 0x" << std::hex << pc
+            //           << "\nSource Register Info: size: " << _exec_info.dec_info.src_reg_info.size()
+            //           << ", Contents: " << _exec_info.dec_info.src_reg_info[0] << "\n";
+
+            if (_exec_info.dec_info.src_reg_info.size() != 1) {
+              std::cout << "FIXME - akhilesh - coding for only one source operand. Pls code for multiple sources";
+            }
+
+            uint8_t src_reg = _exec_info.dec_info.src_reg_info[0];
+            uint64_t producerPC = prodCons_reg.get_producerPC(src_reg);
+
+            if (is_cond_br(_exec_info.dec_info.insn_class)) {
+              //std::cout << "akhilesh - Cond. Branch instruction detected at pc " << pc << "\n";
+            } else {
+              //std::cout << "akhilesh - Non load, Non cond. branch instruction detected at pc " << pc << "\n";
+              uint16_t uid_currPC = uid_map.get_uid(pc);
+            }
+            
+            //std::cout << "akhilesh - uid is " << pc << "-->" << uid_currPC << "\n";
+        }
+    }
+
+    // Simulation trick to handle scenarios when the same PC is the consumer and producer of a register
+    if (_exec_info.dec_info.dst_reg_info.has_value()) {
+      prodCons_reg.record_producer(_exec_info.dec_info.dst_reg_info.value(), pc);
+    }
 }
 
 //

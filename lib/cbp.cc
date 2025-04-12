@@ -308,6 +308,14 @@ int main(int argc, char ** argv)
       //    dump_activity = false;
       //}
 
+      // akhilesh - commment this line if (macro)Op trace is not required
+      // if (inst->is_last_piece)
+      // {
+      //    reader.mInstr.printInstr();
+      // }
+      if (inst->pc == 0x800002f0) {
+         reader.mInstr.printInstr();
+      }
       sim->step(inst);
 
       //const uint64_t next_fetch_cycle = sim->get_current_fetch_cycle();
