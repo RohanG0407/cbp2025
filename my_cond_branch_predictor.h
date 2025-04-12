@@ -33,6 +33,12 @@ struct StoreTableEntry
   uint64_t pc;
 };
 
+struct PC_UID_Map_Entry
+{
+    bool valid;
+    uint64_t pc;
+};
+
 struct ProducerConsumer_Entry
 {
     uint64_t producer_pc;
@@ -40,10 +46,41 @@ struct ProducerConsumer_Entry
     bool valid_pair;
 };
 
+struct PredictionTable_Entry {
+    bool entry_valid;
+    uint16_t src_uid;
+    bool prediction;
+};
+
+// class Prediction_Table
+// {
+//         //PredictionTable_Entry* prediction_table;
+//         std::unordered_map<uint64_t, PredictionTable_Entry> prediction_table;
+//         uint16_t num_entries;   // max number of hard-to-predict branches which can be pre-computed
+//     public:
+//         Prediction_Table (uint16_t num_entries) {
+//             this->num_entries = num_entries;
+            
+//             prediction_table = new PredictionTable_Entry[num_entries];
+
+//             for (int i = 0; i < num_entries; i++) {
+//                 prediction_table[i].entry_valid = false;
+//             }
+//         }
+
+//         ~Prediction_Table() {
+//             if (prediction_table)
+//                 delete[] prediction_table;
+//         }
+
+//         void add_entry() {
+
+//         }
+// };
+
 class Producer_Consumer_Pairs
 {
         ProducerConsumer_Entry* ProdCons_Table;
-        uint16_t num_entries;   // max number of pc->uid mappings which can be tracked
     public:
         Producer_Consumer_Pairs (uint16_t num_entries) {
             ProdCons_Table = new ProducerConsumer_Entry[num_entries];
@@ -102,6 +139,62 @@ class PC_2_uid_map
                 next_uid = (next_uid + 1) >= num_entries ? 0 : (next_uid + 1);
 
                 return new_uid;
+            }
+        }
+};
+
+class PC_UID_Map
+{
+        // Implemented as a circular buffer
+        PC_UID_Map_Entry* PC_UID_Map_Table;
+        uint16_t num_entries; // Max number of pc <--> uid mappings which can be tracked
+        uint16_t next_uid;  // uid given to next new pc
+    public:
+        PC_UID_Map (uint16_t num_entries) {
+            this->num_entries = num_entries;
+
+            PC_UID_Map_Table = new PC_UID_Map_Entry[num_entries];
+
+            // Mark all entries as invalid
+            for (int i = 0; i < num_entries; i++) {
+                PC_UID_Map_Table[i].valid = false;
+            }
+
+            next_uid = 0;
+        }
+
+        ~PC_UID_Map () {
+            if (PC_UID_Map_Table)
+                delete[] PC_UID_Map_Table;
+        }
+
+        uint16_t get_uid(uint64_t pc) {
+            uint16_t uid;
+            bool mapping_exists = false;
+
+            /* Do an associative lookup
+                There can only be one uid for every pc
+            */
+            for (uid = 0; uid < num_entries; uid++) {
+                auto entry = PC_UID_Map_Table[uid];
+
+                if (entry.valid && entry.pc == pc) {
+                    mapping_exists = true;
+                    break;
+                }
+            }
+
+            if (mapping_exists) {
+                return uid;
+            } else {  // Create an entry
+                uid = next_uid;
+                PC_UID_Map_Table[uid].pc = pc;
+                PC_UID_Map_Table[uid].valid = true;
+
+                // Circular buffer
+                next_uid = (next_uid + 1) == num_entries ? 0 : (next_uid + 1);
+
+                return uid;
             }
         }
 };
