@@ -387,8 +387,8 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
       //std::cout << "akhilesh - Learn DFG before current pc " << pc << "\n";
       
       if (is_load(_exec_info.dec_info.insn_class)) {
-        std::cout << "INFO:: Load instruction detected at pc 0x" << std::hex << pc
-                  << " | Mem VA: 0x" << _exec_info.mem_va.value() << "\n";
+        // std::cout << "INFO:: Load instruction detected at pc 0x" << std::hex << pc
+        //           << " | Mem VA: 0x" << _exec_info.mem_va.value() << "\n";
         
         uint64_t memVA = _exec_info.mem_va.value();
         //prodCons_mem.printState(memVA);
@@ -491,4 +491,13 @@ void endCondDirPredictor ()
 {
     cbp2016_tage_sc_l.terminate();
     cond_predictor_impl.terminate();
+
+    // Print State of differnent tables and buffers:
+    std::cout << "INFO:: Any PCs left in Seeker Buffer could not be traced backwards.\n";
+    seeker_buffer.printState();
+    std::cout << "INFO:: Branch Precomputation can be triggered from PCs in the Trigger Buffer.\n";
+    trig_buffer.printState();
+    reservation_station.printState();
+    std::cout << "INFO:: Precomputed values for select branches can be read from the Prediction Table.\n";
+    pred_table.printState();
 }
