@@ -45,14 +45,22 @@ std::deque<RetireOp> retire_op_queue;
 StoreTableEntry ST[ST_SIZE]; // 2^16 entries - 1
 
 // Seeker Buffer - An unordered list of PCs from where we need to build the DFG backwards
-std::unordered_set<uint64_t> seeker_buffer;
+//std::unordered_set<uint64_t> seeker_buffer;
+Seeker_Buffer seeker_buffer;
 // PC -> uid mapping
-//PC_2_uid_map uid_map(256);
-PC_UID_Map uid_map(256);
+const uint16_t num_uids = 256;
+//PC_2_uid_map uid_map(num_uids);
+PC_UID_Map uid_map(num_uids);
 // Track Producer-Consumer relationship for registers
-Producer_Consumer_Pairs prodCons_reg(66);
+Producer_Consumer_Pairs_Register prodCons_reg(66);
 // Prediction Table
-//Prediction_Table pred_table(16);
+Prediction_Table pred_table(16);
+// Reservation Station
+Reservation_Station reservation_station(num_uids);
+// Track Producer-Consumer relationship for memory addresses
+Producer_Consumer_Pairs_Memory prodCons_mem(1024);
+// Trigger List
+Trigger_Buffer trig_buffer(80);
 
 uint64_t RegFile[66];
 void beginCondDirPredictor()
@@ -222,16 +230,16 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
     // akhilesh - comment this block if commit instruction stream is not required
         bool log_instruction_1 = true;
         bool log_instruction_2 = commit_cycle < 1000;
-        bool log_instruction_3 = commit_cycle < 5000;
+        bool log_instruction_3 = commit_cycle < 6000;
         bool log_instruction_4 = commit_cycle > 4000 && commit_cycle < 5000;
-    if (log_instruction_2) {
+    if (log_instruction_1) {
       std::cout << "PC: 0x" << std::hex << pc << std::dec
                     << " | Cycle: " << commit_cycle
                     << " | " << _exec_info  // Use the overloaded operator<< for ExecuteInfo
                     << std::endl;
     }
 
-    // Update producer-consumer tracking tables
+    // Update producer-consumer tracking tables - register
       /* FIXME - If the same pc is consumer as well as producer then the logic and usage of the producer-consumer tracking mechanism is flawed. Need to do something about that situation.
           In the current implementation, the table is guaranteed to give the correct picture only if the register entry is checked when the instruction is a consumer of the register. Otherwise, can't say.
           The simulation trick to handle this situation is to record a pc as producer after all required accesses to this table are done... i.e. towards the end of the simulation of this cycle
@@ -248,6 +256,17 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
       prodCons_reg.record_consumer(_exec_info.dec_info.src_reg_info[i], pc);
     }
 
+    // Update producer-consumer tracking tables - memory
+    if (is_store(_exec_info.dec_info.insn_class)) {
+      prodCons_mem.record_consumer(_exec_info.mem_va.value(), pc);
+    }
+    if (is_load(_exec_info.dec_info.insn_class)) {
+      prodCons_mem.record_consumer(_exec_info.mem_va.value(), pc);
+    }
+
+    // if (pc == 0x449D8C) {
+    //   prodCons_mem.printState(_exec_info.mem_va.value());
+    // }
     // if (pc == 0x800002f0) {
     //   std::cout << "\tSource reg info: " << _exec_info.dec_info.src_reg_info.size()
     //             << "\n\tDest. reg info: " << _exec_info.dec_info.dst_reg_info.has_value() << "\n";
@@ -289,12 +308,9 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
       // append highly mispredicted branch to seeker buffer
       if(pc == target_pc) {
         //std::cout << "akhilesh - assuming branch at " << pc << " is highly mispredicted\n";
-        seeker_buffer.insert(pc);
-
-        std::cout << "Seeker Buffer State:\n";
-        for (uint64_t pc : seeker_buffer) {
-            std::cout << "0x" << std::hex << std::uppercase << pc << std::endl;
-        }
+        if (!pred_table.is_learnt(pc))
+          seeker_buffer.insert(pc);
+        //seeker_buffer.printState();
       }
 
       if(branch_inst_count == 1000) {
@@ -367,34 +383,86 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
     }
 
     // check if current PC is sought to learn the DFG
-    if (seeker_buffer.count(pc)) {
-        //std::cout << "akhilesh - Learn DFG before current pc " << pc << "\n";
+    if (seeker_buffer.exists(pc) && commit_cycle < 6000) {
+      //std::cout << "akhilesh - Learn DFG before current pc " << pc << "\n";
+      
+      if (is_load(_exec_info.dec_info.insn_class)) {
+        std::cout << "INFO:: Load instruction detected at pc 0x" << std::hex << pc
+                  << " | Mem VA: 0x" << _exec_info.mem_va.value() << "\n";
         
-        if (is_load(_exec_info.dec_info.insn_class)) {
-            std::cout << "akhilesh - Load instruction detected at pc 0x" << std::hex << pc << "\n";
-        } else {
-            // std::cout << "akhilesh - Non load instruction detected at pc 0x" << std::hex << pc
-            //           << "\nSource Register Info: size: " << _exec_info.dec_info.src_reg_info.size()
-            //           << ", Contents: " << _exec_info.dec_info.src_reg_info[0] << "\n";
+        uint64_t memVA = _exec_info.mem_va.value();
+        prodCons_mem.printState(memVA);
+        if (prodCons_mem.is_tracked(memVA)) {
+          uint16_t uid_currPC = uid_map.get_uid(pc);
 
-            uint8_t src_reg;
-            uint64_t producerPC;
-            std::vector<uint16_t> uid_producerPC;
-            for (int i = 0; i < _exec_info.dec_info.src_reg_info.size(); i++) {
-              src_reg = _exec_info.dec_info.src_reg_info[i];
-              producerPC = prodCons_reg.get_producerPC(src_reg);
-              uid_producerPC.push_back(uid_map.get_uid(producerPC));
-            }
+          uint64_t producerPC = prodCons_mem.get_producerPC(memVA);
+          uint16_t uid_producerPC = uid_map.get_uid(producerPC);
 
-            if (is_cond_br(_exec_info.dec_info.insn_class)) {
-              std::cout << "akhilesh - Cond. Branch instruction detected at pc " << pc << "\n";
-              //pred_table.add_entry();
-            } else {
-              std::cout << "akhilesh - Non load, Non cond. branch instruction detected at pc " << pc << "\n";
-              uint16_t uid_currPC = uid_map.get_uid(pc);
-              std::cout << "akhilesh - uid is " << pc << "-->" << uid_currPC << "\n";
-            }
+          uint64_t src_value = _exec_info.dst_reg_value.value();
+
+          // Add Load instruction to Reservation Station
+          reservation_station.add_entry(uid_currPC, _exec_info.dec_info.insn_class, uid_producerPC, src_value);
+          reservation_station.printState();
+
+          // Add Store instruction to Trigger List
+          trig_buffer.add_entry(producerPC, uid_producerPC);
+          trig_buffer.printState();
+
+          // Remove load instruction from Seeker Buffer
+          seeker_buffer.remove(pc);
+        } else {  // Add memory address to tracker
+          prodCons_mem.add_memVA(memVA, pc);
+          prodCons_mem.printState(memVA);
         }
+      } else {
+        std::cout << "INFO:: Non load instruction detected at pc 0x" << std::hex << pc
+                  << "\nSource Registers: { " << std::dec;
+        for (int i = 0; i < _exec_info.dec_info.src_reg_info.size(); i++)
+          std::cout << _exec_info.dec_info.src_reg_info[i] << " ";
+        std::cout << "}\n";
+        for (int i = 0; i < _exec_info.dec_info.src_reg_info.size(); i++)
+          prodCons_reg.printState(_exec_info.dec_info.src_reg_info[i]);
+
+        // Get all information regarding source registers
+        uint8_t src_reg;
+        uint64_t producerPC;
+        std::vector<uint64_t> producerPC_vector;
+        std::vector<uint16_t> uid_producerPC_vector;
+        std::vector<uint64_t> src_reg_value_vector;
+        for (int i = 0; i < _exec_info.dec_info.src_reg_info.size(); i++) {
+          src_reg = _exec_info.dec_info.src_reg_info[i];
+          producerPC = prodCons_reg.get_producerPC(src_reg);
+          producerPC_vector.push_back(producerPC);
+          uid_producerPC_vector.push_back(uid_map.get_uid(producerPC));
+          src_reg_value_vector.push_back(RegFile[src_reg]);
+        }
+        // Assumption - at max 3 input registers. Else rethink the reservation Station
+        if (_exec_info.dec_info.src_reg_info.size() > 3)
+          std::cout << "ERROR:: Expected 3 or less input registers. " << _exec_info.dec_info.src_reg_info.size() << " detected for instruction at pc 0x" << std::hex << pc;
+
+        if (is_cond_br(_exec_info.dec_info.insn_class)) {
+          std::cout << "INFO:: Cond. Branch instruction detected at pc 0x" << std::hex << pc << "\n";
+
+          // Branch instructions go in the branch prediction table
+          pred_table.add_entry(pc, uid_producerPC_vector[0]);
+          pred_table.printState();
+        } else {
+          std::cout << "akhilesh - Non load, Non cond. branch instruction detected at pc 0x" << std::hex << pc << "\n";
+          
+          uint16_t uid_currPC = uid_map.get_uid(pc);
+          //std::cout << "akhilesh - uid is " << pc << "-->" << uid_currPC << "\n";
+          
+          // Non-branch instructions go to Reservation Station
+          reservation_station.add_entry(uid_currPC, _exec_info.dec_info.insn_class, uid_producerPC_vector, src_reg_value_vector);
+          reservation_station.printState();
+        }
+
+        // Update Seeker Buffer
+        seeker_buffer.remove(pc);
+        for (uint64_t prod_pc: producerPC_vector)
+          seeker_buffer.insert(prod_pc);
+      }
+      seeker_buffer.printState();
     }
 
     // Simulation trick to handle scenarios when the same PC is the consumer and producer of a register
@@ -402,12 +470,12 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
       prodCons_reg.record_producer(_exec_info.dec_info.dst_reg_info.value(), pc);
     }
 
-    if (pc == 0x800002f0) {
-    //  std::cout << "\tSource reg info: " << _exec_info.dec_info.src_reg_info.size()
-    //             << "\n\tDest. reg info: " << _exec_info.dec_info.dst_reg_info.has_value() << "\n";
-      prodCons_reg.printState(0);
-      prodCons_reg.printState(3);
-    }  
+    // if (pc == 0x800002f0) {
+    // //  std::cout << "\tSource reg info: " << _exec_info.dec_info.src_reg_info.size()
+    // //             << "\n\tDest. reg info: " << _exec_info.dec_info.dst_reg_info.has_value() << "\n";
+    //   prodCons_reg.printState(0);
+    //   prodCons_reg.printState(3);
+    // }  
 }
 
 //

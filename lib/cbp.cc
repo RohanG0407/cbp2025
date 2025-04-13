@@ -313,9 +313,9 @@ int main(int argc, char ** argv)
       // {
       //    reader.mInstr.printInstr();
       // }
-      if (inst->pc == 0x800002f0) {
-         reader.mInstr.printInstr();
-      }
+      // if (inst->pc == 0x800021c0) {
+      //    reader.mInstr.printInstr();
+      // }
       sim->step(inst);
 
       //const uint64_t next_fetch_cycle = sim->get_current_fetch_cycle();
