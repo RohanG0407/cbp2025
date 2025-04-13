@@ -232,12 +232,12 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
         bool log_instruction_2 = commit_cycle < 1000;
         bool log_instruction_3 = commit_cycle < 6000;
         bool log_instruction_4 = commit_cycle > 4000 && commit_cycle < 5000;
-    if (log_instruction_1) {
-      std::cout << "PC: 0x" << std::hex << pc << std::dec
-                    << " | Cycle: " << commit_cycle
-                    << " | " << _exec_info  // Use the overloaded operator<< for ExecuteInfo
-                    << std::endl;
-    }
+    // if (log_instruction_1) {
+    //   std::cout << "PC: 0x" << std::hex << pc << std::dec
+    //                 << " | Cycle: " << commit_cycle
+    //                 << " | " << _exec_info  // Use the overloaded operator<< for ExecuteInfo
+    //                 << std::endl;
+    // }
 
     // Update producer-consumer tracking tables - register
       /* FIXME - If the same pc is consumer as well as producer then the logic and usage of the producer-consumer tracking mechanism is flawed. Need to do something about that situation.
@@ -383,7 +383,7 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
     }
 
     // check if current PC is sought to learn the DFG
-    if (seeker_buffer.exists(pc) && commit_cycle < 6000) {
+    if (seeker_buffer.exists(pc)) {
       //std::cout << "akhilesh - Learn DFG before current pc " << pc << "\n";
       
       if (is_load(_exec_info.dec_info.insn_class)) {
@@ -391,25 +391,28 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
                   << " | Mem VA: 0x" << _exec_info.mem_va.value() << "\n";
         
         uint64_t memVA = _exec_info.mem_va.value();
-        prodCons_mem.printState(memVA);
+        //prodCons_mem.printState(memVA);
         if (prodCons_mem.is_tracked(memVA)) {
-          uint16_t uid_currPC = uid_map.get_uid(pc);
+          if (prodCons_mem.is_traced(memVA)) {
+            uint16_t uid_currPC = uid_map.get_uid(pc);
 
-          uint64_t producerPC = prodCons_mem.get_producerPC(memVA);
-          uint16_t uid_producerPC = uid_map.get_uid(producerPC);
+            uint64_t producerPC = prodCons_mem.get_producerPC(memVA);
+            uint16_t uid_producerPC = uid_map.get_uid(producerPC);
 
-          uint64_t src_value = _exec_info.dst_reg_value.value();
+            uint64_t src_value = _exec_info.dst_reg_value.value();
 
-          // Add Load instruction to Reservation Station
-          reservation_station.add_entry(uid_currPC, _exec_info.dec_info.insn_class, uid_producerPC, src_value);
-          reservation_station.printState();
+            // Add Load instruction to Reservation Station
+            reservation_station.add_entry(uid_currPC, _exec_info.dec_info.insn_class, uid_producerPC, src_value);
+            reservation_station.printState();
 
-          // Add Store instruction to Trigger List
-          trig_buffer.add_entry(producerPC, uid_producerPC);
-          trig_buffer.printState();
+            // Add Store instruction to Trigger List
+            trig_buffer.add_entry(producerPC, uid_producerPC);
+            trig_buffer.printState();
 
-          // Remove load instruction from Seeker Buffer
-          seeker_buffer.remove(pc);
+            // Remove load instruction from Seeker Buffer
+            seeker_buffer.remove(pc);
+            seeker_buffer.printState();
+          }
         } else {  // Add memory address to tracker
           prodCons_mem.add_memVA(memVA, pc);
           prodCons_mem.printState(memVA);
@@ -461,8 +464,8 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
         seeker_buffer.remove(pc);
         for (uint64_t prod_pc: producerPC_vector)
           seeker_buffer.insert(prod_pc);
+        seeker_buffer.printState();
       }
-      seeker_buffer.printState();
     }
 
     // Simulation trick to handle scenarios when the same PC is the consumer and producer of a register

@@ -51,6 +51,7 @@ struct ProducerConsumer_Entry
 struct ProducerConsumer_Entry_Memory
 {
     uint64_t virtual_address;
+    bool store_observed;
     ProducerConsumer_Entry prodCons_info;
 };
 
@@ -165,12 +166,13 @@ class Reservation_Station {
             std::cout << "Reservation Station:\n";
             for (int i = 0; i < num_entries; i++) {
                 if (RS[i].valid) {
-                    std::cout << "Opcode: " << std::dec << cInfo[static_cast<uint8_t>(RS[i].opcode)]
-                                << " | any_update: " << RS[i].any_update;
+                    std::cout << "dst_uid: " << std::dec << i
+                            << " | Opcode: " << cInfo[static_cast<uint8_t>(RS[i].opcode)]
+                            << " | any_update: " << RS[i].any_update;
                     for (Source_Field src: RS[i].src_info) {
                         if (src.valid)
                             std::cout << " || src_uid: " << src.src_uid
-                                        << " | src_value: 0x" << std::hex << src.value;
+                                    << " | src_value: 0x" << std::hex << src.value;
                     }
                     std::cout << "\n";
                 }
@@ -266,6 +268,7 @@ class Producer_Consumer_Pairs_Memory
             
             // Mark all entries as invalid
             for (int i = 0; i < num_entries; i++) {
+                ProdCons_Table[i].store_observed = false;
                 ProdCons_Table[i].prodCons_info.valid_pair = false;
             }
         }
@@ -283,6 +286,14 @@ class Producer_Consumer_Pairs_Memory
             return false;
         }
 
+        bool is_traced (uint64_t virt_addr) {
+            for (int i = 0; i < num_entries; i++) {
+                if (ProdCons_Table[i].virtual_address == hash(virt_addr) && ProdCons_Table[i].prodCons_info.valid_pair)
+                    return true;
+            }
+            return false;
+        }
+
         void add_memVA (uint64_t virt_addr, uint64_t consumer_pc) {
             ProdCons_Table[wr_ptr].virtual_address = hash(virt_addr);
             ProdCons_Table[wr_ptr].prodCons_info.consumer_pc = consumer_pc;
@@ -295,6 +306,7 @@ class Producer_Consumer_Pairs_Memory
         void record_producer(uint64_t virt_addr, uint64_t producer_pc) {
             for (int i = 0; i < num_entries; i++) {
                 if (ProdCons_Table[i].virtual_address == hash(virt_addr)){
+                    ProdCons_Table[i].store_observed = true;
                     ProdCons_Table[i].prodCons_info.producer_pc = producer_pc;
                     ProdCons_Table[i].prodCons_info.valid_pair = false;
                     break;  // Each memory address can have atmost one entry
@@ -306,7 +318,11 @@ class Producer_Consumer_Pairs_Memory
             for (int i = 0; i < num_entries; i++) {
                 if (ProdCons_Table[i].virtual_address == hash(virt_addr)) {
                     ProdCons_Table[i].prodCons_info.consumer_pc = consumer_pc;
-                    ProdCons_Table[i].prodCons_info.valid_pair = true;
+                    /* The pair isn't valid if store is never ovserved
+                            This additional flag wasn't required for registers because every register is tracked throughout the program ...
+                            ... but memory is only tracked after a load is observed. A store may never happen to that memory again.
+                    */
+                    ProdCons_Table[i].prodCons_info.valid_pair = true & ProdCons_Table[i].store_observed;
                     break;  // Each memory address can have atmost one entry
                 }
             }
