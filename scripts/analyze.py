@@ -1,11 +1,15 @@
 import re
 import sys
+from collections import deque
 
 # Regular expressions to parse lines
 uop_pattern = re.compile(r'(\d+)::uOP:: \[PC: (0x[\da-f]+) type: (\w+)(?: \( tkn:(\d) tar: (0x[\da-f]+)\))?.*?\]', re.IGNORECASE)
 input_pattern = re.compile(r'input:  \(int: \d+, idx: (\d+) val: ([\da-f]+)\)', re.IGNORECASE)
 output_pattern = re.compile(r'output:  \(int: \d+, idx: (\d+) val: ([\da-f]+)\)', re.IGNORECASE)
 ea_pattern = re.compile(r'ea: (0x[\da-f]+)', re.IGNORECASE)
+
+global_chain_reg = deque(maxlen=16)
+
 
 # Read and parse trace file
 def parse_trace(file_path):
@@ -105,7 +109,7 @@ def find_dependency_chain(trace_entries, target_branch_pc=None, max_chains=None,
     unique_chains = {}
     unique_chains_store_count = {}
     found_chains = 0
-    start_index = 1_000_000
+    start_index = 0
     print("trace_entries: %d\n" % len(trace_entries))
 
     for idx in range(start_index, len(trace_entries)):
@@ -125,7 +129,13 @@ def find_dependency_chain(trace_entries, target_branch_pc=None, max_chains=None,
             # Create a unique signature for the chain
             chain_signature = tuple(line.split('PC: ')[1].split(' ')[0] for line in chain if 'PC: ' in line)
 
-            # Update counts
+            #iterate through unique chains and count occurrences
+            for i, (sig, data) in enumerate(unique_chains.items(), 1):
+              if chain_signature == sig:
+                global_chain_reg.appendleft(i)
+                # print(list(global_chain_reg))
+                break
+            
             if chain_signature in unique_chains:
                 unique_chains[chain_signature]["count"] += 1
             else:
@@ -148,6 +158,8 @@ def find_dependency_chain(trace_entries, target_branch_pc=None, max_chains=None,
     print("\nSummary of Unique Dependency Chain Occurrences:\n")
     for i, (sig, data) in enumerate(unique_chains.items(), 1):
         print(f"Chain {i}: occurred {data['count']} time(s)")
+        for line in data["chain"]:
+            print(line)
 
 
 # Example usage:
