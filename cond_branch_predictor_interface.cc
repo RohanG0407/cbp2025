@@ -56,7 +56,7 @@ Producer_Consumer_Pairs_Register prodCons_reg(66);
 // Prediction Table
 Prediction_Table pred_table(16);
 // Reservation Station
-Reservation_Station reservation_station(num_uids);
+Reservation_Station reservation_station(num_uids);  // Each uid can have at most one entry in the table
 // Track Producer-Consumer relationship for memory addresses
 Producer_Consumer_Pairs_Memory prodCons_mem(1024);
 // Trigger List
@@ -67,7 +67,7 @@ void beginCondDirPredictor()
 {
     // setup sample_predictor
     cbp2016_tage_sc_l.setup();
-    cond_predictor_impl.setup();
+    //cond_predictor_impl.setup();
     // initial BT setup
     for (int i = 0; i < BT_SIZE; i++) {
         BT[i].src_reg = 0;
@@ -94,6 +94,8 @@ void beginCondDirPredictor()
 //
 void notify_instr_fetch(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t fetch_cycle)
 {
+  // Using this function as a proxy for clock_cycle on hardware
+  reservation_station.evaluate(pred_table);
 }
 
 //
@@ -106,7 +108,8 @@ void notify_instr_fetch(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint6
 bool get_cond_dir_prediction(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t pred_cycle)
 {
     const bool tage_sc_l_pred =  cbp2016_tage_sc_l.predict(seq_no, piece, pc);
-    const bool my_prediction = cond_predictor_impl.predict(seq_no, piece, pc, tage_sc_l_pred);
+    //const bool my_prediction = cond_predictor_impl.predict(seq_no, piece, pc, tage_sc_l_pred);
+    const bool my_prediction = tage_sc_l_pred;
     return my_prediction;
 }
 
@@ -151,7 +154,7 @@ void spec_update(uint64_t seq_no, uint8_t piece, uint64_t pc, InstClass inst_cla
     if(inst_class == InstClass::condBranchInstClass)
     {
         cbp2016_tage_sc_l.history_update(seq_no, piece, pc, br_type, pred_dir, resolve_dir, next_pc);
-        cond_predictor_impl.history_update(seq_no, piece, pc, resolve_dir, next_pc);
+        //cond_predictor_impl.history_update(seq_no, piece, pc, resolve_dir, next_pc);
     }
     else
     {
@@ -206,7 +209,7 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
             const bool _resolve_dir = _exec_info.taken.value();
             const uint64_t _next_pc = _exec_info.next_pc;
             cbp2016_tage_sc_l.update(seq_no, piece, pc, _resolve_dir, pred_dir, _next_pc);
-            cond_predictor_impl.update(seq_no, piece, pc, _resolve_dir, pred_dir, _next_pc);
+            //cond_predictor_impl.update(seq_no, piece, pc, _resolve_dir, pred_dir, _next_pc);
         }
         else
         {
@@ -227,258 +230,267 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
 uint64_t branch_inst_count = 0; // max to 1000
 void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool pred_dir, const ExecuteInfo& _exec_info, const uint64_t commit_cycle)
 {
-    // akhilesh - comment this block if commit instruction stream is not required
-        bool log_instruction_1 = true;
-        bool log_instruction_2 = commit_cycle < 1000;
-        bool log_instruction_3 = commit_cycle < 6000;
-        bool log_instruction_4 = commit_cycle > 4000 && commit_cycle < 5000;
-    // if (log_instruction_1) {
-    //   std::cout << "PC: 0x" << std::hex << pc << std::dec
-    //                 << " | Cycle: " << commit_cycle
-    //                 << " | " << _exec_info  // Use the overloaded operator<< for ExecuteInfo
-    //                 << std::endl;
-    // }
+  // akhilesh - comment this block if commit instruction stream is not required
+      bool log_instruction_1 = true;
+      bool log_instruction_2 = commit_cycle < 6000;
+      bool log_instruction_3 = commit_cycle > 4000 && commit_cycle < 5000;
+  // if (log_instruction_2) {
+  //   std::cout << "PC: 0x" << std::hex << pc << std::dec
+  //                 << " | Cycle: " << commit_cycle
+  //                 << " | " << _exec_info  // Use the overloaded operator<< for ExecuteInfo
+  //                 << std::endl;
+  // }
 
-    // Update producer-consumer tracking tables - register
-      /* FIXME - If the same pc is consumer as well as producer then the logic and usage of the producer-consumer tracking mechanism is flawed. Need to do something about that situation.
-          In the current implementation, the table is guaranteed to give the correct picture only if the register entry is checked when the instruction is a consumer of the register. Otherwise, can't say.
-          The simulation trick to handle this situation is to record a pc as producer after all required accesses to this table are done... i.e. towards the end of the simulation of this cycle
-          Of course this won't directly translate to hardware but a simple solution would be to have a 1-bit signal indicating if a PC is simultaneously the producer and consumer of a register.
-          Or delay the update to producer PC by one cycle. Good luck doing this with multi-fetch architectures
-      */
-    // if (pc == 0x402694) {
-    //   std::cout << "At pc - 0x" << std::hex << pc;
-    //   std::cout << " | #src_reg = " << _exec_info.dec_info.src_reg_info.size()
-    //             << ", src_reg[0] - " << _exec_info.dec_info.src_reg_info[0]
-    //             << ", src_reg[1] - " << _exec_info.dec_info.src_reg_info[1] << "\n";
-    // }
-    for (int i = 0; i < _exec_info.dec_info.src_reg_info.size(); i++) {
-      prodCons_reg.record_consumer(_exec_info.dec_info.src_reg_info[i], pc);
+  // Update producer-consumer tracking tables - register
+    /* FIXME - If the same pc is consumer as well as producer then the logic and usage of the producer-consumer tracking mechanism is flawed. Need to do something about that situation.
+        In the current implementation, the table is guaranteed to give the correct picture only if the register entry is checked when the instruction is a consumer of the register. Otherwise, can't say.
+        The simulation trick to handle this situation is to record a pc as producer after all required accesses to this table are done... i.e. towards the end of the simulation of this cycle
+        Of course this won't directly translate to hardware but a simple solution would be to have a 1-bit signal indicating if a PC is simultaneously the producer and consumer of a register.
+        Or delay the update to producer PC by one cycle. Good luck doing this with multi-fetch architectures
+    */
+  // if (pc == 0x402694) {
+  //   std::cout << "At pc - 0x" << std::hex << pc;
+  //   std::cout << " | #src_reg = " << _exec_info.dec_info.src_reg_info.size()
+  //             << ", src_reg[0] - " << _exec_info.dec_info.src_reg_info[0]
+  //             << ", src_reg[1] - " << _exec_info.dec_info.src_reg_info[1] << "\n";
+  // }
+  for (int i = 0; i < _exec_info.dec_info.src_reg_info.size(); i++) {
+    prodCons_reg.record_consumer(_exec_info.dec_info.src_reg_info[i], pc);
+  }
+
+  // Update producer-consumer tracking tables - memory
+  if (is_store(_exec_info.dec_info.insn_class)) {
+    prodCons_mem.record_producer(_exec_info.mem_va.value(), pc);
+  }
+  if (is_load(_exec_info.dec_info.insn_class)) {
+    prodCons_mem.record_consumer(_exec_info.mem_va.value(), pc);
+  }
+
+  // if (pc == 0x449D8C) {
+  //   prodCons_mem.printState(_exec_info.mem_va.value());
+  // }
+  // if (pc == 0x800002f0) {
+  //   std::cout << "\tSource reg info: " << _exec_info.dec_info.src_reg_info.size()
+  //             << "\n\tDest. reg info: " << _exec_info.dec_info.dst_reg_info.has_value() << "\n";
+  //   prodCons_reg.printState(0);
+  //   prodCons_reg.printState(3);
+  // }
+
+  // Learning Phase
+  if (is_cond_br(_exec_info.dec_info.insn_class))
+  {
+    const bool _resolve_dir = _exec_info.taken.value();
+    //const uint64_t target_pc = 0xFFFFF0D8F2CC;
+    // from sample_traces/fp/sample_fp_trace.gz
+    const uint64_t target_pc = 0x449d9c;
+
+    uint16_t pc_index = pc & 0xFF;
+    // print num src regs
+    if(_exec_info.dec_info.src_reg_info.size() > 0) {
+      if(BT[pc_index].src_reg == _exec_info.dec_info.src_reg_info[0]) {
+        if(_resolve_dir != pred_dir) {
+          if (BT[pc_index].sat_counter < BT_SAT_COUNTER_MAX) {
+            BT[pc_index].sat_counter += 1;
+          }
+        }
+      } else {
+        if(BT[pc_index].sat_counter == 0) {
+          BT[pc_index].src_reg = _exec_info.dec_info.src_reg_info[0];
+          BT[pc_index].sat_counter = 1;
+        }
+      }
     }
 
-    // Update producer-consumer tracking tables - memory
-    if (is_store(_exec_info.dec_info.insn_class)) {
-      prodCons_mem.record_consumer(_exec_info.mem_va.value(), pc);
+    // append to misprediction list of pc's where entry saturation counter = max
+    if(BT[pc_index].sat_counter == BT_SAT_COUNTER_MAX) {
+      // append full 64-bit pc to misprediction list
+      high_mispred_pc.insert(pc);
+      std::cout << "akhilesh - Marked as highly_mispredicted: " << pc << "\n";
     }
+
+    // append highly mispredicted branch to seeker buffer
+    if(pc == target_pc) {
+      //std::cout << "akhilesh - assuming branch at " << pc << " is highly mispredicted\n";
+      if (!pred_table.is_learnt(pc))
+        seeker_buffer.insert(pc);
+      //seeker_buffer.printState();
+    }
+
+    if(branch_inst_count == 1000) {
+      // std::cout << "\nFinal unique PC list:\n";
+      // for (uint64_t pc : high_mispred_pc) {
+      //     std::cout << "0x" << std::hex << std::uppercase << pc << std::endl;
+      // }
+      for(int i = 0; i < BT_SIZE; i++) {
+        if(BT[i].sat_counter < 15) {
+          BT[i].sat_counter = 0;
+        } else {
+          BT[i].sat_counter -= 15;
+        }
+      }
+      branch_inst_count = 0;
+    } else {
+      branch_inst_count++;
+    }
+    
+    // print the branch table for target_pc
+    // if(pc == target_pc) {
+    //   std::cout << "Branch Table for PC: 0x" << std::hex << pc << std::dec << std::endl;
+    //   if(_resolve_dir != pred_dir) {
+    //     std::cout << "Misprediction: " << " | Resolve Dir: " << _resolve_dir << " | Pred Dir: " << pred_dir << std::endl;
+    //   }
+    //   if(BT[0xF2CC].sat_counter > 0) {
+    //     std::cout << "Index: " << 0xF2CC << " | Src Reg: " << BT[0xF2CC].src_reg << " | Sat Counter: " << BT[0xF2CC].sat_counter << std::endl;
+    //   }
+    // }
+  }
+
+  if(_exec_info.dec_info.insn_class == InstClass::storeInstClass) {
+    uint64_t addr = _exec_info.mem_va.value();
+    uint64_t addr_index = addr & 0xFF;
+    uint64_t src_reg_data_idx = _exec_info.dec_info.src_reg_info[1];
+    uint64_t dest_val = RegFile[src_reg_data_idx];
+    ST[addr_index].is_valid = true;
+    ST[addr_index].pc = pc;
+    if(dest_val != 0) {
+      ST[addr_index].is_zero = false;
+    } else {
+      ST[addr_index].is_zero = true;
+    }
+    // print pc and reg file values
+    // if(pc == target_mem_pc) {
+    //   std::cout << "Store Table for PC: 0x" << std::hex << pc << std::dec << std::endl;
+    //   std::cout << "Src Reg: " << src_reg_data_idx << " | Dest Val: 0x" << std::hex << dest_val << << std::dec std::endl;
+    //   std::cout << "Index: " << addr_index << " | Valid: " << ST[addr_index].is_valid << " | Zero: " << ST[addr_index].is_zero << std::endl;
+    // }
+  }
+
+  // Update RetireOp Queue
+  RetireOp retire_op;
+  retire_op.pc = pc;
+  retire_op.exec_info = _exec_info;
+
+  if(retire_op_queue.size() == RETIRE_OP_QUEUE_SIZE) {
+    retire_op_queue.pop_back();
+  }
+
+  retire_op_queue.push_front(retire_op);
+
+  // Update RegFile
+  if(_exec_info.dst_reg_value.has_value()) {
+    uint64_t dest_val = _exec_info.dst_reg_value.value();
+    uint64_t dest_reg = _exec_info.dec_info.dst_reg_info.value();
+    if(dest_reg != 65) { // skip zero register
+      RegFile[dest_reg] = dest_val;
+    }
+  }
+
+  // check if current PC is sought to learn the DFG
+  if (seeker_buffer.exists(pc)) {
+    //std::cout << "akhilesh - Learn DFG before current pc " << pc << "\n";
+    
     if (is_load(_exec_info.dec_info.insn_class)) {
-      prodCons_mem.record_consumer(_exec_info.mem_va.value(), pc);
-    }
-
-    // if (pc == 0x449D8C) {
-    //   prodCons_mem.printState(_exec_info.mem_va.value());
-    // }
-    // if (pc == 0x800002f0) {
-    //   std::cout << "\tSource reg info: " << _exec_info.dec_info.src_reg_info.size()
-    //             << "\n\tDest. reg info: " << _exec_info.dec_info.dst_reg_info.has_value() << "\n";
-    //   prodCons_reg.printState(0);
-    //   prodCons_reg.printState(3);
-    // }
-
-    if (is_cond_br(_exec_info.dec_info.insn_class))
-    {
-      const bool _resolve_dir = _exec_info.taken.value();
-      //const uint64_t target_pc = 0xFFFFF0D8F2CC;
-      // from sample_traces/fp/sample_fp_trace.gz
-      const uint64_t target_pc = 0x449d9c;
-
-      uint16_t pc_index = pc & 0xFF;
-      // print num src regs
-      if(_exec_info.dec_info.src_reg_info.size() > 0) {
-        if(BT[pc_index].src_reg == _exec_info.dec_info.src_reg_info[0]) {
-          if(_resolve_dir != pred_dir) {
-            if (BT[pc_index].sat_counter < BT_SAT_COUNTER_MAX) {
-              BT[pc_index].sat_counter += 1;
-            }
-          }
-        } else {
-          if(BT[pc_index].sat_counter == 0) {
-            BT[pc_index].src_reg = _exec_info.dec_info.src_reg_info[0];
-            BT[pc_index].sat_counter = 1;
-          }
-        }
-      }
-
-      // append to misprediction list of pc's where entry saturation counter = max
-      if(BT[pc_index].sat_counter == BT_SAT_COUNTER_MAX) {
-        // append full 64-bit pc to misprediction list
-        high_mispred_pc.insert(pc);
-        std::cout << "akhilesh - Marked as highly_mispredicted: " << pc << "\n";
-      }
-
-      // append highly mispredicted branch to seeker buffer
-      if(pc == target_pc) {
-        //std::cout << "akhilesh - assuming branch at " << pc << " is highly mispredicted\n";
-        if (!pred_table.is_learnt(pc))
-          seeker_buffer.insert(pc);
-        //seeker_buffer.printState();
-      }
-
-      if(branch_inst_count == 1000) {
-        // std::cout << "\nFinal unique PC list:\n";
-        // for (uint64_t pc : high_mispred_pc) {
-        //     std::cout << "0x" << std::hex << std::uppercase << pc << std::endl;
-        // }
-        for(int i = 0; i < BT_SIZE; i++) {
-          if(BT[i].sat_counter < 15) {
-            BT[i].sat_counter = 0;
-          } else {
-            BT[i].sat_counter -= 15;
-          }
-        }
-        branch_inst_count = 0;
-      } else {
-        branch_inst_count++;
-      }
+      // std::cout << "INFO:: Load instruction detected at pc 0x" << std::hex << pc
+      //           << " | Mem VA: 0x" << _exec_info.mem_va.value() << "\n";
       
-      // print the branch table for target_pc
-      // if(pc == target_pc) {
-      //   std::cout << "Branch Table for PC: 0x" << std::hex << pc << std::dec << std::endl;
-      //   if(_resolve_dir != pred_dir) {
-      //     std::cout << "Misprediction: " << " | Resolve Dir: " << _resolve_dir << " | Pred Dir: " << pred_dir << std::endl;
-      //   }
-      //   if(BT[0xF2CC].sat_counter > 0) {
-      //     std::cout << "Index: " << 0xF2CC << " | Src Reg: " << BT[0xF2CC].src_reg << " | Sat Counter: " << BT[0xF2CC].sat_counter << std::endl;
-      //   }
-      // }
-    }
-
-    if(_exec_info.dec_info.insn_class == InstClass::storeInstClass) {
-      uint64_t addr = _exec_info.mem_va.value();
-      uint64_t addr_index = addr & 0xFF;
-      uint64_t src_reg_data_idx = _exec_info.dec_info.src_reg_info[1];
-      uint64_t dest_val = RegFile[src_reg_data_idx];
-      ST[addr_index].is_valid = true;
-      ST[addr_index].pc = pc;
-      if(dest_val != 0) {
-        ST[addr_index].is_zero = false;
-      } else {
-        ST[addr_index].is_zero = true;
-      }
-      // print pc and reg file values
-      // if(pc == target_mem_pc) {
-      //   std::cout << "Store Table for PC: 0x" << std::hex << pc << std::dec << std::endl;
-      //   std::cout << "Src Reg: " << src_reg_data_idx << " | Dest Val: 0x" << std::hex << dest_val << << std::dec std::endl;
-      //   std::cout << "Index: " << addr_index << " | Valid: " << ST[addr_index].is_valid << " | Zero: " << ST[addr_index].is_zero << std::endl;
-      // }
-    }
-
-    // Update RetireOp Queue
-    RetireOp retire_op;
-    retire_op.pc = pc;
-    retire_op.exec_info = _exec_info;
-
-    if(retire_op_queue.size() == RETIRE_OP_QUEUE_SIZE) {
-      retire_op_queue.pop_back();
-    }
-
-    retire_op_queue.push_front(retire_op);
-
-    // Update RegFile
-    if(_exec_info.dst_reg_value.has_value()) {
-      uint64_t dest_val = _exec_info.dst_reg_value.value();
-      uint64_t dest_reg = _exec_info.dec_info.dst_reg_info.value();
-      if(dest_reg != 65) { // skip zero register
-        RegFile[dest_reg] = dest_val;
-      }
-    }
-
-    // check if current PC is sought to learn the DFG
-    if (seeker_buffer.exists(pc)) {
-      //std::cout << "akhilesh - Learn DFG before current pc " << pc << "\n";
-      
-      if (is_load(_exec_info.dec_info.insn_class)) {
-        // std::cout << "INFO:: Load instruction detected at pc 0x" << std::hex << pc
-        //           << " | Mem VA: 0x" << _exec_info.mem_va.value() << "\n";
-        
-        uint64_t memVA = _exec_info.mem_va.value();
-        //prodCons_mem.printState(memVA);
-        if (prodCons_mem.is_tracked(memVA)) {
-          if (prodCons_mem.is_traced(memVA)) {
-            uint16_t uid_currPC = uid_map.get_uid(pc);
-
-            uint64_t producerPC = prodCons_mem.get_producerPC(memVA);
-            uint16_t uid_producerPC = uid_map.get_uid(producerPC);
-
-            uint64_t src_value = _exec_info.dst_reg_value.value();
-
-            // Add Load instruction to Reservation Station
-            reservation_station.add_entry(uid_currPC, _exec_info.dec_info.insn_class, uid_producerPC, src_value);
-            reservation_station.printState();
-
-            // Add Store instruction to Trigger List
-            trig_buffer.add_entry(producerPC, uid_producerPC);
-            trig_buffer.printState();
-
-            // Remove load instruction from Seeker Buffer
-            seeker_buffer.remove(pc);
-            seeker_buffer.printState();
-          }
-        } else {  // Add memory address to tracker
-          prodCons_mem.add_memVA(memVA, pc);
-          prodCons_mem.printState(memVA);
-        }
-      } else {
-        std::cout << "INFO:: Non load instruction detected at pc 0x" << std::hex << pc
-                  << "\nSource Registers: { " << std::dec;
-        for (int i = 0; i < _exec_info.dec_info.src_reg_info.size(); i++)
-          std::cout << _exec_info.dec_info.src_reg_info[i] << " ";
-        std::cout << "}\n";
-        for (int i = 0; i < _exec_info.dec_info.src_reg_info.size(); i++)
-          prodCons_reg.printState(_exec_info.dec_info.src_reg_info[i]);
-
-        // Get all information regarding source registers
-        uint8_t src_reg;
-        uint64_t producerPC;
-        std::vector<uint64_t> producerPC_vector;
-        std::vector<uint16_t> uid_producerPC_vector;
-        std::vector<uint64_t> src_reg_value_vector;
-        for (int i = 0; i < _exec_info.dec_info.src_reg_info.size(); i++) {
-          src_reg = _exec_info.dec_info.src_reg_info[i];
-          producerPC = prodCons_reg.get_producerPC(src_reg);
-          producerPC_vector.push_back(producerPC);
-          uid_producerPC_vector.push_back(uid_map.get_uid(producerPC));
-          src_reg_value_vector.push_back(RegFile[src_reg]);
-        }
-        // Assumption - at max 3 input registers. Else rethink the reservation Station
-        if (_exec_info.dec_info.src_reg_info.size() > 3)
-          std::cout << "ERROR:: Expected 3 or less input registers. " << _exec_info.dec_info.src_reg_info.size() << " detected for instruction at pc 0x" << std::hex << pc;
-
-        if (is_cond_br(_exec_info.dec_info.insn_class)) {
-          std::cout << "INFO:: Cond. Branch instruction detected at pc 0x" << std::hex << pc << "\n";
-
-          // Branch instructions go in the branch prediction table
-          pred_table.add_entry(pc, uid_producerPC_vector[0]);
-          pred_table.printState();
-        } else {
-          std::cout << "akhilesh - Non load, Non cond. branch instruction detected at pc 0x" << std::hex << pc << "\n";
-          
+      uint64_t memVA = _exec_info.mem_va.value();
+      //prodCons_mem.printState(memVA);
+      if (prodCons_mem.is_tracked(memVA)) {
+        if (prodCons_mem.is_traced(memVA)) {
+          std::cout << "INFO:: Found a link between load and store\n";
           uint16_t uid_currPC = uid_map.get_uid(pc);
-          //std::cout << "akhilesh - uid is " << pc << "-->" << uid_currPC << "\n";
-          
-          // Non-branch instructions go to Reservation Station
-          reservation_station.add_entry(uid_currPC, _exec_info.dec_info.insn_class, uid_producerPC_vector, src_reg_value_vector);
-          reservation_station.printState();
+
+          uint64_t producerPC = prodCons_mem.get_producerPC(memVA);
+          uint16_t uid_producerPC = uid_map.get_uid(producerPC);
+
+          uint64_t src_value = _exec_info.dst_reg_value.value();
+
+          // Add Load instruction to Reservation Station
+          reservation_station.add_entry(uid_currPC, _exec_info.dec_info.insn_class, uid_producerPC, src_value);
+          reservation_station.printState(uid_currPC);
+
+          // Add Store instruction to Trigger List
+          trig_buffer.add_entry(producerPC, uid_producerPC);
+          trig_buffer.printState();
+
+          // Remove load instruction from Seeker Buffer
+          seeker_buffer.remove(pc);
+          seeker_buffer.printState();
         }
-
-        // Update Seeker Buffer
-        seeker_buffer.remove(pc);
-        for (uint64_t prod_pc: producerPC_vector)
-          seeker_buffer.insert(prod_pc);
-        seeker_buffer.printState();
+      } else {  // Add memory address to tracker
+        prodCons_mem.add_memVA(memVA, pc);
+        //prodCons_mem.printState(memVA);
       }
-    }
+    } else {
+      std::cout << "INFO:: Non load instruction detected at pc 0x" << std::hex << pc
+                << "\nSource Registers: { " << std::dec;
+      for (int i = 0; i < _exec_info.dec_info.src_reg_info.size(); i++)
+        std::cout << _exec_info.dec_info.src_reg_info[i] << " ";
+      std::cout << "}\n";
+      for (int i = 0; i < _exec_info.dec_info.src_reg_info.size(); i++)
+        prodCons_reg.printState(_exec_info.dec_info.src_reg_info[i]);
 
-    // Simulation trick to handle scenarios when the same PC is the consumer and producer of a register
-    if (_exec_info.dec_info.dst_reg_info.has_value()) {
-      prodCons_reg.record_producer(_exec_info.dec_info.dst_reg_info.value(), pc);
-    }
+      // Get all information regarding source registers
+      uint8_t src_reg;
+      uint64_t producerPC;
+      std::vector<uint64_t> producerPC_vector;
+      std::vector<uint16_t> uid_producerPC_vector;
+      std::vector<uint64_t> src_reg_value_vector;
+      for (int i = 0; i < _exec_info.dec_info.src_reg_info.size(); i++) {
+        src_reg = _exec_info.dec_info.src_reg_info[i];
+        producerPC = prodCons_reg.get_producerPC(src_reg);
+        producerPC_vector.push_back(producerPC);
+        uid_producerPC_vector.push_back(uid_map.get_uid(producerPC));
+        src_reg_value_vector.push_back(RegFile[src_reg]);
+      }
+      // Assumption - at max 3 input registers. Else rethink the reservation Station
+      if (_exec_info.dec_info.src_reg_info.size() > 3)
+        std::cout << "ERROR:: Expected 3 or less input registers. " << _exec_info.dec_info.src_reg_info.size() << " detected for instruction at pc 0x" << std::hex << pc;
 
-    // if (pc == 0x800002f0) {
-    // //  std::cout << "\tSource reg info: " << _exec_info.dec_info.src_reg_info.size()
-    // //             << "\n\tDest. reg info: " << _exec_info.dec_info.dst_reg_info.has_value() << "\n";
-    //   prodCons_reg.printState(0);
-    //   prodCons_reg.printState(3);
-    // }  
+      if (is_cond_br(_exec_info.dec_info.insn_class)) {
+        std::cout << "INFO:: Cond. Branch instruction detected at pc 0x" << std::hex << pc << "\n";
+
+        // Branch instructions go in the branch prediction table
+        pred_table.add_entry(pc, uid_producerPC_vector[0]);
+        pred_table.printState();
+      } else {
+        std::cout << "INFO:: Non load, Non cond. branch instruction detected at pc 0x" << std::hex << pc << "\n";
+        
+        uint16_t uid_currPC = uid_map.get_uid(pc);
+        //std::cout << "akhilesh - uid is " << pc << "-->" << uid_currPC << "\n";
+        
+        // Non-branch instructions go to Reservation Station
+        reservation_station.add_entry(uid_currPC, _exec_info.dec_info.insn_class, uid_producerPC_vector, src_reg_value_vector);
+        reservation_station.printState(uid_currPC);
+      }
+
+      // Update Seeker Buffer
+      seeker_buffer.remove(pc);
+      for (uint64_t prod_pc: producerPC_vector)
+        seeker_buffer.insert(prod_pc);
+      seeker_buffer.printState();
+    }
+  }
+
+  // Simulation trick to handle scenarios when the same PC is the consumer and producer of a register
+  if (_exec_info.dec_info.dst_reg_info.has_value()) {
+    prodCons_reg.record_producer(_exec_info.dec_info.dst_reg_info.value(), pc);
+  }
+
+  // if (pc == 0x449C58 || pc == 0x449D64) {
+  // //  std::cout << "\tSource reg info: " << _exec_info.dec_info.src_reg_info.size()
+  // //             << "\n\tDest. reg info: " << _exec_info.dec_info.dst_reg_info.has_value() << "\n";
+  //   // prodCons_reg.printState(0);
+  //   // prodCons_reg.printState(3);
+  //   prodCons_mem.printState(0xFFFFFFFF2B18);
+  // }
+
+  // Execution
+  if (is_store(_exec_info.dec_info.insn_class)) {
+    uint64_t src_reg = _exec_info.dec_info.src_reg_info[1];
+    uint64_t stored_value = RegFile[src_reg];
+    trig_buffer.trigger(pc, stored_value, reservation_station, pred_table);
+  }
 }
 
 //
@@ -490,9 +502,9 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
 void endCondDirPredictor ()
 {
     cbp2016_tage_sc_l.terminate();
-    cond_predictor_impl.terminate();
+    //cond_predictor_impl.terminate();
 
-    // Print State of differnent tables and buffers:
+    // Print State of different tables and buffers:
     std::cout << "INFO:: Any PCs left in Seeker Buffer could not be traced backwards.\n";
     seeker_buffer.printState();
     std::cout << "INFO:: Branch Precomputation can be triggered from PCs in the Trigger Buffer.\n";

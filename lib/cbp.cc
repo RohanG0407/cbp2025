@@ -311,6 +311,7 @@ int main(int argc, char ** argv)
       // akhilesh - commment this line if (macro)Op trace is not required
       // if (inst->is_last_piece)
       // {
+      //    //std::cout << "Fetch Cycle: " << current_fetch_cycle << " | ";
       //    reader.mInstr.printInstr();
       // }
       // if (inst->pc == 0x800021c0) {
