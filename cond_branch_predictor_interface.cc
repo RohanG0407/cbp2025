@@ -155,12 +155,12 @@ void spec_update(uint64_t seq_no, uint8_t piece, uint64_t pc, InstClass inst_cla
     {
         cbp2016_tage_sc_l.history_update(seq_no, piece, pc, br_type, pred_dir, resolve_dir, next_pc);
         //cond_predictor_impl.history_update(seq_no, piece, pc, resolve_dir, next_pc);
+        pred_table.learn_branch_type(pc, resolve_dir);
     }
     else
     {
         cbp2016_tage_sc_l.TrackOtherInst(pc, br_type, pred_dir, resolve_dir, next_pc);
     }
-
 }
 
 //
@@ -451,7 +451,7 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
         std::cout << "INFO:: Cond. Branch instruction detected at pc 0x" << std::hex << pc << "\n";
 
         // Branch instructions go in the branch prediction table
-        pred_table.add_entry(pc, uid_producerPC_vector[0]);
+        pred_table.add_entry(pc, uid_producerPC_vector[0], _exec_info.dec_info.src_reg_info[0]);
         pred_table.printState();
       } else {
         std::cout << "INFO:: Non load, Non cond. branch instruction detected at pc 0x" << std::hex << pc << "\n";

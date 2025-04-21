@@ -216,10 +216,10 @@ bool Prediction_Table::is_learnt(uint64_t pc) {
     return false;
 }
 
-void Prediction_Table::add_entry(uint64_t pc, uint16_t src_uid) {
+void Prediction_Table::add_entry(uint64_t pc, uint16_t src_uid, uint64_t value) {
     // Check if an entry already exists. If it does then invalidate it
     for (int i = 0; i < num_entries; i++) {
-        auto entry = prediction_table[i];
+        PredictionTable_Entry& entry = prediction_table[i];
         if (entry.valid && entry.pc == pc)
             entry.valid = false;
     }
@@ -227,9 +227,19 @@ void Prediction_Table::add_entry(uint64_t pc, uint16_t src_uid) {
     prediction_table[wr_ptr].pc = pc;
     prediction_table[wr_ptr].valid = 1;
     prediction_table[wr_ptr].src_uid = src_uid;
+    prediction_table[wr_ptr].zero_val = (value == 0);
+    //prediction_table[wr_ptr].brnz = false;  // This should ideally be trivial to know but is not possible in this trace based simulator.
 
     wr_ptr++;
     wr_ptr = (wr_ptr == num_entries) ? 0 : wr_ptr;
+}
+
+void Prediction_Table::learn_branch_type(uint64_t pc, bool taken) {
+    for (int i = 0; i < num_entries; i++) {
+        PredictionTable_Entry& entry = prediction_table[i];
+        if (entry.valid && entry.pc == pc)
+            entry.brnz = entry.zero_val ^ taken;
+    }
 }
 
 void Prediction_Table::receive_broadcast(uint16_t src_uid, uint64_t value) {
@@ -240,7 +250,8 @@ void Prediction_Table::receive_broadcast(uint16_t src_uid, uint64_t value) {
             continue;
 
         if(prediction_table[i].src_uid == src_uid) {
-            prediction_table[i].prediction = value & 0x1; // Store only the LSB of the broadcasted value
+            prediction_table[i].zero_val == (value == 0);
+            prediction_table[i].prediction = (value == 0) ^ prediction_table[i].brnz;
             any_update_inTable = true;
         }
     }
@@ -255,7 +266,9 @@ void Prediction_Table::printState() {
         if (prediction_table[i].valid)
             std::cout << "\tBr. PC: 0x" << std::hex << prediction_table[i].pc
                         << " | Src. uid: " << std::dec << prediction_table[i].src_uid
-                        << " | Pred: " << prediction_table[i].prediction << "\n";
+                        << " | Pred: " << prediction_table[i].prediction
+                        << " | BRnz: " << prediction_table[i].brnz
+                        << " | Zero_value: " << prediction_table[i].zero_val << "\n";
     }
 }
 

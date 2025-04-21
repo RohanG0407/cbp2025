@@ -60,6 +60,8 @@ struct PredictionTable_Entry {
     uint64_t pc;
     bool valid;
     uint16_t src_uid;
+    bool zero_val;
+    bool brnz;
     bool prediction;
 };
 
@@ -132,7 +134,8 @@ class Prediction_Table
         Prediction_Table (uint16_t num_entries);
         ~Prediction_Table();
         bool is_learnt(uint64_t pc);
-        void add_entry(uint64_t pc, uint16_t src_uid);
+        void add_entry(uint64_t pc, uint16_t src_uid, uint64_t value);
+        void learn_branch_type(uint64_t pc, bool taken);
         void receive_broadcast(uint16_t src_uid, uint64_t value);
         void printState();
 };
