@@ -44,6 +44,13 @@ std::deque<RetireOp> retire_op_queue;
 #define ST_SIZE 65535
 StoreTableEntry ST[ST_SIZE]; // 2^16 entries - 1
 
+// Store Chain Info
+#define SC_SIZE 65535
+StoreChainEntry SCT[SC_SIZE]; // 2^16 entries - 1
+
+// Store Chain Info
+uint64_t linked_store_table[ST_SIZE]; // 2^16 entries - 1
+
 uint64_t RegFile[66];
 void beginCondDirPredictor()
 {
@@ -54,12 +61,32 @@ void beginCondDirPredictor()
     for (int i = 0; i < BT_SIZE; i++) {
         BT[i].src_reg = 0;
         BT[i].sat_counter = 0;
+        BT[i].tag = 0;
+        BT[i].override_tage_pred = false;
+        BT[i].st_table_index = 0;
+        BT[i].valid_chains = 0;
+    }
+
+    // initial retire_op_queue setup
+    retire_op_queue.clear();
+
+    // initial SC setup
+    for (int i = 0; i < SC_SIZE; i++) {
+        SCT[i].tag = 0;
+        SCT[i].is_valid = false;
+        SCT[i].predict_taken = false;
+        SCT[i].direction_matched = false;
     }
 
     // initial ST setup
     for (int i = 0; i < ST_SIZE; i++) {
         ST[i].is_valid = false;
         ST[i].is_zero = true;
+        ST[i].pc = 0;
+        ST[i].predict_taken = false;
+        ST[i].direction_matched = false;
+        ST[i].link_made = false;
+        linked_store_table[i] = 0;
     }
 
     // initial RegFile setp
@@ -87,8 +114,16 @@ void notify_instr_fetch(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint6
 //
 bool get_cond_dir_prediction(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t pred_cycle)
 {
+    uint64_t pc_index = pc & 0xFFFF;
+    uint64_t tag = (pc & 0xFFF0000) >> 16;
+    // use custom predictor to predict the branch direction
     const bool tage_sc_l_pred =  cbp2016_tage_sc_l.predict(seq_no, piece, pc);
-    const bool my_prediction = cond_predictor_impl.predict(seq_no, piece, pc, tage_sc_l_pred);
+    bool my_prediction = cond_predictor_impl.predict(seq_no, piece, pc, tage_sc_l_pred);
+    // if(BT[pc_index].tag == tag && BT[pc_index].override_tage_pred) {
+    //   uint64_t st_index = BT[pc_index].st_table_index;
+    //   my_prediction = SCT[st_index].predict_taken;
+    //   // std::cout << "Using custom predictor for PC: 0x" << std::hex << pc << std::dec << " | Prediction: " << my_prediction << std::endl;
+    // }
     return my_prediction;
 }
 
@@ -221,12 +256,13 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
     if (is_cond_br(_exec_info.dec_info.insn_class))
     {
       const bool _resolve_dir = _exec_info.taken.value();
-      const uint64_t target_pc = 0xFFFFF0D8F2CC;
 
-      uint16_t pc_index = pc & 0xFF;
-      // print num src regs
+      uint16_t pc_index = pc & 0xFFFF;
+      uint64_t tag = (pc & 0xFFF0000) >> 16;
+      
+      // mechnaism to find high mispredction branches
       if(_exec_info.dec_info.src_reg_info.size() > 0) {
-        if(BT[pc_index].src_reg == _exec_info.dec_info.src_reg_info[0]) {
+        if(tag == BT[pc_index].tag && BT[pc_index].src_reg == _exec_info.dec_info.src_reg_info[0]) {
           if(_resolve_dir != pred_dir) {
             if (BT[pc_index].sat_counter < BT_SAT_COUNTER_MAX) {
               BT[pc_index].sat_counter += 1;
@@ -236,26 +272,92 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
           if(BT[pc_index].sat_counter == 0) {
             BT[pc_index].src_reg = _exec_info.dec_info.src_reg_info[0];
             BT[pc_index].sat_counter = 1;
+            BT[pc_index].tag = tag;
+            BT[pc_index].override_tage_pred = false;
+            BT[pc_index].st_table_index = 0;
+            BT[pc_index].valid_chains = 0;
           }
         }
       }
 
       // append to misprediction list of pc's where entry saturation counter = max
-      if(BT[pc_index].sat_counter == BT_SAT_COUNTER_MAX) {
+      if(BT[pc_index].tag == tag && BT[pc_index].sat_counter == BT_SAT_COUNTER_MAX) {
         // append full 64-bit pc to misprediction list
         high_mispred_pc.insert(pc);
+
+        // print the branch we are going to analyze
+        // std::cout << "---------------------------------------------------" << std::endl;
+        // std::cout << "Processing H2P Branch PC: 0x" << std::hex << pc << std::dec << " | " << _exec_info << std::endl;
+
+        // loop thorugh last 8 entries in retire_op_queue and print out the instructions
+        //std::cout << "Last 8 RetireOp Queue Entries:" << std::endl;
+        for(int i = 0; i < 8 && i < retire_op_queue.size(); i++) {
+          RetireOp retire_op = retire_op_queue[i];
+          //std::cout << "PC: 0x" << std::hex << retire_op.pc << std::dec << " | " << retire_op.exec_info << std::endl;
+          // check if retire_op is a load with dest reg idx == branch src reg
+          if(retire_op.exec_info.dec_info.insn_class == InstClass::loadInstClass) {
+            uint64_t dest_reg_idx = retire_op.exec_info.dec_info.dst_reg_info.value();
+            // check if branch register is same as load producing register
+            if(dest_reg_idx == _exec_info.dec_info.src_reg_info[0]) {
+              // print out address
+              uint64_t load_addr = retire_op.exec_info.mem_va.value();
+              // std::cout << "Load Address: " << std::hex << load_addr << std::dec << std::endl;
+
+              // check if address is in store table
+              uint64_t addr_index = load_addr & 0xFFFF;
+              if(ST[addr_index].is_valid && !(ST[addr_index].link_made)) {
+                // print out store table entry
+                // std::cout << "Store Table Entry: " << std::endl;
+                // std::cout << "Index: " << addr_index << " | Valid: " << ST[addr_index].is_valid << " | Zero: " << ST[addr_index].is_zero << std::endl;
+                // std::cout << "Linked to PC: 0x" << std::hex << ST[addr_index].pc << std::dec << std::endl;
+
+                uint64_t sct_index = (ST[addr_index].pc) & 0xFFFF;
+                uint64_t sct_tag = (ST[addr_index].pc & 0xFFF0000) >> 16; 
+
+                bool chain_found = false;
+                for(int j = 0; j < BT[pc_index].valid_chains; j++) {
+                  // check if the chain is already made
+                  if(BT[pc_index].dependence_chains[j] == ST[addr_index].pc) {
+                    chain_found = true;
+                    break;
+                  }
+                }
+
+                if(!chain_found) {
+                    // std::cout << "Making chain with PC: 0x" << std::hex << ST[addr_index].pc << std::dec << std::endl;
+                    BT[pc_index].dependence_chains[BT[pc_index].valid_chains] = ST[addr_index].pc;
+                    BT[pc_index].valid_chains += 1;
+                }
+
+                if(ST[addr_index].is_zero && _exec_info.taken.value()) {
+                  SCT[sct_index].direction_matched = true; 
+                } else {
+                  SCT[sct_index].direction_matched = false;
+                }
+                SCT[sct_index].is_valid = true;
+                SCT[sct_index].tag = sct_tag;
+                ST[addr_index].link_made = true;
+                BT[pc_index].override_tage_pred = true;
+                BT[pc_index].st_table_index = sct_index;
+              }
+              
+              break;
+            }
+          }
+        }
       }
 
+      // peridoic reset of saturation counter
       if(branch_inst_count == 1000) {
         // std::cout << "\nFinal unique PC list:\n";
         // for (uint64_t pc : high_mispred_pc) {
         //     std::cout << "0x" << std::hex << std::uppercase << pc << std::endl;
         // }
         for(int i = 0; i < BT_SIZE; i++) {
-          if(BT[i].sat_counter < 15) {
+          if(BT[i].sat_counter < 5) {
             BT[i].sat_counter = 0;
           } else {
-            BT[i].sat_counter -= 15;
+            BT[i].sat_counter -= 5;
           }
         }
         branch_inst_count = 0;
@@ -263,29 +365,41 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
         branch_inst_count++;
       }
       
+      uint64_t target_pc = 0xfffff0d8f288;
       // print the branch table for target_pc
-      // if(pc == target_pc) {
-      //   std::cout << "Branch Table for PC: 0x" << std::hex << pc << std::dec << std::endl;
-      //   if(_resolve_dir != pred_dir) {
+      // if((pc == target_pc)) {
+      //   // print the entire instruction
+      //   std::cout << "Seq no: " << seq_no << " PC: 0x" << std::hex << pc << std::dec << " | " << _exec_info << std::endl;
+      //   //if(_resolve_dir != pred_dir) {
       //     std::cout << "Misprediction: " << " | Resolve Dir: " << _resolve_dir << " | Pred Dir: " << pred_dir << std::endl;
-      //   }
-      //   if(BT[0xF2CC].sat_counter > 0) {
-      //     std::cout << "Index: " << 0xF2CC << " | Src Reg: " << BT[0xF2CC].src_reg << " | Sat Counter: " << BT[0xF2CC].sat_counter << std::endl;
-      //   }
+      //   //}
       // }
     }
 
     if(_exec_info.dec_info.insn_class == InstClass::storeInstClass) {
-      uint64_t addr = _exec_info.mem_va.value();
-      uint64_t addr_index = addr & 0xFF;
       uint64_t src_reg_data_idx = _exec_info.dec_info.src_reg_info[1];
       uint64_t dest_val = RegFile[src_reg_data_idx];
-      ST[addr_index].is_valid = true;
-      ST[addr_index].pc = pc;
-      if(dest_val != 0) {
-        ST[addr_index].is_zero = false;
+
+      uint64_t addr = _exec_info.mem_va.value();
+      uint64_t addr_index = addr & 0xFFFF;
+      // check if address is in store table with chain made
+      if(ST[addr_index].is_valid && (ST[addr_index].pc == pc) && ST[addr_index].link_made) {
+          ST[addr_index].is_zero = dest_val == 0;
+          ST[addr_index].predict_taken = ST[addr_index].direction_matched ? ST[addr_index].is_zero : !(ST[addr_index].is_zero);
       } else {
-        ST[addr_index].is_zero = true;
+        ST[addr_index].is_valid = true;
+        ST[addr_index].pc = pc;
+        ST[addr_index].is_zero = dest_val == 0;
+        ST[addr_index].predict_taken = false;
+        ST[addr_index].link_made = false;
+        ST[addr_index].direction_matched = false;
+      }
+
+      uint64_t stc_index = (ST[addr_index].pc) & 0xFFFF;
+      uint64_t tag = (pc & 0xFFF0000) >> 16;
+
+      if(SCT[stc_index].is_valid && (SCT[stc_index].tag == tag)) {
+        SCT[stc_index].predict_taken = SCT[stc_index].direction_matched ? dest_val == 0 : !(dest_val == 0);
       }
       // print pc and reg file values
       // if(pc == target_mem_pc) {
