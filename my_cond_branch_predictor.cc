@@ -5,6 +5,21 @@
 #include <cmath>
 #include "my_cond_branch_predictor.h"
 
+uint64_t hash(const uint64_t ip_num, uint64_t index_width) {
+    //return ip_num; // Don't  hash. Use the full address.
+
+    uint64_t mask = (1 << index_width) - 1;
+
+    uint64_t remaining_num = ip_num >> 3; // Ignore the lower 3 bits
+    uint64_t hashed_num = 0;
+    while (remaining_num != 0) {
+        hashed_num = hashed_num ^ (remaining_num & mask);
+        remaining_num = remaining_num >> index_width;
+    }
+
+    return hashed_num;
+}
+
 
 uint16_t Trigger_Buffer::get_dst (uint64_t pc) {
     for (int i = 0; i < num_entries; i++) {
@@ -48,7 +63,7 @@ void Trigger_Buffer::add_entry (uint64_t pc, uint16_t dst_uid) {
 void Trigger_Buffer::trigger (uint64_t pc, uint64_t data, Reservation_Station& rs, Prediction_Table& pred_table) {
     for (int i = 0; i < num_entries; i++) {
         if (trigger_buffer[i].valid && trigger_buffer[i].pc == pc && trigger_buffer[i].active_src) {
-            std::cout << "Broadcast: Set off pre-computation of DFG from pc: 0x" << std::hex << pc << " | value: 0x" << data << "\n";
+            if (DEBUG_MODE) std::cout << "Broadcast: Set off pre-computation of DFG from pc: 0x" << std::hex << pc << " | value: 0x" << data << "\n";
 
             rs.receive_broadcast(trigger_buffer[i].dst_uid, data);
             pred_table.receive_broadcast(trigger_buffer[i].dst_uid, data);
@@ -56,7 +71,10 @@ void Trigger_Buffer::trigger (uint64_t pc, uint64_t data, Reservation_Station& r
     }
 }
 
-void Trigger_Buffer::printState () {
+void Trigger_Buffer::printState (bool DEBUG_MODE) {
+    if (!DEBUG_MODE)
+        return;
+
     std::cout << "Trigger Buffer:\n";
     for (int i = 0; i < num_entries; i++) {
         if (trigger_buffer[i].valid)
@@ -70,6 +88,7 @@ void Trigger_Buffer::printState () {
 Reservation_Station::Reservation_Station (uint16_t num_entries) {
     this->num_entries = num_entries;
     RS = new Reservation_Station_Entry[num_entries];
+    wr_ptr = 0;
 
     for (int i = 0; i < num_entries; i++) {
         RS[i].valid = false;
@@ -85,15 +104,20 @@ Reservation_Station::~Reservation_Station () {
 }
 
 void Reservation_Station::add_entry (const uint16_t dst_uid, const InstClass instr_class, const std::vector<uint16_t> src_uid_vector, const std::vector<uint64_t> src_reg_value_vector) {
-    RS[dst_uid].valid = true;
-    RS[dst_uid].opcode = instr_class;
+    Reservation_Station_Entry& entry = RS[wr_ptr];
+    entry.valid = true;
+    entry.opcode = instr_class;
+    entry.dest_uid = dst_uid;
     for (int i = 0; i < src_uid_vector.size(); i++) {
-        RS[dst_uid].src_info[i].valid = true;
-        RS[dst_uid].src_info[i].src_uid = src_uid_vector[i];
-        RS[dst_uid].src_info[i].value = src_reg_value_vector[i];
-        RS[dst_uid].src_info[i].updated = false;
+        entry.src_info[i].valid = true;
+        entry.src_info[i].src_uid = src_uid_vector[i];
+        entry.src_info[i].value = src_reg_value_vector[i];
+        entry.src_info[i].updated = false;
     }
-    RS[dst_uid].any_update = false;
+    entry.any_update = false;
+
+    wr_ptr++;
+    wr_ptr = (wr_ptr == num_entries) ? 0 : wr_ptr;
 }
 
 // Wrapper around above function, to support a simpler syntax for single source dependencies.
@@ -125,7 +149,7 @@ void Reservation_Station::receive_broadcast(uint16_t src_uid, uint64_t value) {
     }
 
     if (any_update_inTable)
-        printState_updated();
+        printState_updated(DEBUG_MODE);
 }
 
 void Reservation_Station::evaluate(Prediction_Table& pred_table) {
@@ -145,15 +169,19 @@ void Reservation_Station::evaluate(Prediction_Table& pred_table) {
             }
 
             RS[i].any_update = false;
-            std::cout << "Broadcast: Evaluated RS entry: " << std::dec << i << "\n";
-            receive_broadcast(i, output_value);
-            pred_table.receive_broadcast(i, output_value);
+            uint16_t dst_uid = RS[i].dest_uid;
+            if (DEBUG_MODE) std::cout << "Broadcast: Evaluated RS entry: " << std::dec << i << "\n";
+            receive_broadcast(dst_uid, output_value);
+            pred_table.receive_broadcast(dst_uid, output_value);
             break;
         }
     }
 }
 
-void Reservation_Station::printState() {
+void Reservation_Station::printState(bool DEBUG_MODE) {
+    if (!DEBUG_MODE)
+        return;
+
     std::cout << "Reservation Station:\n";
     for (int i = 0; i < num_entries; i++) {
         if (RS[i].valid)
@@ -161,15 +189,27 @@ void Reservation_Station::printState() {
     }
 }
 
-void Reservation_Station::printState(uint16_t uid) {
+void Reservation_Station::printState(bool DEBUG_MODE, uint16_t uid) {
+    if (!DEBUG_MODE)
+        return;
+
     std::cout << "Reservation Station:\n";
-    if (RS[uid].valid)
-        printState_line(uid);
-    else
+    bool any_entryForUID = false;
+    for (int i = 0; i < num_entries; i++) {
+        if (RS[i].valid and RS[i].dest_uid == uid) {
+            any_entryForUID = true;
+            printState_line(i);
+        }
+    }
+
+    if (!any_entryForUID)
         std::cout << "\tNo valid lines for dst_uid: " << std::dec << uid << "\n";
 }
 
-void Reservation_Station::printState_updated() {
+void Reservation_Station::printState_updated(bool DEBUG_MODE) {
+    if (!DEBUG_MODE)
+        return;
+
     std::cout << "Reservation Station:\n";
     for (int i = 0; i < num_entries; i++) {
         if (RS[i].valid and RS[i].any_update)
@@ -177,11 +217,12 @@ void Reservation_Station::printState_updated() {
     }
 }
 
-void Reservation_Station::printState_line(uint16_t uid) {
-    std::cout << "\tdst_uid: " << std::dec << uid
-            << " | Opcode: " << cInfo[static_cast<uint8_t>(RS[uid].opcode)]
-            << " | any_update: " << RS[uid].any_update;
-    for (Source_Field src: RS[uid].src_info) {
+void Reservation_Station::printState_line(uint16_t index) {
+    Reservation_Station_Entry entry = RS[index];
+    std::cout << "\tdst_uid: " << std::dec << entry.dest_uid
+            << " | Opcode: " << cInfo[static_cast<uint8_t>(entry.opcode)]
+            << " | any_update: " << entry.any_update;
+    for (Source_Field src: entry.src_info) {
         if (src.valid)
             std::cout << " || src_uid: " << std::dec << src.src_uid
                     << " | src_value: 0x" << std::hex << src.value;
@@ -216,6 +257,15 @@ bool Prediction_Table::is_learnt(uint64_t pc) {
     return false;
 }
 
+bool Prediction_Table::trcSim_is_predicted(uint64_t pc) {
+    for (int i = 0; i < num_entries; i++) {
+        auto entry = prediction_table[i];
+        if (entry.valid && entry.pc == pc)
+            return !entry.trcSim_infeasible;
+    }
+    return false;
+}
+
 void Prediction_Table::add_entry(uint64_t pc, uint16_t src_uid, uint64_t value) {
     // Check if an entry already exists. If it does then invalidate it
     for (int i = 0; i < num_entries; i++) {
@@ -227,8 +277,9 @@ void Prediction_Table::add_entry(uint64_t pc, uint16_t src_uid, uint64_t value) 
     prediction_table[wr_ptr].pc = pc;
     prediction_table[wr_ptr].valid = 1;
     prediction_table[wr_ptr].src_uid = src_uid;
-    prediction_table[wr_ptr].zero_val = (value == 0);
+    prediction_table[wr_ptr].trcSim_zero_val = (value == 0);
     //prediction_table[wr_ptr].brnz = false;  // This should ideally be trivial to know but is not possible in this trace based simulator.
+    prediction_table[wr_ptr].trcSim_infeasible = false;
 
     wr_ptr++;
     wr_ptr = (wr_ptr == num_entries) ? 0 : wr_ptr;
@@ -238,7 +289,7 @@ void Prediction_Table::learn_branch_type(uint64_t pc, bool taken) {
     for (int i = 0; i < num_entries; i++) {
         PredictionTable_Entry& entry = prediction_table[i];
         if (entry.valid && entry.pc == pc)
-            entry.brnz = entry.zero_val ^ taken;
+            entry.brnz = entry.trcSim_zero_val ^ taken;
     }
 }
 
@@ -250,17 +301,29 @@ void Prediction_Table::receive_broadcast(uint16_t src_uid, uint64_t value) {
             continue;
 
         if(prediction_table[i].src_uid == src_uid) {
-            prediction_table[i].zero_val == (value == 0);
+            prediction_table[i].trcSim_zero_val == (value == 0);
             prediction_table[i].prediction = (value == 0) ^ prediction_table[i].brnz;
             any_update_inTable = true;
         }
     }
 
     if (any_update_inTable)
-        printState();
+        printState(DEBUG_MODE);
 }
 
-void Prediction_Table::printState() {
+bool Prediction_Table::get_prediction(uint64_t pc) {
+    for (int i = 0; i < num_entries; i++) {
+        PredictionTable_Entry& entry = prediction_table[i];
+        if (entry.valid && entry.pc == pc)
+            return entry.prediction;
+    }
+    return true; // dummy value returned. You shouldn't be using this
+}
+
+void Prediction_Table::printState(bool DEBUG_MODE) {
+    if (!DEBUG_MODE)
+        return;
+
     std::cout << "Prediction Table:\n";
     for (int i = 0; i < num_entries; i++) {
         if (prediction_table[i].valid)
@@ -268,27 +331,38 @@ void Prediction_Table::printState() {
                         << " | Src. uid: " << std::dec << prediction_table[i].src_uid
                         << " | Pred: " << prediction_table[i].prediction
                         << " | BRnz: " << prediction_table[i].brnz
-                        << " | Zero_value: " << prediction_table[i].zero_val << "\n";
+                        << " | Zero_value: " << prediction_table[i].trcSim_zero_val
+                        << " | Infeasible: " << prediction_table[i].trcSim_infeasible << "\n";
+    }
+}
+
+void Prediction_Table::trcSim_infeasible (uint16_t src_uid) {
+    for (int i = 0; i < num_entries; i++) {
+        if (prediction_table[i].valid && prediction_table[i].src_uid == src_uid)
+        prediction_table[i].trcSim_infeasible = true;
     }
 }
 
 
-uint64_t Producer_Consumer_Pairs_Memory::hash(const uint64_t ip_num) {
-    uint64_t index_width = static_cast<int>(std::log2(num_entries));
-    uint64_t mask = (1 << index_width) - 1;
+// uint64_t Producer_Consumer_Pairs_Memory::hash(const uint64_t ip_num) {
+//     return ip_num; // Don't  hash. Use the full address.
 
-    uint64_t remaining_num = ip_num >> 3; // Ignore the lower 3 bits
-    uint64_t hashed_num = 0;
-    while (remaining_num != 0) {
-        hashed_num = hashed_num ^ (remaining_num & mask);
-        remaining_num = remaining_num >> index_width;
-    }
+//     uint64_t index_width = static_cast<int>(std::log2(num_entries));
+//     uint64_t mask = (1 << index_width) - 1;
 
-    return hashed_num;
-}
+//     uint64_t remaining_num = ip_num >> 3; // Ignore the lower 3 bits
+//     uint64_t hashed_num = 0;
+//     while (remaining_num != 0) {
+//         hashed_num = hashed_num ^ (remaining_num & mask);
+//         remaining_num = remaining_num >> index_width;
+//     }
 
-Producer_Consumer_Pairs_Memory::Producer_Consumer_Pairs_Memory (uint16_t num_entries) {
+//     return hashed_num;
+// }
+
+Producer_Consumer_Pairs_Memory::Producer_Consumer_Pairs_Memory (uint16_t num_entries, uint64_t hashedVA_width) {
     this->num_entries = num_entries;
+    this->hashedVA_width = hashedVA_width;
     ProdCons_Table = new ProducerConsumer_Entry_Memory[num_entries];
     wr_ptr = 0;
     
@@ -306,7 +380,7 @@ Producer_Consumer_Pairs_Memory::~Producer_Consumer_Pairs_Memory () {
 
 bool Producer_Consumer_Pairs_Memory::is_tracked (uint64_t virt_addr) {
     for (int i = 0; i < num_entries; i++) {
-        if (ProdCons_Table[i].virtual_address == hash(virt_addr))
+        if (ProdCons_Table[i].virtual_address == hash(virt_addr, hashedVA_width))
             return true;
     }
     return false;
@@ -314,14 +388,14 @@ bool Producer_Consumer_Pairs_Memory::is_tracked (uint64_t virt_addr) {
 
 bool Producer_Consumer_Pairs_Memory::is_traced (uint64_t virt_addr) {
     for (int i = 0; i < num_entries; i++) {
-        if (ProdCons_Table[i].virtual_address == hash(virt_addr) && ProdCons_Table[i].prodCons_info.valid_pair)
+        if (ProdCons_Table[i].virtual_address == hash(virt_addr, hashedVA_width) && ProdCons_Table[i].prodCons_info.valid_pair)
             return true;
     }
     return false;
 }
 
 void Producer_Consumer_Pairs_Memory::add_memVA (uint64_t virt_addr, uint64_t consumer_pc) {
-    ProdCons_Table[wr_ptr].virtual_address = hash(virt_addr);
+    ProdCons_Table[wr_ptr].virtual_address = hash(virt_addr, hashedVA_width);
     ProdCons_Table[wr_ptr].prodCons_info.consumer_pc = consumer_pc;
     ProdCons_Table[wr_ptr].prodCons_info.valid_pair = false;
 
@@ -331,7 +405,7 @@ void Producer_Consumer_Pairs_Memory::add_memVA (uint64_t virt_addr, uint64_t con
 
 void Producer_Consumer_Pairs_Memory::record_producer(uint64_t virt_addr, uint64_t producer_pc) {
     for (int i = 0; i < num_entries; i++) {
-        if (ProdCons_Table[i].virtual_address == hash(virt_addr)){
+        if (ProdCons_Table[i].virtual_address == hash(virt_addr, hashedVA_width)){
             ProdCons_Table[i].store_observed = true;
             ProdCons_Table[i].prodCons_info.producer_pc = producer_pc;
             ProdCons_Table[i].prodCons_info.valid_pair = false;
@@ -342,7 +416,7 @@ void Producer_Consumer_Pairs_Memory::record_producer(uint64_t virt_addr, uint64_
 
 void Producer_Consumer_Pairs_Memory::record_consumer(uint64_t virt_addr, uint64_t consumer_pc) {
     for (int i = 0; i < num_entries; i++) {
-        if (ProdCons_Table[i].virtual_address == hash(virt_addr)) {
+        if (ProdCons_Table[i].virtual_address == hash(virt_addr, hashedVA_width)) {
             ProdCons_Table[i].prodCons_info.consumer_pc = consumer_pc;
             /* The pair isn't valid if store is never ovserved
                     This additional flag wasn't required for registers because every register is tracked throughout the program ...
@@ -356,21 +430,24 @@ void Producer_Consumer_Pairs_Memory::record_consumer(uint64_t virt_addr, uint64_
 
 uint64_t Producer_Consumer_Pairs_Memory::get_producerPC (uint64_t virt_addr) {
     for (int i = 0; i < num_entries; i++) {
-        if (ProdCons_Table[i].virtual_address == hash(virt_addr) && ProdCons_Table[i].prodCons_info.valid_pair) {
+        if (ProdCons_Table[i].virtual_address == hash(virt_addr, hashedVA_width) && ProdCons_Table[i].prodCons_info.valid_pair) {
             return ProdCons_Table[i].prodCons_info.producer_pc;
         }
     }
     return 0xFFFFFFFFFFFFFFFF; // this should never be returned becuase the function should only be called after verifying that the virt_addr is_tracked.
 }
 
-void Producer_Consumer_Pairs_Memory::printState (uint64_t virt_addr) {
+void Producer_Consumer_Pairs_Memory::printState (bool DEBUG_MODE, uint64_t virt_addr) {
+    if (!DEBUG_MODE)
+        return;
+
     std::cout << "Producer Consumer Table - Memory:\n";
 
     bool is_tracked = false;
     for (int i = 0; i < num_entries; i++) {
-        if (ProdCons_Table[i].virtual_address == hash(virt_addr)) {
+        if (ProdCons_Table[i].virtual_address == hash(virt_addr, hashedVA_width)) {
             std::cout << "VA: 0x" << std::hex << virt_addr
-                    << " | hash: 0x" << hash(virt_addr)
+                    << " | hash: 0x" << hash(virt_addr, hashedVA_width)
                     << " | Prod. PC: 0x" << ProdCons_Table[i].prodCons_info.producer_pc
                     << " | Cons. PC: 0x" << ProdCons_Table[i].prodCons_info.consumer_pc
                     << " | Valid: " << std::dec << ProdCons_Table[i].prodCons_info.valid_pair
@@ -382,7 +459,7 @@ void Producer_Consumer_Pairs_Memory::printState (uint64_t virt_addr) {
 
     if (!is_tracked) {
         std::cout << "\t Not tracking VA: " << std::hex << virt_addr
-                << " | hash: 0x" << hash(virt_addr) << "\n";
+                << " | hash: 0x" << hash(virt_addr, hashedVA_width) << "\n";
     }
 }
 
@@ -415,7 +492,10 @@ void Producer_Consumer_Pairs_Register::record_consumer(uint8_t dst_reg, uint64_t
     ProdCons_Table[dst_reg].valid_pair = true;
 }
 
-void Producer_Consumer_Pairs_Register::printState(uint8_t reg) {
+void Producer_Consumer_Pairs_Register::printState(bool DEBUG_MODE, uint8_t reg) {
+    if (!DEBUG_MODE)
+        return;
+
     std::cout << "\tr" << std::dec << unsigned(reg)
             << " | Producer - 0x" << std::hex << ProdCons_Table[reg].producer_pc
             << " | Consumer - 0x" << std::hex << ProdCons_Table[reg].consumer_pc
@@ -509,13 +589,47 @@ bool Seeker_Buffer::exists(uint64_t elem) {
     return (seeker_buffer.count(elem) != 0);
 }
 
-void Seeker_Buffer::printState() {
+void Seeker_Buffer::printState(bool DEBUG_MODE) {
+    if (!DEBUG_MODE)
+        return;
+
     std::cout << "Seeker Buffer State:\n";
     for (uint64_t pc : seeker_buffer) {
         std::cout << "\t0x" << std::hex << std::uppercase << pc << std::endl;
     }
 }
 
+Store_Table::Store_Table (uint64_t num_entries) {
+    this->num_entries = num_entries;
+    this->index_width = static_cast<int>(std::log2(num_entries));
+    ST_Table = new Store_Table_Entry[num_entries];
+    
+    // Mark all entries as invalid
+    for (int i = 0; i < num_entries; i++) {
+        ST_Table[i].valid = false;
+    }
+}
+
+Store_Table::~Store_Table () {
+    if (ST_Table)
+        delete[] ST_Table;
+}
+
+void Store_Table::record (uint64_t memVA, uint64_t pc) {
+    uint64_t index = hash(memVA, index_width);
+    ST_Table[index].valid = true;
+    ST_Table[index].producer_pc = pc;
+}
+
+bool Store_Table::is_recorded(uint64_t memVA) {
+    uint64_t index = hash(memVA, index_width);
+    return ST_Table[index].valid;
+}
+
+uint64_t Store_Table::get_pc(uint64_t memVA) {
+    uint64_t index = hash(memVA, index_width);
+    return ST_Table[index].producer_pc;
+}
 
 // SampleCondPredictor::SampleCondPredictor (void)
 // {
@@ -536,16 +650,16 @@ void Seeker_Buffer::printState() {
 //     return (seq_no << 4) | (piece & 0x000F);
 // }
 
-// bool SampleCondPredictor::predict (uint64_t seq_no, uint8_t piece, uint64_t PC, const bool tage_pred)
+// bool SampleCondPredictor::predict (uint64_t seq_no, uint8_t piece, uint64_t PC, bool tage_pred)
 // {
 //     active_hist.tage_pred = tage_pred;
 //     // checkpoint current hist
 //     pred_time_histories.emplace(get_unique_inst_id(seq_no, piece), active_hist);
-//     const bool pred_taken = predict_using_given_hist(seq_no, piece, PC, active_hist, true/*pred_time_predict*/);
+//     bool pred_taken = predict_using_given_hist(seq_no, piece, PC, active_hist, true/*pred_time_predict*/);
 //     return pred_taken;
 // }
 
-// bool SampleCondPredictor::predict_using_given_hist (uint64_t seq_no, uint8_t piece, uint64_t PC, const SampleHist& hist_to_use, const bool pred_time_predict)
+// bool SampleCondPredictor::predict_using_given_hist (uint64_t seq_no, uint8_t piece, uint64_t PC, const SampleHist& hist_to_use, bool pred_time_predict)
 // {
 //     return hist_to_use.tage_pred;
 // }

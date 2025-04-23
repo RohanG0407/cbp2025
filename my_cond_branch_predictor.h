@@ -6,6 +6,10 @@
 #include <cmath>
 #include "lib/sim_common_structs.h"
 
+extern bool DEBUG_MODE;
+
+uint64_t hash(const uint64_t ip_num, uint64_t index_width);
+
 struct SampleHist
 {
       uint64_t ghist;
@@ -36,21 +40,23 @@ struct StoreTableEntry
   uint64_t pc;
 };
 
-struct PC_UID_Map_Entry
-{
+struct Store_Table_Entry {
+    bool valid;
+    bool producer_pc;
+};
+
+struct PC_UID_Map_Entry {
     bool valid;
     uint64_t pc;
 };
 
-struct ProducerConsumer_Entry
-{
+struct ProducerConsumer_Entry {
     uint64_t producer_pc;
     uint64_t consumer_pc;
     bool valid_pair;
 };
 
-struct ProducerConsumer_Entry_Memory
-{
+struct ProducerConsumer_Entry_Memory {
     uint64_t virtual_address;
     bool store_observed;
     ProducerConsumer_Entry prodCons_info;
@@ -60,9 +66,10 @@ struct PredictionTable_Entry {
     uint64_t pc;
     bool valid;
     uint16_t src_uid;
-    bool zero_val;
+    bool trcSim_zero_val;
     bool brnz;
     bool prediction;
+    bool trcSim_infeasible;
 };
 
 struct Source_Field {
@@ -75,7 +82,7 @@ struct Source_Field {
 struct Reservation_Station_Entry {
     bool valid;
     InstClass opcode;
-    //uint16_t dest_uid;
+    uint16_t dest_uid;
     Source_Field src_info[3];
     bool any_update;
 };
@@ -102,12 +109,13 @@ class Trigger_Buffer {
         ~Trigger_Buffer ();
         void add_entry (uint64_t pc, uint16_t dst_uid);
         void trigger (uint64_t pc, uint64_t data, Reservation_Station& rs, Prediction_Table& pred_table);
-        void printState ();
+        void printState (bool DEBUG_MODE);
 };
 
 class Reservation_Station {
         Reservation_Station_Entry* RS;
         uint16_t num_entries;
+        uint16_t wr_ptr;
 
         void printState_line(uint16_t uid);
 
@@ -119,9 +127,9 @@ class Reservation_Station {
         void add_entry (const uint16_t dst_uid, const InstClass instr_class, const uint16_t src_uid, const uint64_t src_value);
         void receive_broadcast(uint16_t src_uid, uint64_t value);
         void evaluate(Prediction_Table& pred_table);
-        void printState();
-        void printState(uint16_t uid);
-        void printState_updated();
+        void printState(bool DEBUG_MODE);
+        void printState(bool DEBUG_MODE, uint16_t uid);
+        void printState_updated(bool DEBUG_MODE);
 };
 
 class Prediction_Table
@@ -134,10 +142,14 @@ class Prediction_Table
         Prediction_Table (uint16_t num_entries);
         ~Prediction_Table();
         bool is_learnt(uint64_t pc);
+        bool trcSim_is_predicted(uint64_t pc);
         void add_entry(uint64_t pc, uint16_t src_uid, uint64_t value);
         void learn_branch_type(uint64_t pc, bool taken);
         void receive_broadcast(uint16_t src_uid, uint64_t value);
-        void printState();
+        bool get_prediction(uint64_t pc);
+        void printState(bool DEBUG_MODE);
+
+        void trcSim_infeasible(uint16_t src_uid);
 };
 
 class Producer_Consumer_Pairs_Memory
@@ -145,11 +157,12 @@ class Producer_Consumer_Pairs_Memory
         ProducerConsumer_Entry_Memory* ProdCons_Table;
         uint16_t num_entries;
         uint16_t wr_ptr;
+        uint64_t hashedVA_width;
 
-        uint64_t hash(const uint64_t ip_num);
+        //uint64_t hash(const uint64_t ip_num);
 
     public:
-        Producer_Consumer_Pairs_Memory (uint16_t num_entries);
+        Producer_Consumer_Pairs_Memory (uint16_t num_entries, uint64_t hashedVA_width);
         ~Producer_Consumer_Pairs_Memory ();
         bool is_tracked (uint64_t virt_addr);
         bool is_traced (uint64_t virt_addr);
@@ -157,7 +170,7 @@ class Producer_Consumer_Pairs_Memory
         void record_producer(uint64_t virt_addr, uint64_t producer_pc);
         void record_consumer(uint64_t virt_addr, uint64_t consumer_pc);
         uint64_t get_producerPC (uint64_t virt_addr);
-        void printState (uint64_t virt_addr);
+        void printState (bool DEBUG_MODE, uint64_t virt_addr);
 };
 
 class Producer_Consumer_Pairs_Register
@@ -169,7 +182,7 @@ class Producer_Consumer_Pairs_Register
         uint64_t get_producerPC (uint8_t src_reg);
         void record_producer(uint8_t src_reg, uint64_t pc);
         void record_consumer(uint8_t dst_reg, uint64_t pc);
-        void printState(uint8_t reg);
+        void printState(bool DEBUG_MODE, uint8_t reg);
 };
 
 // class PC_2_uid_map
@@ -214,7 +227,20 @@ class Seeker_Buffer {
         void insert(uint64_t elem);
         void remove(uint64_t elem);
         bool exists(uint64_t elem);
-        void printState();
+        void printState(bool DEBUG_MODE);
+};
+
+// From Memory Address to PC
+class Store_Table {
+        Store_Table_Entry* ST_Table;
+        uint64_t num_entries;
+        uint64_t index_width;
+    public:
+        Store_Table (uint64_t num_entries);
+        ~Store_Table ();
+        void record (uint64_t memVA, uint64_t pc);
+        bool is_recorded(uint64_t memVA);
+        uint64_t get_pc(uint64_t memVA);
 };
 
 // class SampleCondPredictor
@@ -227,8 +253,8 @@ class Seeker_Buffer {
 //         void terminate();
 //         // sample function to get unique instruction id
 //         uint64_t get_unique_inst_id(uint64_t seq_no, uint8_t piece) const;
-//         bool predict (uint64_t seq_no, uint8_t piece, uint64_t PC, const bool tage_pred);
-//         bool predict_using_given_hist (uint64_t seq_no, uint8_t piece, uint64_t PC, const SampleHist& hist_to_use, const bool pred_time_predict);
+//         bool predict (uint64_t seq_no, uint8_t piece, uint64_t PC, bool tage_pred);
+//         bool predict_using_given_hist (uint64_t seq_no, uint8_t piece, uint64_t PC, const SampleHist& hist_to_use, bool pred_time_predict);
 //         void history_update (uint64_t seq_no, uint8_t piece, uint64_t PC, bool taken, uint64_t nextPC);
 //         void update (uint64_t seq_no, uint8_t piece, uint64_t PC, bool resolveDir, bool predDir, uint64_t nextPC);
 //         void update (uint64_t PC, bool resolveDir, bool pred_taken, uint64_t nextPC, const SampleHist& hist_to_use);
