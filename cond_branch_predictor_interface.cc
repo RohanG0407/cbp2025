@@ -56,7 +56,7 @@ Producer_Consumer_Pairs_Register prodCons_reg(66);
 // Prediction Table
 Prediction_Table pred_table(16);
 // Reservation Station
-Reservation_Station reservation_station(256);  // Each dest_uid can have multiple sources if the source is a store pc
+Reservation_Station reservation_station(NUM_UIDS);  // Each dest_uid can have multiple sources if the source is a store pc. Each of the source pcs is treated as a source operand.
 // Track Producer-Consumer relationship for memory addresses. Only observers memory specifically requested by DFG learning algo
 Producer_Consumer_Pairs_Memory prodCons_mem(NUM_SPECIFIC_MEM_ADDRESSES, prodCons_mem_hashedVA_wdith);
 // Trigger List

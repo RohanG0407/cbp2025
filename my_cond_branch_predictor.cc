@@ -104,17 +104,43 @@ Reservation_Station::~Reservation_Station () {
 }
 
 void Reservation_Station::add_entry (const uint16_t dst_uid, const InstClass instr_class, const std::vector<uint16_t> src_uid_vector, const std::vector<uint64_t> src_reg_value_vector) {
-    Reservation_Station_Entry& entry = RS[wr_ptr];
+    Reservation_Station_Entry& entry = RS[dst_uid];
     entry.valid = true;
     entry.opcode = instr_class;
-    entry.dest_uid = dst_uid;
-    for (int i = 0; i < src_uid_vector.size(); i++) {
-        entry.src_info[i].valid = true;
-        entry.src_info[i].src_uid = src_uid_vector[i];
-        entry.src_info[i].value = src_reg_value_vector[i];
-        entry.src_info[i].updated = false;
-    }
     entry.any_update = false;
+
+    // If instruction is a load, append src_uid to existing list of sources because multiple loads could link to the same store
+    if (is_load(instr_class)) {
+        src_uid = src_uid_vector[0];
+        // Check if source uid is already in the list. If not, then add.
+        bool src_uid_isKnown = false;
+        int i;
+        for (i = 0; i < src_uid_vector.size(); i++) {
+            if (!src_info[i].valid)
+                break;  // Leave the loop at the first invalid operand. It can't be index 0 for sure
+            else if (src_info[i].src_uid == src_uid) {
+                src_uid_isKnown = true;
+                break;
+            }
+        }
+
+        // Check if source uid is found
+        if (!src_uid_isKnown) {
+            // Shift all operands right and insert new source.
+            ()
+            for (; i > 0; i--) {
+                
+            }
+        }
+    } else {
+        //entry.dest_uid = dst_uid;
+        for (int i = 0; i < src_uid_vector.size(); i++) {
+            entry.src_info[i].valid = true;
+            entry.src_info[i].src_uid = src_uid_vector[i];
+            entry.src_info[i].value = src_reg_value_vector[i];
+            entry.src_info[i].updated = false;
+        }
+    }
 
     wr_ptr++;
     wr_ptr = (wr_ptr == num_entries) ? 0 : wr_ptr;
@@ -169,7 +195,8 @@ void Reservation_Station::evaluate(Prediction_Table& pred_table) {
             }
 
             RS[i].any_update = false;
-            uint16_t dst_uid = RS[i].dest_uid;
+            //uint16_t dst_uid = RS[i].dest_uid;
+	    uint16_t dst_uid = i;
             if (DEBUG_MODE) std::cout << "Broadcast: Evaluated RS entry: " << std::dec << i << "\n";
             receive_broadcast(dst_uid, output_value);
             pred_table.receive_broadcast(dst_uid, output_value);
@@ -195,11 +222,15 @@ void Reservation_Station::printState(bool DEBUG_MODE, uint16_t uid) {
 
     std::cout << "Reservation Station:\n";
     bool any_entryForUID = false;
-    for (int i = 0; i < num_entries; i++) {
-        if (RS[i].valid and RS[i].dest_uid == uid) {
-            any_entryForUID = true;
-            printState_line(i);
-        }
+    //for (int i = 0; i < num_entries; i++) {
+    //    if (RS[i].valid and RS[i].dest_uid == uid) {
+    //        any_entryForUID = true;
+    //        printState_line(i);
+    //    }
+    //}
+    if (RS[uid].valid) {
+	any_entryForUID = true;
+        printState_line(uid);
     }
 
     if (!any_entryForUID)
@@ -219,7 +250,9 @@ void Reservation_Station::printState_updated(bool DEBUG_MODE) {
 
 void Reservation_Station::printState_line(uint16_t index) {
     Reservation_Station_Entry entry = RS[index];
-    std::cout << "\tdst_uid: " << std::dec << entry.dest_uid
+    //uint16_t dest_uid = entry.dest_uid;
+    uint16_t dest_uid = index;
+    std::cout << "\tdst_uid: " << std::dec << dest_uid
             << " | Opcode: " << cInfo[static_cast<uint8_t>(entry.opcode)]
             << " | any_update: " << entry.any_update;
     for (Source_Field src: entry.src_info) {

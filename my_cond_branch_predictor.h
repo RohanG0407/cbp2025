@@ -82,8 +82,8 @@ struct Source_Field {
 struct Reservation_Station_Entry {
     bool valid;
     InstClass opcode;
-    uint16_t dest_uid;
-    Source_Field src_info[3];
+    //uint16_t dest_uid;
+    Source_Field src_info[5];
     bool any_update;
 };
 
