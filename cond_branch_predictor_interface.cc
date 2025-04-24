@@ -394,6 +394,12 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
         // Add Load instruction to Reservation Station
         reservation_station.add_entry(uid_currPC, _exec_info.dec_info.insn_class, uid_producerPC, src_value);
         reservation_station.printState(DEBUG_MODE, uid_currPC);
+
+        // Add Store instruction to Trigger List
+        trig_buffer.add_entry(producerPC, uid_producerPC);
+        trig_buffer.printState(DEBUG_MODE);
+
+        // Don't remove load instruction from Seeker Buffer. Program may have different store instrs feeding the same load.
       }
 
       // Idea 1: Track a memory address only on seeing a load from it.
@@ -520,7 +526,7 @@ void endCondDirPredictor ()
 
     DEBUG_MODE = true;
     // Print State of different tables and buffers:
-    std::cout << "INFO:: Any PCs left in Seeker Buffer could not be traced backwards.\n";
+    std::cout << "INFO:: Any PCs left in Seeker Buffer are either load instructions, or could not be traced backwards.\n";
     seeker_buffer.printState(DEBUG_MODE);
     std::cout << "INFO:: Branch Precomputation can be triggered from PCs in the Trigger Buffer.\n";
     trig_buffer.printState(DEBUG_MODE);

@@ -6,6 +6,8 @@
 #include <cmath>
 #include "lib/sim_common_structs.h"
 
+#define ReservationStation_NUM_SOURCES 5
+
 extern bool DEBUG_MODE;
 
 uint64_t hash(const uint64_t ip_num, uint64_t index_width);
@@ -83,7 +85,7 @@ struct Reservation_Station_Entry {
     bool valid;
     InstClass opcode;
     //uint16_t dest_uid;
-    Source_Field src_info[5];
+    Source_Field src_info[ReservationStation_NUM_SOURCES];
     bool any_update;
 };
 

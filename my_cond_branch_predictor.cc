@@ -108,17 +108,19 @@ void Reservation_Station::add_entry (const uint16_t dst_uid, const InstClass ins
     entry.valid = true;
     entry.opcode = instr_class;
     entry.any_update = false;
+    auto& src_opr = entry.src_info;
 
     // If instruction is a load, append src_uid to existing list of sources because multiple loads could link to the same store
     if (is_load(instr_class)) {
-        src_uid = src_uid_vector[0];
+        uint16_t src_uid = src_uid_vector[0];
+        uint64_t src_value = src_reg_value_vector[0];
         // Check if source uid is already in the list. If not, then add.
         bool src_uid_isKnown = false;
         int i;
-        for (i = 0; i < src_uid_vector.size(); i++) {
-            if (!src_info[i].valid)
-                break;  // Leave the loop at the first invalid operand. It can't be index 0 for sure
-            else if (src_info[i].src_uid == src_uid) {
+        for (i = 0; i < ReservationStation_NUM_SOURCES; i++) {
+            if (!src_opr[i].valid)
+                break;  // Leave the loop at the first invalid operand. It could be index 0 itself
+            else if (src_opr[i].src_uid == src_uid) {
                 src_uid_isKnown = true;
                 break;
             }
@@ -127,10 +129,15 @@ void Reservation_Station::add_entry (const uint16_t dst_uid, const InstClass ins
         // Check if source uid is found
         if (!src_uid_isKnown) {
             // Shift all operands right and insert new source.
-            ()
+            i = (i == ReservationStation_NUM_SOURCES) ? i-- : i;
             for (; i > 0; i--) {
-                
+                src_opr[i] = src_opr[i-1];
             }
+            // Add new source operand
+            src_opr[0].valid = true;
+            src_opr[0].src_uid = src_uid;
+            src_opr[0].value = src_value;
+            src_opr[0].updated = false;
         }
     } else {
         //entry.dest_uid = dst_uid;
