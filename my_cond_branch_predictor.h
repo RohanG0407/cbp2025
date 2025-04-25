@@ -2,6 +2,10 @@
 #define _PREDICTOR_H_
 
 #include <stdlib.h>
+#define GHR_SIZE 8  // 8-bit GHR (256 possible values)
+#define PHT_SIZE (1 << GHR_SIZE)  // 256 PHT rows
+#define NUM_CHAINS 4  // 4 possible dependency chains
+#define MAX_COUNTER 3  // Max value for counters (2-bit saturating counter)
 
 struct SampleHist
 {
@@ -14,7 +18,7 @@ struct SampleHist
       }
 };
 
-
+//Structure for branch table entry 
 
 struct BranchTableEntry
 {
@@ -23,8 +27,18 @@ struct BranchTableEntry
   uint64_t sat_counter;
   bool override_tage_pred;
   uint64_t st_table_index;
-  uint64_t dependence_chains[8];
+  uint64_t dependence_chains[4];
   uint64_t valid_chains;
+  bool direction_matched;    // true if the if_zero == predict_taken 
+  //For variant 2
+  uint32_t ghr = 0;  // Global History Register (shift register)
+  int pht[PHT_SIZE][NUM_CHAINS];
+  int actual_chain; // This points to the dependence chain actually used for prediction useful for updating.
+  //For TBZ TBNZ bit prediction 
+   uint64_t prev_value;     // Previous value tested
+   bool prev_taken;         // Previous branch outcome
+   uint64_t branch_bit_mask; // Mask with 1 at the branch bit
+   int bit_position;
 };
 
 struct RetireOp
@@ -33,22 +47,28 @@ struct RetireOp
   ExecuteInfo exec_info;
 };
 
+//Structure for store table entry
+
 struct StoreTableEntry
 {
   bool is_valid;
   bool is_zero;
   uint64_t pc;
-  bool predict_taken;
-  bool direction_matched; // true if the if_zero == predict_taken
+  bool predict_taken;   //Vineeth to do, move this to branch entry as well
+//  bool direction_matched; // true if the if_zero == predict_taken Rohan : direction_matched should be a feature of branch not store table as multiple branches might point to same store, but a particular branch will have fixed direction. 
   bool link_made;
+  uint64_t value;
 };
+
+//Structure for trigger table
 
 struct StoreChainEntry 
 {
   uint64_t tag;
   bool is_valid;
   bool predict_taken;
-  bool direction_matched;
+//  bool direction_matched;
+  uint64_t value;
 };
 
 
