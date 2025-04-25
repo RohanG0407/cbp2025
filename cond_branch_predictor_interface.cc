@@ -23,12 +23,6 @@
 #include <unordered_set>
 #include <deque>
 
-//
-// beginCondDirPredictor()
-// 
-// This function is called by the simulator before the start of simulation.
-// It can be used for arbitrary initialization steps for the contestant's code.
-//
 
 // Branch Table Info
 #define BT_SIZE 65535
@@ -39,6 +33,11 @@ std::unordered_set<uint64_t> high_mispred_pc;
 // RetireOp Queue
 std::deque<RetireOp> retire_op_queue;
 #define RETIRE_OP_QUEUE_SIZE 64
+
+uint64_t RegFile[66];
+uint64_t mispred_for_target = 0;
+
+bool DEBUG_MODE = false;
 
 #define NUM_UIDS 256
 #define NUM_SPECIFIC_MEM_ADDRESSES 1024
@@ -62,9 +61,12 @@ Producer_Consumer_Pairs_Memory prodCons_mem(NUM_SPECIFIC_MEM_ADDRESSES, prodCons
 // Trigger List
 Trigger_Buffer trig_buffer(80);
 
-bool DEBUG_MODE = false;
-
-uint64_t RegFile[66];
+//
+// beginCondDirPredictor()
+// 
+// This function is called by the simulator before the start of simulation.
+// It can be used for arbitrary initialization steps for the contestant's code.
+//
 void beginCondDirPredictor()
 {
     // setup sample_predictor
@@ -119,8 +121,6 @@ bool get_cond_dir_prediction(uint64_t seq_no, uint8_t piece, uint64_t pc, const 
 // after a prediction is made.
 // input values are unique identifying ids(seq_no, piece), PC of the instruction, instruction class, predicted/resolve direction and the next_pc 
 //
-
-uint64_t mispred_for_target = 0;
 void spec_update(uint64_t seq_no, uint8_t piece, uint64_t pc, InstClass inst_class, const bool resolve_dir, const bool pred_dir, const uint64_t next_pc)
 {
     assert(is_br(inst_class));
@@ -153,7 +153,8 @@ void spec_update(uint64_t seq_no, uint8_t piece, uint64_t pc, InstClass inst_cla
     {
         cbp2016_tage_sc_l.history_update(seq_no, piece, pc, br_type, pred_dir, resolve_dir, next_pc);
         //cond_predictor_impl.history_update(seq_no, piece, pc, resolve_dir, next_pc);
-        pred_table.learn_branch_type(pc, resolve_dir);
+        
+        //contestants are not allowed to update prediction tables using the actual branch outcome (“resolve_dir”, “next_pc”) supplied by spec_update()
     }
     else
     {
@@ -180,13 +181,6 @@ void notify_instr_decode(uint64_t seq_no, uint8_t piece, uint64_t pc, const Deco
 //
 void notify_agen_complete(uint64_t seq_no, uint8_t piece, uint64_t pc, const DecodeInfo& _decode_info, const uint64_t mem_va, const uint64_t mem_sz, const uint64_t agen_cycle)
 {
-  // uint64_t target_addr = 0xffffefd1e6d8;
-  // if(mem_va == target_addr) {
-  //   std::cout << "Target instruction at PC: 0x" << std::hex << pc << std::dec
-  //             << " | Cycle: " << agen_cycle
-  //             << " | " << _decode_info  // Use the overloaded operator<< for ExecuteInfo
-  //             << std::endl;
-  // }
 }
 
 //
@@ -223,9 +217,7 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
 // Along with the unique identifying ids(seq_no, piece), PC of the instruction, execute info and cycle are also provided as inputs
 //
 // For the sample predictor implementation, we do not leverage commit information
-
-
-uint64_t branch_inst_count = 0; // max to 1000
+int64_t branch_inst_count = 0; // max to 1000
 void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool pred_dir, const ExecuteInfo& _exec_info, const uint64_t commit_cycle)
 {
   // akhilesh - comment this block if commit instruction stream is not required
@@ -246,12 +238,6 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
         Of course this won't directly translate to hardware but a simple solution would be to have a 1-bit signal indicating if a PC is simultaneously the producer and consumer of a register.
         Or delay the update to producer PC by one cycle. Good luck doing this with multi-fetch architectures
     */
-  // if (pc == 0x402694) {
-  //   std::cout << "At pc - 0x" << std::hex << pc;
-  //   std::cout << " | #src_reg = " << _exec_info.dec_info.src_reg_info.size()
-  //             << ", src_reg[0] - " << _exec_info.dec_info.src_reg_info[0]
-  //             << ", src_reg[1] - " << _exec_info.dec_info.src_reg_info[1] << "\n";
-  // }
   for (int i = 0; i < _exec_info.dec_info.src_reg_info.size(); i++) {
     prodCons_reg.record_consumer(_exec_info.dec_info.src_reg_info[i], pc);
   }
@@ -348,7 +334,13 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
 
   // Record all stores
   if(_exec_info.dec_info.insn_class == InstClass::storeInstClass) {
-    st_table.record(_exec_info.mem_va.value(), pc);
+    uint64_t memVA = _exec_info.mem_va.value();
+    st_table.record(memVA, pc);
+
+    // if (memVA == 0xFFFFEFD1E6C8) {
+    //   std::cout << "INFO:: Recording store from pc: 0x" << std::hex << pc << "\n";
+    //   st_table.printState(memVA);
+    // }
   }
 
   // Update RetireOp Queue
@@ -371,6 +363,20 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
     }
   }
 
+  // // Update stupid trcSim variables to learn the branch bit
+  // if (is_cond_br(_exec_info.dec_info.insn_class) && pred_table.trcSim_is_predicted(pc)) {
+  //   pred_table.trcSim_update_branch_bit_state(pc, _exec_info.dec_info.src_reg_info[0]);
+  // }
+  if (is_cond_br(_exec_info.dec_info.insn_class)) {
+    const bool _resolve_dir = _exec_info.taken.value();
+    uint64_t src_reg = _exec_info.dec_info.src_reg_info[0];
+    uint64_t stored_value = RegFile[src_reg];
+    // if (pc == 0xFFFFF0D8F1D0)
+    //   std::cout << "INFO:: Num source operands = " << std::dec << _exec_info.dec_info.src_reg_info.size() << "\n";
+    pred_table.trcSim_learn_branch_bit(pc, stored_value, _resolve_dir);
+    pred_table.trcSim_learn_branch_type(pc, stored_value, _resolve_dir);
+  }
+
   // check if current PC is sought to learn the DFG
   if (seeker_buffer.exists(pc)) {
     //std::cout << "akhilesh - Learn DFG before current pc " << pc << "\n";
@@ -386,6 +392,9 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
       if (st_table.is_recorded(memVA)) {
         uint16_t uid_currPC = uid_map.get_uid(pc);
         
+        // if (memVA == 0xFFFFEFD1E6C8)
+        //   st_table.printState(memVA);
+
         uint64_t producerPC = st_table.get_pc(memVA);
         uint16_t uid_producerPC = uid_map.get_uid(producerPC);
 
@@ -445,7 +454,7 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
       if (trcSim_aluOp) {
         if (DEBUG_MODE) std::cout << "WARN:: Non load, Non cond. branch instruction detected at pc 0x" << std::hex << pc << ". This cannot be implemented on a trace based simulator. Deleting this DFG.\n";
         seeker_buffer.remove(pc);
-        pred_table.trcSim_infeasible(uid_map.get_uid(pc));
+        pred_table.trcSim_markInfeasible(uid_map.get_uid(pc));
       } else { // Start of trcSim_aluOp if-else block
 
       // Get all information regarding source registers
@@ -461,9 +470,9 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
         uid_producerPC_vector.push_back(uid_map.get_uid(producerPC));
         src_reg_value_vector.push_back(RegFile[src_reg]);
       }
-      // Assumption - at max 3 input registers. Else rethink the reservation Station
-      if (_exec_info.dec_info.src_reg_info.size() > 3)
-        if (DEBUG_MODE) std::cout << "ERROR:: Expected 3 or less input registers. " << _exec_info.dec_info.src_reg_info.size() << " detected for instruction at pc 0x" << std::hex << pc;
+      // Assumption - at max 5 input registers. Else rethink the reservation Station
+      if (_exec_info.dec_info.src_reg_info.size() > ReservationStation_NUM_SOURCES)
+        if (DEBUG_MODE) std::cout << "ERROR:: Expected " << std::dec << ReservationStation_NUM_SOURCES << " or less input registers. " << _exec_info.dec_info.src_reg_info.size() << " detected for instruction at pc 0x" << std::hex << pc;
 
       if (is_cond_br(_exec_info.dec_info.insn_class)) {
         if (DEBUG_MODE) std::cout << "INFO:: Cond. Branch instruction detected at pc 0x" << std::hex << pc << "\n";

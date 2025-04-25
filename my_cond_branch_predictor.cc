@@ -250,7 +250,7 @@ void Reservation_Station::printState_updated(bool DEBUG_MODE) {
 
     std::cout << "Reservation Station:\n";
     for (int i = 0; i < num_entries; i++) {
-        if (RS[i].valid and RS[i].any_update)
+        if (RS[i].valid && RS[i].any_update)
             printState_line(i);
     }
 }
@@ -314,36 +314,38 @@ void Prediction_Table::add_entry(uint64_t pc, uint16_t src_uid, uint64_t value) 
             entry.valid = false;
     }
 
-    prediction_table[wr_ptr].pc = pc;
-    prediction_table[wr_ptr].valid = 1;
-    prediction_table[wr_ptr].src_uid = src_uid;
-    prediction_table[wr_ptr].trcSim_zero_val = (value == 0);
+    auto& entry = prediction_table[wr_ptr];
+
+    entry.pc = pc;
+    entry.valid = 1;
+    entry.src_uid = src_uid;
+    //prediction_table[wr_ptr].trcSim_zero_val = (value == 0);
     //prediction_table[wr_ptr].brnz = false;  // This should ideally be trivial to know but is not possible in this trace based simulator.
-    prediction_table[wr_ptr].trcSim_infeasible = false;
+    entry.trcSim_infeasible = false;
+    entry.trcSim_prev_value = trcSim_STUPID_VALUE;
+    //entry.src_value = value; --> updated by receive_broadcast()
+    //entry.trcSim_prev_resolveDir --> updated by trcSim_learn_branch_bit()
+    entry.trcSim_branch_bit_mask = UINT_64_T_MAX_VALUE;
 
     wr_ptr++;
     wr_ptr = (wr_ptr == num_entries) ? 0 : wr_ptr;
-}
-
-void Prediction_Table::learn_branch_type(uint64_t pc, bool taken) {
-    for (int i = 0; i < num_entries; i++) {
-        PredictionTable_Entry& entry = prediction_table[i];
-        if (entry.valid && entry.pc == pc)
-            entry.brnz = entry.trcSim_zero_val ^ taken;
-    }
 }
 
 void Prediction_Table::receive_broadcast(uint16_t src_uid, uint64_t value) {
     bool any_update_inTable = false;
 
     for (int i = 0; i < num_entries; i++) {
-        if (!prediction_table[i].valid)
+        auto& entry = prediction_table[i];
+        if (!entry.valid)
             continue;
 
-        if(prediction_table[i].src_uid == src_uid) {
-            prediction_table[i].trcSim_zero_val == (value == 0);
-            prediction_table[i].prediction = (value == 0) ^ prediction_table[i].brnz;
+        if(entry.src_uid == src_uid) {
+            //entry.trcSim_zero_val == (value == 0);
+            //entry.prediction = (value == 0) ^ entry.brnz;
             any_update_inTable = true;
+            //std::cout << "Updating state for src_uid: " << std::dec << src_uid << "\n";
+            entry.src_value = value;
+            entry.prediction = ((value & entry.trcSim_branch_bit_mask) == 0) ^ entry.brnz;
         }
     }
 
@@ -364,41 +366,92 @@ void Prediction_Table::printState(bool DEBUG_MODE) {
     if (!DEBUG_MODE)
         return;
 
-    std::cout << "Prediction Table:\n";
+    std::cout << "Prediction Table: (Write Ptr: " << std::dec << wr_ptr << ")\n";
     for (int i = 0; i < num_entries; i++) {
         if (prediction_table[i].valid)
             std::cout << "\tBr. PC: 0x" << std::hex << prediction_table[i].pc
                         << " | Src. uid: " << std::dec << prediction_table[i].src_uid
                         << " | Pred: " << prediction_table[i].prediction
                         << " | BRnz: " << prediction_table[i].brnz
-                        << " | Zero_value: " << prediction_table[i].trcSim_zero_val
-                        << " | Infeasible: " << prediction_table[i].trcSim_infeasible << "\n";
+                        //<< " | Zero_value: " << prediction_table[i].trcSim_zero_val
+                        << " | Infeasible: " << prediction_table[i].trcSim_infeasible
+                        << " | Branch Bit: 0x" << std::hex << prediction_table[i].trcSim_branch_bit_mask << "\n";
     }
 }
 
-void Prediction_Table::trcSim_infeasible (uint16_t src_uid) {
+void Prediction_Table::trcSim_markInfeasible (uint16_t src_uid) {
     for (int i = 0; i < num_entries; i++) {
         if (prediction_table[i].valid && prediction_table[i].src_uid == src_uid)
-        prediction_table[i].trcSim_infeasible = true;
+            prediction_table[i].trcSim_infeasible = true;
     }
 }
 
+void Prediction_Table::trcSim_learn_branch_bit(uint64_t pc, uint64_t value, bool taken) {
+    // if (pc == 0xFFFFF0D8F1D0)
+    //     std::cout << "INFO:: Got resolve_dir for pc: 0x" << std::hex << pc
+    //             << " | Value: 0x" << std::hex << value
+    //             << " | Branch: " << taken << "\n";
+    
+    uint64_t trcSim_curr_value;
+    for (int i = 0; i < num_entries; i++) {
+        PredictionTable_Entry& entry = prediction_table[i];
+        if (entry.valid && entry.pc == pc) {
+            //trcSim_curr_value = entry.trcSim_curr_value;
+            trcSim_curr_value = value;
+            if (entry.trcSim_prev_value == trcSim_STUPID_VALUE) {
+                // if (pc == 0xFFFFF0D8F1D0)
+                //     std::cout << "INFO:: Found entry. First visit\n";
+                entry.trcSim_prev_value = trcSim_curr_value;
+                entry.trcSim_prev_resolveDir = taken;
+            } else {
+                uint64_t changed_bits = entry.trcSim_prev_value ^ trcSim_curr_value;
+                uint64_t unchanged_bits = ~changed_bits;
 
-// uint64_t Producer_Consumer_Pairs_Memory::hash(const uint64_t ip_num) {
-//     return ip_num; // Don't  hash. Use the full address.
+                bool curr_resolveDir = taken;
+                uint64_t branch_bit_mask = (curr_resolveDir == entry.trcSim_prev_resolveDir)
+                                                ?   unchanged_bits
+                                                :   changed_bits;
+                
+                // if (pc == 0xFFFFF0D8F1D0 && entry.trcSim_branch_bit_mask != 0)
+                //     std::cout << "Prev. Val: 0x" << std::hex << entry.trcSim_prev_value
+                //             << " | Curr. Val: 0x" << trcSim_curr_value
+                //             << " | Prev. Dir: " << std::dec << entry.trcSim_prev_resolveDir
+                //             << " | Curr. Dir: " << taken
+                //             << " | Bit Mask: 0x" << std::hex << entry.trcSim_branch_bit_mask
+                //             << " | Incr. Mask: 0x" << branch_bit_mask << "\n";
 
-//     uint64_t index_width = static_cast<int>(std::log2(num_entries));
-//     uint64_t mask = (1 << index_width) - 1;
+                entry.trcSim_branch_bit_mask &= branch_bit_mask;
+                
+                // State update
+                entry.trcSim_prev_value = trcSim_curr_value;
+                entry.trcSim_prev_resolveDir = curr_resolveDir;
+            }
+            break;
+        }
+    }
+}
 
-//     uint64_t remaining_num = ip_num >> 3; // Ignore the lower 3 bits
-//     uint64_t hashed_num = 0;
-//     while (remaining_num != 0) {
-//         hashed_num = hashed_num ^ (remaining_num & mask);
-//         remaining_num = remaining_num >> index_width;
+void Prediction_Table::trcSim_learn_branch_type(uint64_t pc, uint64_t value, bool taken) {
+    for (int i = 0; i < num_entries; i++) {
+        PredictionTable_Entry& entry = prediction_table[i];
+        if (entry.valid && entry.pc == pc)
+            //entry.brnz = entry.trcSim_zero_val ^ taken;
+            entry.brnz = ((value & entry.trcSim_branch_bit_mask) == 0) ^ taken;
+    }
+}
+
+// void Prediction_Table::trcSim_update_branch_bit_state(uint64_t pc, uint64_t value) {
+//     //std::cout << "INFO:: Updating state for pc: 0x" << std::hex << pc << "\n";
+
+//     for (int i = 0; i < num_entries; i++) {
+//         PredictionTable_Entry& entry = prediction_table[i];
+//         if (entry.valid && entry.pc == pc) {
+//             entry.trcSim_prev_value = entry.trcSim_curr_value;
+//             entry.trcSim_curr_value = value;
+//         }
 //     }
-
-//     return hashed_num;
 // }
+
 
 Producer_Consumer_Pairs_Memory::Producer_Consumer_Pairs_Memory (uint16_t num_entries, uint64_t hashedVA_width) {
     this->num_entries = num_entries;
@@ -670,6 +723,16 @@ uint64_t Store_Table::get_pc(uint64_t memVA) {
     uint64_t index = hash(memVA, index_width);
     return ST_Table[index].producer_pc;
 }
+
+void Store_Table::printState(uint64_t memVA) {
+    uint64_t index = hash(memVA, index_width);
+    std::cout << "Store Table:\n";
+    std::cout << "\tmemVA: 0x" << std::hex << memVA
+            << " | hash: 0x" << index
+            << " | vld: " << ST_Table[index].valid
+            << " | store PC: 0x" << ST_Table[index].producer_pc << "\n";
+}
+
 
 // SampleCondPredictor::SampleCondPredictor (void)
 // {

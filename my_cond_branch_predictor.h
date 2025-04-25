@@ -7,6 +7,8 @@
 #include "lib/sim_common_structs.h"
 
 #define ReservationStation_NUM_SOURCES 5
+#define trcSim_STUPID_VALUE 0x00DABBA000F00100
+#define UINT_64_T_MAX_VALUE 0xFFFFFFFFFFFFFFFF
 
 extern bool DEBUG_MODE;
 
@@ -44,7 +46,7 @@ struct StoreTableEntry
 
 struct Store_Table_Entry {
     bool valid;
-    bool producer_pc;
+    uint64_t producer_pc;
 };
 
 struct PC_UID_Map_Entry {
@@ -68,10 +70,14 @@ struct PredictionTable_Entry {
     uint64_t pc;
     bool valid;
     uint16_t src_uid;
-    bool trcSim_zero_val;
+    bool src_value;
     bool brnz;
     bool prediction;
     bool trcSim_infeasible;
+    uint64_t trcSim_prev_value;
+    uint64_t trcSim_curr_value;
+    bool trcSim_prev_resolveDir;
+    uint64_t trcSim_branch_bit_mask;
 };
 
 struct Source_Field {
@@ -146,12 +152,14 @@ class Prediction_Table
         bool is_learnt(uint64_t pc);
         bool trcSim_is_predicted(uint64_t pc);
         void add_entry(uint64_t pc, uint16_t src_uid, uint64_t value);
-        void learn_branch_type(uint64_t pc, bool taken);
         void receive_broadcast(uint16_t src_uid, uint64_t value);
         bool get_prediction(uint64_t pc);
         void printState(bool DEBUG_MODE);
 
-        void trcSim_infeasible(uint16_t src_uid);
+        void trcSim_markInfeasible(uint16_t src_uid);
+        void trcSim_learn_branch_bit(uint64_t pc, uint64_t value, bool taken);
+        void trcSim_learn_branch_type(uint64_t pc, uint64_t value, bool taken);
+        void trcSim_update_branch_bit_state(uint64_t pc, uint64_t value);
 };
 
 class Producer_Consumer_Pairs_Memory
@@ -243,6 +251,7 @@ class Store_Table {
         void record (uint64_t memVA, uint64_t pc);
         bool is_recorded(uint64_t memVA);
         uint64_t get_pc(uint64_t memVA);
+        void printState(uint64_t memVA);
 };
 
 // class SampleCondPredictor
