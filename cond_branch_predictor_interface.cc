@@ -26,8 +26,9 @@
 
 #include "lib/my_addr_predictor.h"
 
-#define DEBUG_FLAG false
-#define LV_DEBUG_FLAG false
+#define DEBUG_FLAG true
+#define LV_DEBUG_FLAG true
+#define PERFECT_ADDR_PRED true
 
 //
 // beginCondDirPredictor()
@@ -131,13 +132,14 @@ void beginCondDirPredictor()
 // This function is called when any instructions(not just branches) gets fetched.
 // Along with the unique identifying ids(seq_no, piece), PC of the instruction and fetch_cycle are also provided as inputs
 //
-void notify_instr_fetch(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t fetch_cycle)
+void notify_instr_fetch(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t fetch_cycle, uint64_t load_addr)
 {
   uint64_t predicted_addr = 0xdeadbeef;
   uint64_t load_pc_index = pc & 0xFFFF;
   uint64_t load_tag = (pc & 0xFFF0000) >> 16;
   if(load_table[load_pc_index].tag == load_tag && load_table[load_pc_index].valid) {
-    predicted_addr = load_table[load_pc_index].last_addr + load_table[load_pc_index].stride;
+    if(PERFECT_ADDR_PRED) predicted_addr = load_addr;
+    else predicted_addr = load_table[load_pc_index].last_addr + load_table[load_pc_index].stride;
     uint64_t branch_pc = load_table[load_pc_index].br_pc;
     uint64_t branch_pc_index = branch_pc & 0xFFFF;
     uint64_t branch_tag = (branch_pc & 0xFFF0000) >> 16;
@@ -287,12 +289,12 @@ void notify_instr_decode(uint64_t seq_no, uint8_t piece, uint64_t pc, const Deco
 //
 void notify_agen_complete(uint64_t seq_no, uint8_t piece, uint64_t pc, const DecodeInfo& _decode_info, const uint64_t mem_va, const uint64_t mem_sz, const uint64_t agen_cycle)
 {
-  uint64_t target_addr = 0xfffff0d8f180;
-  uint64_t load_addr = mem_va;
-  uint64_t load_addr_index = load_addr & 0xFFFF;
-  uint64_t load_addr_tag = (load_addr & 0xFFF0000) >> 16;
 
-  if(pc == target_addr) {
+  if(pc == 0xfffff0d8f180 || pc == 0xfffff0d8f284) {
+    uint64_t target_pc = pc;
+    uint64_t load_addr = mem_va;
+    uint64_t load_addr_index = load_addr & 0xFFFF;
+    uint64_t load_addr_tag = (load_addr & 0xFFF0000) >> 16;
     if(prediction_table[load_addr_index].tag == load_addr_tag) {
       if(DEBUG_FLAG) {
         std::cout << "Target Load: Sequence Number: " << seq_no
@@ -307,6 +309,59 @@ void notify_agen_complete(uint64_t seq_no, uint8_t piece, uint64_t pc, const Dec
           << " | Address: 0x" << std::hex << load_addr << std::dec
           << " | Taken: Unknown" << std::endl;
       }
+    }
+  }
+
+  if(_decode_info.insn_class == InstClass::storeInstClass) {
+    uint64_t src_reg_data_idx = 0;
+    if(_decode_info.src_reg_info.size() == 3) {
+      src_reg_data_idx = _decode_info.src_reg_info[2];
+    } else if(_decode_info.src_reg_info.size() == 2){
+      src_reg_data_idx = _decode_info.src_reg_info[1];
+    } else {
+      assert(_decode_info.src_reg_info.size());
+    }
+    uint64_t dest_val = RegFile[src_reg_data_idx];
+
+    uint64_t store_addr = mem_va;
+    uint64_t store_addr_index = store_addr & 0xFFFF;
+    uint64_t store_addr_tag = (store_addr & 0xFFF0000) >> 16;
+
+    uint64_t store_pc = pc;
+    uint64_t store_pc_index = store_pc & 0xFFFF;
+    uint64_t store_pc_tag = (store_pc & 0xFFF0000) >> 16;
+    // check if in trigger table
+    if(trigger_table[store_pc_index].tag == store_pc_tag) {
+      // check if the value is in the trigger table
+      trigger_table[store_pc_index].value = dest_val;
+      trigger_table[store_pc_index].addr = store_addr;
+      
+      // if in the trigger table, update the prediction table
+      prediction_table[store_addr_index].tag = store_addr_tag;
+      if(trigger_table[store_pc_index].br_type == CBZ) {
+        prediction_table[store_addr_index].taken = (dest_val == 0) ? true : false;
+      } else if(trigger_table[store_pc_index].br_type == CBNZ) {
+        prediction_table[store_addr_index].taken = (dest_val != 0) ? true : false;
+      }
+      if(DEBUG_FLAG) {
+        std::cout << "Trigger Store: Sequence Number: " << seq_no;
+        std::cout << " | PC 0x:" << std::hex << pc  << " | Value: 0x" << std::hex << trigger_table[store_pc_index].value << std::dec 
+                  << " | Addr: 0x" << std::hex << trigger_table[store_pc_index].addr << std::dec 
+                  << " | BranchType: " << trigger_table[store_pc_index].br_type 
+                  << " | Stored Prediction: " << prediction_table[store_addr_index].taken << std::endl;
+      }
+    }
+
+    
+    if(store_table[store_addr_index].tag == store_addr_tag) {
+      // check if the value is in the store table
+      store_table[store_addr_index].pc = store_pc;
+      store_table[store_addr_index].value = dest_val;
+    } else {
+      // add to the store table
+      store_table[store_addr_index].tag = store_addr_tag;
+      store_table[store_addr_index].pc = store_pc;
+      store_table[store_addr_index].value = dest_val;
     }
   }
 
@@ -367,60 +422,6 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
             assert(pred_dir);
         }
     }
-
-    if(_exec_info.dec_info.insn_class == InstClass::storeInstClass) {
-      
-      uint64_t src_reg_data_idx = 0;
-      if(_exec_info.dec_info.src_reg_info.size() == 3) {
-        src_reg_data_idx = _exec_info.dec_info.src_reg_info[2];
-      } else if(_exec_info.dec_info.src_reg_info.size() == 2){
-        src_reg_data_idx = _exec_info.dec_info.src_reg_info[1];
-      } else {
-        assert(_exec_info.dec_info.src_reg_info.size());
-      }
-      uint64_t dest_val = RegFile[src_reg_data_idx];
-
-      uint64_t store_addr = _exec_info.mem_va.value();
-      uint64_t store_addr_index = store_addr & 0xFFFF;
-      uint64_t store_addr_tag = (store_addr & 0xFFF0000) >> 16;
-
-      uint64_t store_pc = pc;
-      uint64_t store_pc_index = store_pc & 0xFFFF;
-      uint64_t store_pc_tag = (store_pc & 0xFFF0000) >> 16;
-      // check if in trigger table
-      if(trigger_table[store_pc_index].tag == store_pc_tag) {
-        // check if the value is in the trigger table
-        trigger_table[store_pc_index].value = dest_val;
-        trigger_table[store_pc_index].addr = store_addr;
-        
-        // if in the trigger table, update the prediction table
-        prediction_table[store_addr_index].tag = store_addr_tag;
-        if(trigger_table[store_pc_index].br_type == CBZ) {
-          prediction_table[store_addr_index].taken = (dest_val == 0) ? true : false;
-        } else if(trigger_table[store_pc_index].br_type == CBNZ) {
-          prediction_table[store_addr_index].taken = (dest_val != 0) ? true : false;
-        }
-        if(DEBUG_FLAG) {
-          std::cout << "Trigger Store: Sequence Number: " << seq_no;
-          std::cout << " | PC 0x:" << std::hex << pc  << " | Value: 0x" << std::hex << trigger_table[store_pc_index].value << std::dec 
-                    << " | Addr: 0x" << std::hex << trigger_table[store_pc_index].addr << std::dec 
-                    << " | BranchType: " << trigger_table[store_pc_index].br_type 
-                    << " | Stored Prediction: " << prediction_table[store_addr_index].taken << std::endl;
-        }
-      }
-
-      
-      if(store_table[store_addr_index].tag == store_addr_tag) {
-        // check if the value is in the store table
-        store_table[store_addr_index].pc = store_pc;
-        store_table[store_addr_index].value = dest_val;
-      } else {
-        // add to the store table
-        store_table[store_addr_index].tag = store_addr_tag;
-        store_table[store_addr_index].pc = store_pc;
-        store_table[store_addr_index].value = dest_val;
-      }
-    }
 }
 
 //
@@ -476,6 +477,9 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
         for(int i = 0; i < 8 && i < retire_op_queue.size(); i++) {
           RetireOp retire_op = retire_op_queue[i];
           //std::cout << "PC: 0x" << std::hex << retire_op.pc << std::dec << " | " << retire_op.exec_info << std::endl;
+          if(!(retire_op.exec_info.dec_info.dst_reg_info.has_value())) {
+            continue;
+          }
           uint64_t dest_reg_idx = retire_op.exec_info.dec_info.dst_reg_info.value();
           // check if branch register is same as load producing register
           if(dest_reg_idx == _exec_info.dec_info.src_reg_info[0]) {
