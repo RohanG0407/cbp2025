@@ -151,6 +151,7 @@ struct ExecuteInfo
     {
         os<<"{ DecodeInfo:"<<exec_info.dec_info;
         os<<" mem_va:0x"<<std::hex<<exec_info.mem_va.value_or(0xFFFFFFFFFFFFFFFF)<<std::dec;
+        if(exec_info.taken.has_value()) os <<" taken:"<<std::boolalpha<<exec_info.taken.value();
         os<<" mem_sz:0x"<<std::hex<<exec_info.mem_sz.value_or(0xFFFFFFFFFFFFFFFF)<<std::dec;
         os<<" dst_reg_value:0x"<<std::hex<<exec_info.dst_reg_value.value_or(0xFFFFFFFFFFFFFFFF)<<std::dec;
         os<<" }";

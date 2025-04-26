@@ -14,41 +14,52 @@ struct SampleHist
       }
 };
 
+enum BranchType
+{
+  CBZ,
+  CBNZ,
+};
+
 
 
 struct BranchTableEntry
 {
   uint64_t tag;
   uint64_t src_reg;
-  uint64_t sat_counter;
+  uint64_t sat_ctr;
   bool override_tage_pred;
-  uint64_t st_table_index;
-  uint64_t dependence_chains[8];
-  uint64_t valid_chains;
+  uint64_t store_triggers[8];
+  uint64_t num_triggers;
+  bool is_linked;
+  BranchType br_type;
+  uint64_t predicted_load_addr;
+};
+
+struct StoreTableEntry
+{
+  uint64_t tag;
+  uint64_t pc;
+  uint64_t value;
+};
+
+struct TriggerTableEntry 
+{
+  uint64_t tag;
+  uint64_t value;
+  uint64_t addr;
+  BranchType br_type;
+};
+
+struct PredictionTableEntry
+{
+  uint64_t tag;
+  bool taken;
 };
 
 struct RetireOp
 {
   uint64_t pc;
   ExecuteInfo exec_info;
-};
-
-struct StoreTableEntry
-{
-  bool is_valid;
-  bool is_zero;
-  uint64_t pc;
-  bool predict_taken;
-  bool direction_matched; // true if the if_zero == predict_taken
-  bool link_made;
-};
-
-struct StoreChainEntry 
-{
-  uint64_t tag;
-  bool is_valid;
-  bool predict_taken;
-  bool direction_matched;
 };
 
 
