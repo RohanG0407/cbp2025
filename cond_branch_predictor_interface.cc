@@ -26,8 +26,8 @@
 
 #include "lib/my_addr_predictor.h"
 
-#define DEBUG_FLAG true
-#define LV_DEBUG_FLAG true
+#define DEBUG_FLAG false
+#define LV_DEBUG_FLAG false
 #define PERFECT_ADDR_PRED true
 
 //
