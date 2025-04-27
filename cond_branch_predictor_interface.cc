@@ -45,6 +45,8 @@ bool DEBUG_MODE = false;
 const uint64_t prodCons_mem_hashedVA_wdith = 10;
 // Store table to record every store which comes. 
 Store_Table st_table(65536);  // 2^16 entries
+// Cache for data stored by critical store instructions
+Store_Cache st_cache(65536);
 // Seeker Buffer - An unordered list of PCs from where we need to build the DFG backwards
 Seeker_Buffer seeker_buffer;
 // PC -> uid mapping
@@ -60,6 +62,8 @@ Reservation_Station reservation_station(NUM_UIDS);  // Each dest_uid can have mu
 Producer_Consumer_Pairs_Memory prodCons_mem(NUM_SPECIFIC_MEM_ADDRESSES, prodCons_mem_hashedVA_wdith);
 // Trigger List
 Trigger_Buffer trig_buffer(80);
+// A trigger table to start from load instruction
+Load_Pattern_Table ld_pattern_table(80);
 
 //
 // beginCondDirPredictor()
@@ -336,6 +340,9 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
   if(_exec_info.dec_info.insn_class == InstClass::storeInstClass) {
     uint64_t memVA = _exec_info.mem_va.value();
     st_table.record(memVA, pc);
+    // uint64_t src_reg = _exec_info.dec_info.src_reg_info[1];
+    // uint64_t stored_value = RegFile[src_reg];
+    // st_table.record(memVA, stored_value);
 
     // if (memVA == 0xFFFFEFD1E6C8) {
     //   std::cout << "INFO:: Recording store from pc: 0x" << std::hex << pc << "\n";
@@ -397,6 +404,9 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
 
         uint64_t producerPC = st_table.get_pc(memVA);
         uint16_t uid_producerPC = uid_map.get_uid(producerPC);
+        if (pc == 0xfffff0d8f284)
+          std::cout << "INFO:: Last producer pc: 0x" << std::hex << producerPC
+                  << " | memVA: 0x" << memVA << "\n";
 
         uint64_t src_value = _exec_info.dst_reg_value.value();
       
@@ -518,7 +528,20 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
   if (is_store(_exec_info.dec_info.insn_class)) {
     uint64_t src_reg = _exec_info.dec_info.src_reg_info[1];
     uint64_t stored_value = RegFile[src_reg];
-    trig_buffer.trigger(pc, stored_value, reservation_station, pred_table);
+    // if (pc == 0xfffff0d8f1a4 || pc == 0xfffff0d8f23c || pc == 0xfffff0d8f158)
+    //   std::cout << "Triggering from store pc: 0x" << std::hex << pc << " | MemVA: 0x" << _exec_info.mem_va.value() << "\n";
+    // trig_buffer.trigger(pc, stored_value, reservation_station, pred_table);
+
+    // This can't go in notify_agen_complete() because we don't know correct value of register at that time.
+    if (uid_map.is_mapped(pc)) { // This store exists on the critical path
+      uint64_t memVA = _exec_info.mem_va.value();
+      st_cache.record(memVA, stored_value);
+    }
+  }
+
+  // This can probably go in notify_agen_complete() but keeping it ensure the correct load address is used downstream
+  if (is_load(_exec_info.dec_info.insn_class) && uid_map.is_mapped(pc)) { // This load exists on the critical path
+    reservation_station.
   }
 }
 

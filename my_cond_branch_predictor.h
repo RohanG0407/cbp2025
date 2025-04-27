@@ -37,16 +37,14 @@ struct RetireOp
   ExecuteInfo exec_info;
 };
 
-struct StoreTableEntry
-{
-  bool is_valid;
-  bool is_zero;
-  uint64_t pc;
-};
-
 struct Store_Table_Entry {
     bool valid;
     uint64_t producer_pc;
+    //uint64_t value;
+};
+
+struct Store_Cache_Entry {
+    uint64_t value;
 };
 
 struct PC_UID_Map_Entry {
@@ -78,6 +76,7 @@ struct PredictionTable_Entry {
     uint64_t trcSim_curr_value;
     bool trcSim_prev_resolveDir;
     uint64_t trcSim_branch_bit_mask;
+    uint64_t trcSim_compareValue;
 };
 
 struct Source_Field {
@@ -229,6 +228,7 @@ class PC_UID_Map
         PC_UID_Map (uint16_t num_entries);
         ~PC_UID_Map ();
         uint16_t get_uid(uint64_t pc);
+        bool is_mapped(uint64_t pc);
 };
 
 class Seeker_Buffer {
@@ -238,6 +238,17 @@ class Seeker_Buffer {
         void remove(uint64_t elem);
         bool exists(uint64_t elem);
         void printState(bool DEBUG_MODE);
+};
+
+// Direct mapped for now
+class Store_Cache {
+        Store_Cache_Entry* ST_Cache;
+        uint64_t num_entries;
+        uint64_t index_width;
+    public:
+    Store_Cache(uint64_t num_entries);
+    ~Store_Cache();
+    void record(uint64_t memVA, uint64_t value);
 };
 
 // From Memory Address to PC

@@ -236,7 +236,7 @@ void Reservation_Station::printState(bool DEBUG_MODE, uint16_t uid) {
     //    }
     //}
     if (RS[uid].valid) {
-	any_entryForUID = true;
+	    any_entryForUID = true;
         printState_line(uid);
     }
 
@@ -345,7 +345,8 @@ void Prediction_Table::receive_broadcast(uint16_t src_uid, uint64_t value) {
             any_update_inTable = true;
             //std::cout << "Updating state for src_uid: " << std::dec << src_uid << "\n";
             entry.src_value = value;
-            entry.prediction = ((value & entry.trcSim_branch_bit_mask) == 0) ^ entry.brnz;
+            //entry.prediction = ((value & entry.trcSim_branch_bit_mask) == 0) ^ entry.brnz;
+            entry.prediction = ((value & entry.trcSim_branch_bit_mask) == entry.trcSim_compareValue) ^ entry.brnz;
         }
     }
 
@@ -421,6 +422,14 @@ void Prediction_Table::trcSim_learn_branch_bit(uint64_t pc, uint64_t value, bool
                 //             << " | Incr. Mask: 0x" << branch_bit_mask << "\n";
 
                 entry.trcSim_branch_bit_mask &= branch_bit_mask;
+
+                branch_bit_mask = entry.trcSim_branch_bit_mask;
+                /* Idea : Where the bit mask is '1', some bits in the value could be 0 and some could be 1
+                    For example the bits corresponding to the bitmask could be 011 or 100. Store one of these as type A (there can only be 2 types). With this learn the branch to be type P or Q.
+                */
+                uint64_t label_A_compareValue =  ~trcSim_curr_value & branch_bit_mask; // Boolean eqaution to get candidate branch-bits of the current value that are 0
+                uint64_t label_B_compareValue = trcSim_curr_value & branch_bit_mask; // Boolean eqaution to get candidate branch-bits of the current value that are 1
+                entry.trcSim_compareValue = (label_A_compareValue < label_B_compareValue) ? label_A_compareValue : label_B_compareValue; // Select the minimum of these values to store. Assume this corresponds to 
                 
                 // State update
                 entry.trcSim_prev_value = trcSim_curr_value;
@@ -436,7 +445,8 @@ void Prediction_Table::trcSim_learn_branch_type(uint64_t pc, uint64_t value, boo
         PredictionTable_Entry& entry = prediction_table[i];
         if (entry.valid && entry.pc == pc)
             //entry.brnz = entry.trcSim_zero_val ^ taken;
-            entry.brnz = ((value & entry.trcSim_branch_bit_mask) == 0) ^ taken;
+            //entry.brnz = ((value & entry.trcSim_branch_bit_mask) == 0) ^ taken;
+            entry.brnz = ((value & entry.trcSim_branch_bit_mask) == entry.trcSim_compareValue) ^ taken;
     }
 }
 
@@ -669,6 +679,16 @@ uint16_t PC_UID_Map::get_uid(uint64_t pc) {
     }
 }
 
+bool PC_UID_Map::is_mapped(uint64_t pc) {
+    for (uint16_t uid = 0; uid < num_entries; uid++) {
+        auto entry = PC_UID_Map_Table[uid];
+
+        if (entry.valid && entry.pc == pc)
+            return true;
+    }
+    return false;
+}
+
 
 void Seeker_Buffer::insert(uint64_t elem) {
     seeker_buffer.insert(elem);
@@ -692,6 +712,24 @@ void Seeker_Buffer::printState(bool DEBUG_MODE) {
     }
 }
 
+
+Store_Cache::Store_Cache (uint64_t num_entries) {
+    this->num_entries = num_entries;
+    this->index_width = static_cast<int>(std::log2(num_entries));
+    ST_Cache = new Store_Cache_Entry[num_entries];
+}
+
+Store_Cache::~Store_Cache() {
+    if (ST_Cache)
+        delete[] ST_Cache;
+}
+
+void Store_Cache::record(uint64_t memVA, uint64_t value) {
+    uint64_t index = hash(memVA, index_width);\
+    ST_Cache[index].value = value;
+}
+
+
 Store_Table::Store_Table (uint64_t num_entries) {
     this->num_entries = num_entries;
     this->index_width = static_cast<int>(std::log2(num_entries));
@@ -712,6 +750,7 @@ void Store_Table::record (uint64_t memVA, uint64_t pc) {
     uint64_t index = hash(memVA, index_width);
     ST_Table[index].valid = true;
     ST_Table[index].producer_pc = pc;
+    //ST_Table[index].value = value;
 }
 
 bool Store_Table::is_recorded(uint64_t memVA) {
@@ -722,6 +761,7 @@ bool Store_Table::is_recorded(uint64_t memVA) {
 uint64_t Store_Table::get_pc(uint64_t memVA) {
     uint64_t index = hash(memVA, index_width);
     return ST_Table[index].producer_pc;
+    //return ST_Table[index].value;
 }
 
 void Store_Table::printState(uint64_t memVA) {
