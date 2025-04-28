@@ -14,55 +14,6 @@ struct SampleHist
       }
 };
 
-enum BranchType
-{
-  CBZ,
-  CBNZ,
-};
-
-
-
-struct BranchTableEntry
-{
-  uint64_t tag;
-  uint64_t src_reg;
-  uint64_t sat_ctr;
-  bool override_tage_pred;
-  uint64_t store_triggers[8];
-  uint64_t num_triggers;
-  bool is_linked;
-  BranchType br_type;
-  uint64_t predicted_load_addr;
-};
-
-struct StoreTableEntry
-{
-  uint64_t tag;
-  uint64_t pc;
-  uint64_t value;
-};
-
-struct TriggerTableEntry 
-{
-  uint64_t tag;
-  uint64_t value;
-  uint64_t addr;
-  BranchType br_type;
-};
-
-struct PredictionTableEntry
-{
-  uint64_t tag;
-  bool taken;
-};
-
-struct RetireOp
-{
-  uint64_t pc;
-  ExecuteInfo exec_info;
-};
-
-
 class SampleCondPredictor
 {
         SampleHist active_hist;
