@@ -32,31 +32,25 @@
 #define STUPID_VALUE 8898
 
 // Branch Table Info
-#define BT_SIZE 65535
-#define BT_SAT_COUNTER_MAX 31
 BranchTableEntry branch_table[BT_SIZE]; // 2^16 entries - 1
 std::unordered_set<uint64_t> high_mispred_pc;
 
 // Store Table Info
-#define ST_SIZE 65535
 StoreTableEntry store_table[ST_SIZE]; // 2^16 entries - 1
 
 // Store Chain Info
-#define SC_SIZE 65535
 TriggerTableEntry trigger_table[SC_SIZE]; // 2^16 entries - 1
 
 // Prediction Table Info
-#define PT_SIZE 65535
 PredictionTableEntry prediction_table[PT_SIZE]; // 2^16 entries - 1
 
 // Value Predictor Load Table
-#define LT_SIZE 65535
 LoadTableEntry load_table[LT_SIZE]; // 2^16 entries - 1
 std::unordered_map<uint64_t, SpeculativeInfo> speculation_map;
+LinkTable link_table[LT_SIZE];
 
 // RetireOp Queue
 std::deque<RetireOp> retire_op_queue;
-#define RETIRE_OP_QUEUE_SIZE 64
 
 // Register File
 uint64_t RegFile[66];
@@ -70,6 +64,12 @@ void beginLoadAddrPredictor() {
     load_table[i].stride = 0;
     load_table[i].state = INVALID;
     load_table[i].inflight_loads = 0;
+    load_table[i].addr_history_reg = 0;
+    load_table[i].confidence_ctr = 0;
+  }
+
+  for(int i = 0; i < LT_SIZE; i++) {
+    link_table[i].address = 0;
   }
 }
 
@@ -144,6 +144,9 @@ void predictLoadAddr(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t
   uint64_t predicted_addr = 0xdeadbeef;
   uint64_t load_pc_index = pc & 0xFFFF;
   uint64_t load_tag = (pc & 0xFFF0000) >> 16;
+  uint64_t branch_pc = load_table[load_pc_index].br_pc;
+  uint64_t branch_pc_index = branch_pc & 0xFFFF;
+  uint64_t branch_tag = (branch_pc & 0xFFF0000) >> 16;
   if(load_table[load_pc_index].tag == load_tag) {
     if(PERFECT_ADDR_PRED) {
       predicted_addr = oracle_load_addr;
@@ -152,18 +155,28 @@ void predictLoadAddr(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t
       uint64_t branch_tag = (branch_pc & 0xFFF0000) >> 16;
       branch_table[branch_pc_index].predicted_load_addr = predicted_addr;
       return;
-    } 
-    if(load_table[load_pc_index].state == VALID) {
+    }
+    if(load_table[load_pc_index].state == VALID_STRIDE) {
       if(PERFECT_ADDR_PRED) predicted_addr = oracle_load_addr;
       else predicted_addr = load_table[load_pc_index].last_addr + load_table[load_pc_index].stride;
-      uint64_t branch_pc = load_table[load_pc_index].br_pc;
-      uint64_t branch_pc_index = branch_pc & 0xFFFF;
-      uint64_t branch_tag = (branch_pc & 0xFFF0000) >> 16;
       branch_table[branch_pc_index].predicted_load_addr = predicted_addr;
       speculation_map[seq_no] = { seq_no, pc, predicted_addr, true};
       load_table[load_pc_index].last_addr = predicted_addr;
       load_table[load_pc_index].inflight_loads += 1;
       
+      if(LV_DEBUG_FLAG) {
+        std::cout << "LAP Predicting: Sequence Number: " << seq_no
+                  << " | Load PC: 0x" << std::hex << pc << std::dec 
+                  << " | Predicted Addr: 0x" << std::hex << predicted_addr << std::dec
+                  << " | Branch PC: 0x" << std::hex << load_table[load_pc_index].br_pc << std::dec
+                  << " | Inflight Loads: " << load_table[load_pc_index].inflight_loads
+                  << std::endl;
+      }
+    } else if(load_table[load_pc_index].state == VALID_CORRELATION) {
+      uint64_t current_history_reg = load_table[load_pc_index].addr_history_reg;
+      if(PERFECT_ADDR_PRED) predicted_addr = oracle_load_addr;
+      else predicted_addr = link_table[current_history_reg].address;
+      branch_table[branch_pc_index].predicted_load_addr = predicted_addr;
       if(LV_DEBUG_FLAG) {
         std::cout << "LAP Predicting: Sequence Number: " << seq_no
                   << " | Load PC: 0x" << std::hex << pc << std::dec 
@@ -321,7 +334,7 @@ void updateLoadPredictor(uint64_t seq_no, uint8_t piece, uint64_t pc, const Deco
     uint64_t load_pc_index = pc & 0xFFFF;
     uint64_t load_tag = (pc & 0xFFF0000) >> 16;
     if(load_table[load_pc_index].tag == load_tag) {
-      if(load_table[load_pc_index].state == VALID) {
+      if(load_table[load_pc_index].state == VALID_STRIDE) {
         if(speculation_map[seq_no].valid) {
           uint64_t pc = speculation_map[seq_no].pc;
           uint64_t pc_index = pc & 0xFFFF;
@@ -351,12 +364,34 @@ void updateLoadPredictor(uint64_t seq_no, uint8_t piece, uint64_t pc, const Deco
           }
           speculation_map[seq_no].valid = false;
         }
+      } else if(load_table[load_pc_index].state == VALID_CORRELATION) {
+
+        // correlation predictor
+        uint64_t current_history_reg = load_table[load_pc_index].addr_history_reg;
+        link_table[current_history_reg].address = mem_va;
+        if(LV_DEBUG_FLAG) {
+          std::cout << "LAP Training: Sequence Number: " << seq_no
+                    << " | PC: 0x" << std::hex << pc << std::dec 
+                    << " | History Reg: 0x" << std::hex << current_history_reg << std::dec
+                    << " | Actual Addr: 0x" << std::hex << mem_va << std::dec
+                    << std::endl;
+        }
+
+        uint64_t trimmed_address = (mem_va >> 2) & LAP_SUBSET_MASK;
+        load_table[load_pc_index].addr_history_reg = ((load_table[load_pc_index].addr_history_reg << LAP_SHIFT_BITS) ^ trimmed_address) & LAP_HISTORY_MASK;
       } else if(load_table[load_pc_index].state == TRAINING) {
+         // correlation predictor
+        uint64_t current_history_reg = load_table[load_pc_index].addr_history_reg;
+        link_table[current_history_reg].address = mem_va;
+        uint64_t trimmed_address = (mem_va >> 2) & LAP_SUBSET_MASK;
+        load_table[load_pc_index].addr_history_reg = ((load_table[load_pc_index].addr_history_reg << LAP_SHIFT_BITS) ^ trimmed_address) & LAP_HISTORY_MASK;
+
+        // stride predictor
         // check if the predicted address is correct
         if(load_table[load_pc_index].last_addr != mem_va) {
           load_table[load_pc_index].stride = mem_va - load_table[load_pc_index].last_addr;
           load_table[load_pc_index].last_addr = mem_va;
-          load_table[load_pc_index].state = VALID;
+          load_table[load_pc_index].state = VALID_STRIDE;
           uint64_t branch_pc = load_table[load_pc_index].br_pc;
           uint64_t branch_pc_index = branch_pc & 0xFFFF;
           uint64_t branch_tag = (branch_pc & 0xFFF0000) >> 16;
@@ -369,6 +404,7 @@ void updateLoadPredictor(uint64_t seq_no, uint8_t piece, uint64_t pc, const Deco
                           << std::endl;
           }
         }
+
       }
     }
 }
@@ -381,7 +417,7 @@ void updateLoadPredictor(uint64_t seq_no, uint8_t piece, uint64_t pc, const Deco
 //
 void notify_agen_complete(uint64_t seq_no, uint8_t piece, uint64_t pc, const DecodeInfo& _decode_info, const uint64_t mem_va, const uint64_t mem_sz, const uint64_t agen_cycle)
 {
-  if(pc == 0xfffff0d8f1cc) {
+  if(pc == 0xFFFFF0D8F180) {
     uint64_t target_pc = pc;
     uint64_t load_addr = mem_va;
     uint64_t load_addr_index = load_addr & 0xFFFF;
@@ -949,25 +985,6 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
                                 << " | BR PC: 0x" << std::hex << pc << std::dec << " | Stride: " << load_table[load_pc_index].stride << std::endl;
                     }
                   } 
-
-                  
-
-                  // determine branch type
-                  // branch was taken
-                  //if(_resolve_dir) {
-                  //  if(store_table[addr_index].value == 0) {
-                  //    branch_table[pc_index].br_type = CBZ;
-                  //  } else {
-                  //    branch_table[pc_index].br_type = CBNZ;
-                  //  }
-                  // branch was not taken
-                 // } else {
-                 //   if(store_table[addr_index].value == 0) {
-                 //     branch_table[pc_index].br_type = CBNZ;
-                 //   } else {
-                 //     branch_table[pc_index].br_type = CBZ;
-                 //   }
-                 // }
 
                   if(trigger_table[store_pc_index].tag == 0) {
                     // add to the trigger table

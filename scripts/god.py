@@ -8,10 +8,23 @@ input_pattern = re.compile(r'input:  \(int: \d+, idx: (\d+) val: ([\da-f]+)\)', 
 output_pattern = re.compile(r'output:  \(int: \d+, idx: (\d+) val: ([\da-f]+)\)', re.IGNORECASE)
 ea_pattern = re.compile(r'ea: (0x[\da-f]+)', re.IGNORECASE)
 
-global_chain_reg = deque(maxlen=16)
+global_chain_reg = deque(maxlen=5)
+global_store_reg = deque(maxlen=5)
+store_chain_addr_map = deque(maxlen=1000)
+predict_table = {}
 
 register_file = [0] * 66
 
+def pack_ghr(ghr):
+    """Convert GHR deque to an int (like a bit vector)."""
+    value = 0
+    for bit in global_chain_reg:
+        value = (value << 2) | bit
+    return value
+
+def predict():
+    index = pack_ghr(global_chain_reg)
+    return predict_table.get(index, "default_prediction")
 
 # Read and parse trace file
 def parse_trace(file_path):
@@ -59,40 +72,73 @@ def analaze(trace_entries):
       }
     ]
     
+    active_store_table = [0] * 3
+    
     active_chains = []
+    count_load_matches = 0
+    count_store_matches = 0
+    entry_counter = 0
+    correct_load = 0
+    total_loads = 0
+    predicted_correct = 0
+    
+    
     
     for entry in trace_entries:
+      entry_counter += 1
+      if entry_counter < 10_000:
+        continue
       if entry['type'] == 'stOp':
         for i in range(len(dependence_chains)):
           if entry['pc'] in dependence_chains[i]['stOp']:
             ## get idx of 2nd input
-            print(entry)
             idx = list(entry['inputs'].keys())[1]
             value = register_file[idx]
-            print(f"Found store dependency for {entry['pc']} in chain {i} with value {value}")
             active_chains.append({
               'stOp': entry['pc'],
               'address' : entry['ea'],
               'value': value,
               'chainIdx': i
             })
+            count_store_matches+= 1
+            active_store_table[i] = hex(value)
+            store_chain_addr_map.append({'address': entry['ea'], 'chainIdx:': i})
+            global_store_reg.append(i)
+          
+            break
       elif entry['type'] == 'loadOp':
-        for active_chain in reversed(active_chains):
-          if entry['pc'] in dependence_chains[active_chain['chainIdx']]['loadOp']:
-            print(entry)
-            print(f"Found load dependency for {entry['pc']} in chain {active_chain['chainIdx']} with value {value}")
-            active_chain['value'] = hex(value)
-            return
-      
+        for i in range(len(dependence_chains)):
+          if entry['pc'] in dependence_chains[i]['loadOp']:
+            for store_map in reversed(list(store_chain_addr_map)):
+              if entry['ea'] == store_map['address']:
+                
+                predicted_chain = predict()
+                if predicted_chain == store_map['chainIdx:']:
+                  predicted_correct+=1
+                
+                print("Chain reg ->", end=' ')
+                print(list(global_chain_reg))
+                print("Store reg ->", end=' ')
+                print(list(global_store_reg))
+                index = pack_ghr(global_chain_reg)
+                predict_table[index] = store_map['chainIdx:']
+                global_chain_reg.append(store_map['chainIdx:'])
+                break
+            for idx, val in entry['outputs'].items():
+              if hex(int(val, 16)) in active_store_table:
+                correct_load+=1
+          
+            total_loads+=1
+            count_load_matches+=1
+          break
+
       if entry['outputs']:
         # update reg file
         for idx, val in entry['outputs'].items():
           register_file[idx] = int(val, 16)
-      
-  
-  
 
-
+    print("Load accuracy is", (correct_load / total_loads) * 100)
+    print("Predicted accuracy is", (predicted_correct / total_loads) * 100)
 
 # Example usage:
 if __name__ == "__main__":

@@ -75,8 +75,16 @@ struct RetireOp
 enum AddrPredictorState {
   INVALID,
   TRAINING,
-  VALID
+  VALID_STRIDE,
+  VALID_CORRELATION
 };
+
+constexpr int LAP_SHIFT_BITS = 4;
+constexpr int LAP_HISTORY_LENGTH = 4;
+constexpr int LAP_HISTORY_BITS = LAP_HISTORY_LENGTH * LAP_SHIFT_BITS;
+constexpr uint64_t LAP_HISTORY_MASK = (1 << LAP_HISTORY_BITS) - 1;
+constexpr uint64_t LAP_SUBSET_MASK = (1 << LAP_SHIFT_BITS) - 1;
+constexpr uint8_t LAP_STRIDE_MAX_CONFIDENCE = 3;
 
 struct LoadTableEntry {
   uint64_t tag;
@@ -84,7 +92,13 @@ struct LoadTableEntry {
   uint64_t last_addr;
   uint64_t  stride;
   uint64_t inflight_loads;
+  uint8_t confidence_ctr;
   AddrPredictorState state; 
+  uint64_t addr_history_reg;
+};
+
+struct LinkTable {
+  uint64_t address;
 };
 
 struct SpeculativeInfo {
@@ -117,6 +131,7 @@ extern PredictionTableEntry prediction_table[PT_SIZE]; // 2^16 entries - 1
 #define LT_SIZE 65535
 extern LoadTableEntry load_table[LT_SIZE]; // 2^16 entries - 1
 extern std::unordered_map<uint64_t, SpeculativeInfo> speculation_map;
+extern LinkTable link_table[LT_SIZE];
 
 // RetireOp Queue
 extern std::deque<RetireOp> retire_op_queue;
