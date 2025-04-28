@@ -3,6 +3,24 @@
 
 #include <stdlib.h>
 
+enum BranchType
+{
+  NA,
+  CBZ,
+  CBNZ,
+  TBZ,
+  TBNZ
+};
+
+enum ALU_Operation
+{
+  UNKNOWN,
+  TST,
+  TEQ,
+  CMP,
+  CMN
+};
+
 struct SampleHist
 {
       uint64_t ghist;
@@ -13,17 +31,6 @@ struct SampleHist
           ghist = 0;
       }
 };
-
-enum BranchType
-{
-  NA,
-  CBZ,
-  CBNZ,
-  TBZ,
-  TBNZ
-};
-
-
 
 struct BranchTableEntry
 {

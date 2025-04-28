@@ -84,12 +84,12 @@ void beginCondDirPredictor()
         branch_table[i].is_linked = false;
         branch_table[i].br_type = NA;
         branch_table[i].predicted_load_addr = 0;
-	branch_table[i].prev_value = STUPID_VALUE;
-	branch_table[i].prev_taken = false;
-	branch_table[i].branch_bit_mask = UINT64_MAX;
-	branch_table[i].bit_position_matters = false;
-	branch_table[i].direction_zero_match = true;
-	branch_table[i].bit_flag = false;
+        branch_table[i].prev_value = STUPID_VALUE;
+        branch_table[i].prev_taken = false;
+        branch_table[i].branch_bit_mask = UINT64_MAX;
+        branch_table[i].bit_position_matters = false;
+        branch_table[i].direction_zero_match = true;
+        branch_table[i].bit_flag = false;
     }
 
     // initial store_table setup
@@ -105,7 +105,7 @@ void beginCondDirPredictor()
         trigger_table[i].value = 0;
         trigger_table[i].addr = 0;
         trigger_table[i].br_type = CBZ;
-	trigger_table[i].branch_bit_mask = UINT64_MAX;
+	      trigger_table[i].branch_bit_mask = UINT64_MAX;
     }
 
     // initial prediction_table setup
@@ -122,7 +122,7 @@ void beginCondDirPredictor()
       load_table[i].stride = 0;
       load_table[i].valid = false;
       load_table[i].inflight_loads = 0;
-  }
+    }
 
     // initial retire_op_queue setup
     retire_op_queue.clear();
@@ -173,7 +173,6 @@ void notify_instr_fetch(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint6
 // input values are unique identifying ids(seq_no, piece) and PC of the branch.
 // return value is the predicted direction. 
 //
-
 bool get_cond_dir_prediction(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t pred_cycle)
 {
     const bool tage_sc_l_pred =  cbp2016_tage_sc_l.predict(seq_no, piece, pc);
@@ -225,7 +224,6 @@ bool get_cond_dir_prediction(uint64_t seq_no, uint8_t piece, uint64_t pc, const 
 // after a prediction is made.
 // input values are unique identifying ids(seq_no, piece), PC of the instruction, instruction class, predicted/resolve direction and the next_pc 
 //
-
 uint64_t mispred_for_target = 0;
 void spec_update(uint64_t seq_no, uint8_t piece, uint64_t pc, InstClass inst_class, const bool resolve_dir, const bool pred_dir, const uint64_t next_pc)
 {
@@ -277,7 +275,6 @@ void spec_update(uint64_t seq_no, uint8_t piece, uint64_t pc, InstClass inst_cla
     {
         cbp2016_tage_sc_l.TrackOtherInst(pc, br_type, pred_dir, resolve_dir, next_pc);
     }
-
 }
 
 //
@@ -299,7 +296,6 @@ void notify_instr_decode(uint64_t seq_no, uint8_t piece, uint64_t pc, const Deco
 //
 void notify_agen_complete(uint64_t seq_no, uint8_t piece, uint64_t pc, const DecodeInfo& _decode_info, const uint64_t mem_va, const uint64_t mem_sz, const uint64_t agen_cycle)
 {
-
   if(pc == 0xfffff0d8f180 || pc == 0xfffff0d8f284) {
     uint64_t target_pc = pc;
     uint64_t load_addr = mem_va;
@@ -366,7 +362,7 @@ void notify_agen_complete(uint64_t seq_no, uint8_t piece, uint64_t pc, const Dec
 	//std::cout << " the trigger table prediction is tbnz \n" << trigger_table[store_pc_index].br_type << "  taken or not taken?" << prediction_table[store_addr_index].taken << "\n";
       }
       else if(trigger_table[store_pc_index].br_type == NA) {
-	prediction_table[store_addr_index].taken = true;
+	      prediction_table[store_addr_index].taken = true;
 	//std::cout <<"printing tag, value, addr, br_type and branch_bit_mask respectively" << trigger_table[store_pc_index].tag << "\n" << trigger_table[store_pc_index].value << "\n" << trigger_table[store_pc_index].addr << "\n" << trigger_table[store_pc_index].br_type << "\n" << trigger_table[store_pc_index].branch_bit_mask << "\n";
 
 	//std::cout << "PROBLEM PROBLEM trigger table setting even without br type set!!!!!\n";
@@ -484,19 +480,13 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
     }
 }
 
-//
-// notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool pred_dir, const ExecuteInfo& _exec_info, const uint64_t commit_cycle)
-// 
-// This function is called when any instructions(not just branches) gets committed.
-// Along with the unique identifying ids(seq_no, piece), PC of the instruction, execute info and cycle are also provided as inputs
-//
-// For the sample predictor implementation, we do not leverage commit information
+
 void get_branch_bit_direction(uint16_t pc_index,  uint64_t dest_reg_val, const bool _resolve_dir)
 {
       if(branch_table[pc_index].br_type > 5)
       {
-	std::cout << "ERROR ERROR " << dest_reg_val << "\n";
-	exit(0);
+        std::cout << "ERROR ERROR " << dest_reg_val << "\n";
+        exit(0);
       }	      
       //std::cout << "branch bit drection started for pc_index:" << pc_index <<" val : "<< dest_reg_val << "dir: "<< _resolve_dir << " \n";	
       if(branch_table[pc_index].bit_position_matters == false)
@@ -658,11 +648,105 @@ void get_branch_bit_direction(uint16_t pc_index,  uint64_t dest_reg_val, const b
 
 
 }
+
 void learn_src_branch_behaivour(uint16_t pc_index,  uint64_t dest_reg_val, const bool _resolve_dir)
 {
-	
 }
 
+uint64_t pack_r64 (bool N, bool Z, bool C, bool V) {
+  return ((N << 3) | (Z << 2) | (C << 1) | V);
+}
+
+ALU_Operation reverse_engineer_aluOp (const uint64_t pc, const ExecuteInfo& exec_info) {
+  std::vector<uint64_t> src_reg_info = exec_info.dec_info.src_reg_info;
+  ALU_Operation aluOp = UNKNOWN;
+  int detected_op_count = 0;
+  uint64_t dst_reg_value;
+  std::vector<uint8_t> DEBUG_r64_possibilities;
+
+  // Supporting only two source operands for now
+  if (src_reg_info.size() != 2) {
+    std::cout << "WARN:: Unsupported aluOp at PC: 0x" << std::hex << pc << "\n";
+    return UNKNOWN;
+  }
+
+  int64_t op1 = RegFile[src_reg_info[0]];
+  int64_t op2 = RegFile[src_reg_info[1]];
+  int64_t alu_result;
+  uint64_t r64 = RegFile[64];
+
+  bool N = (r64 >> 0x3) & 0x1;
+  bool Z = (r64 >> 0x2) & 0x1;
+  bool C = (r64 >> 0x1) & 0x1;
+  bool V = (r64 >> 0x0) & 0x1;
+
+  // TST
+  alu_result = op1 & op2;
+  N = (alu_result < 0);
+  Z = (alu_result == 0);
+  dst_reg_value = pack_r64(N, Z, C, V);
+  DEBUG_r64_possibilities.push_back(dst_reg_value);
+  if (dst_reg_value == exec_info.dst_reg_value.value()) {
+    aluOp = TST;
+    detected_op_count++;
+  }
+
+  // TEQ
+  alu_result = op1 ^ op2;
+  N = (alu_result < 0);
+  Z = (alu_result == 0);
+  dst_reg_value = pack_r64(N, Z, C, V);
+  DEBUG_r64_possibilities.push_back(dst_reg_value);
+  if (dst_reg_value == exec_info.dst_reg_value.value()) {
+    aluOp = TEQ;
+    detected_op_count++;
+  }
+
+  // CMP
+  alu_result = op1 - op2;
+  N = (alu_result < 0);
+  Z = (alu_result == 0);
+  //C = (static_cast<uint64_t>(op1) - static_cast<uint64_t>(op2) > static_cast<uint64_t>(op1));
+  //V = (alu_result > op1);
+  dst_reg_value = pack_r64(N, Z, C, V);
+  DEBUG_r64_possibilities.push_back(dst_reg_value);
+  if (dst_reg_value == exec_info.dst_reg_value.value()) {
+    aluOp = CMP;
+    detected_op_count++;
+  }
+
+  // CMN
+  alu_result = op1 + op2;
+  N = (alu_result < 0);
+  Z = (alu_result == 0);
+  //C = (static_cast<uint64_t>(op1) + static_cast<uint64_t>(op2) < static_cast<uint64_t>(op1));
+  //V = (alu_result < op1);
+  dst_reg_value = pack_r64(N, Z, C, V);
+  DEBUG_r64_possibilities.push_back(dst_reg_value);
+  if (dst_reg_value == exec_info.dst_reg_value.value()) {
+    aluOp = CMN;
+    detected_op_count++;
+  }
+
+  std::cout << "\t\t\t TST | TEQ | CMP | CMN |\n";
+  std::cout << "r64 values:  ";
+  for (uint8_t r64_val: DEBUG_r64_possibilities) {
+    std::cout << "0x" << std::hex << static_cast<int>(r64_val) << " | ";
+  }
+  std::cout << "\n";
+  if (detected_op_count != 1)
+    std::cout << "WARN:: reverse_engineer_aluOp(): Detected " << std::dec << detected_op_count << " possible operations. Couldn't identify unique alu operation.\n";
+  
+  return aluOp;
+}
+
+//
+// notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool pred_dir, const ExecuteInfo& _exec_info, const uint64_t commit_cycle)
+// 
+// This function is called when any instructions(not just branches) gets committed.
+// Along with the unique identifying ids(seq_no, piece), PC of the instruction, execute info and cycle are also provided as inputs
+//
+// For the sample predictor implementation, we do not leverage commit information
 uint64_t branch_inst_count = 0; // max to 1000
 void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool pred_dir, const ExecuteInfo& _exec_info, const uint64_t commit_cycle)
 {
@@ -673,7 +757,7 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
       uint16_t pc_index = pc & 0xFFFF;
       uint64_t tag = (pc & 0xFFF0000) >> 16;
       
-      // mechnaism to find high mispredction branches
+      // mechanism to find highly mispredicted branches
       if(_exec_info.dec_info.src_reg_info.size() > 0) {
         if(tag == branch_table[pc_index].tag) {
           if(_resolve_dir != pred_dir) {
@@ -697,20 +781,20 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
       if(branch_table[pc_index].tag == tag && branch_table[pc_index].sat_ctr == BT_SAT_COUNTER_MAX) {
         // append full 64-bit pc to misprediction list
         high_mispred_pc.insert(pc);
-	uint64_t dest_reg_val = RegFile[_exec_info.dec_info.src_reg_info[0]];
-	//if(pc_index == 37824 )
-	//{
-	//	std::cout<< "src reg for weird branch!!" << _exec_info.dec_info.src_reg_info[0]<< "\n";
-	//}
-	if(_exec_info.dec_info.src_reg_info[0] != 64)
-	{
-         get_branch_bit_direction(pc_index, dest_reg_val, _resolve_dir);
-	 //std::cout << " debug br type " << branch_table[pc_index].br_type;
-	}
-	else
-	{
-		learn_src_branch_behaivour(pc_index, dest_reg_val, _resolve_dir);
-	}
+        uint64_t dest_reg_val = RegFile[_exec_info.dec_info.src_reg_info[0]];
+        //if(pc_index == 37824 )
+        //{
+        //	std::cout<< "src reg for weird branch!!" << _exec_info.dec_info.src_reg_info[0]<< "\n";
+        //}
+        if(_exec_info.dec_info.src_reg_info[0] != 64)
+        {
+          get_branch_bit_direction(pc_index, dest_reg_val, _resolve_dir);
+          //std::cout << " debug br type " << branch_table[pc_index].br_type;
+        }
+        else
+        {
+          learn_src_branch_behaivour(pc_index, dest_reg_val, _resolve_dir);
+        }
         //learning branch direction and bit (TBZ vs CBZ)
         // print the branch we are going to analyze
         // std::cout << "---------------------------------------------------" << std::endl;
@@ -727,12 +811,24 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
           uint64_t dest_reg_idx = retire_op.exec_info.dec_info.dst_reg_info.value();
           // check if branch register is same as load producing register
           if(dest_reg_idx == _exec_info.dec_info.src_reg_info[0]) {
-	    //uint64_t dest_reg_val = retire_op.exec_info.dst_reg_value.value();
-	    //get_branch_bit_direction(pc_index, dest_reg_val, _resolve_dir);
+            //uint64_t dest_reg_val = retire_op.exec_info.dst_reg_value.value();
+            //get_branch_bit_direction(pc_index, dest_reg_val, _resolve_dir);
             // check if the instruction is a load
             if(retire_op.exec_info.dec_info.insn_class != InstClass::loadInstClass) {
               // std::cout << "Producer is not a load, skipping..." << std::endl;
               // std::cout << "PC: 0x" << std::hex << retire_op.pc << std::dec << " | " << retire_op.exec_info << std::endl;
+              // std::cout << "\t";
+              // for (auto src_reg: retire_op.exec_info.dec_info.src_reg_info) {
+              //   std::cout << " | r" << std::dec << src_reg << ": 0x" << std::hex << RegFile[src_reg];
+              // }
+              // std::cout << "\n";
+
+              ALU_Operation aluOp = reverse_engineer_aluOp(pc, retire_op.exec_info);
+              //std::cout << "ALU_op = " << aluOp << "\n\n";
+
+              if (aluOp == UNKNOWN)
+                break;
+
               break;
             }
             // print out address
@@ -758,18 +854,17 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
                 // check if the chain is already made
                 if(branch_table[pc_index].store_triggers[j] == store_pc) {
                   store_trigger_found = true;
-		  trigger_table[store_pc_index].br_type = branch_table[pc_index].br_type;
+		              trigger_table[store_pc_index].br_type = branch_table[pc_index].br_type;
                   trigger_table[store_pc_index].branch_bit_mask = branch_table[pc_index].branch_bit_mask;
                   break;
                 }
               }
 
-	      if (!store_trigger_found) {
-    		if (branch_table[pc_index].num_triggers >= 32) {
-        		std::cerr << "ERROR: num_triggers=" << branch_table[pc_index].num_triggers << " at pc_index=" << pc_index << "\n";
-    			}		 
-		else {
-     
+	            if (!store_trigger_found) {
+    		        if (branch_table[pc_index].num_triggers >= 32) {
+        		      std::cerr << "ERROR: num_triggers=" << branch_table[pc_index].num_triggers << " at pc_index=" << pc_index << "\n";
+    			      }		 
+		            else {
                   // std::cout << "Making chain with PC: 0x" << std::hex << store_pc << std::dec << " --> Branch PC: 0x" << std::hex << pc <<std::endl;
                   // add the store pc to the chain
 
@@ -819,7 +914,7 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
                     trigger_table[store_pc_index].value = store_value;
                     trigger_table[store_pc_index].addr = load_addr;
                     trigger_table[store_pc_index].br_type = branch_table[pc_index].br_type;
-		    trigger_table[store_pc_index].branch_bit_mask = branch_table[pc_index].branch_bit_mask;
+		                trigger_table[store_pc_index].branch_bit_mask = branch_table[pc_index].branch_bit_mask;
                     
                   } else {
                     // update the trigger table
@@ -827,8 +922,8 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
                     trigger_table[store_pc_index].addr = load_addr;
                   }
                   
+                }
               }
-	      }
 
               branch_table[pc_index].is_linked = true;
             }
@@ -837,7 +932,7 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
         }
       }
 
-      // peridoic reset of saturation counter
+      // periodic reset of saturation counter
       if(branch_inst_count == 1000) {
         // std::cout << "\nFinal unique PC list:\n";
         // for (uint64_t pc : high_mispred_pc) {
@@ -877,7 +972,6 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
         RegFile[dest_reg] = dest_val;
       }
     }
-
 }
 
 //
