@@ -24,7 +24,7 @@
 #include <deque>
 #include <cstdlib>
 
-#include "lib/my_addr_predictor.h"
+#include "global_variables.h"
 
 #define DEBUG_FLAG false
 #define LV_DEBUG_FLAG false
@@ -64,7 +64,21 @@ std::unordered_map<uint64_t, SpeculativeInfo> speculation_map;
 std::deque<RetireOp> retire_op_queue;
 #define RETIRE_OP_QUEUE_SIZE 64
 
+// Register File
 uint64_t RegFile[66];
+
+void beginLoadAddrPredictor() {
+  // initial load_table setup
+  for (int i = 0; i < LT_SIZE; i++) {
+    load_table[i].tag = 0;
+    load_table[i].br_pc = 0;
+    load_table[i].last_addr = 0;
+    load_table[i].stride = 0;
+    load_table[i].state = INVALID;
+    load_table[i].inflight_loads = 0;
+  }
+}
+
 void beginCondDirPredictor()
 { 
     srand(time(NULL));
@@ -113,16 +127,8 @@ void beginCondDirPredictor()
         prediction_table[i].tag = 0;
         prediction_table[i].taken = false;
     }
-
-    // initial load_table setup
-    for (int i = 0; i < LT_SIZE; i++) {
-      load_table[i].tag = 0;
-      load_table[i].br_pc = 0;
-      load_table[i].last_addr = 0;
-      load_table[i].stride = 0;
-      load_table[i].valid = false;
-      load_table[i].inflight_loads = 0;
-    }
+  
+    beginLoadAddrPredictor();
 
     // initial retire_op_queue setup
     retire_op_queue.clear();
@@ -133,6 +139,41 @@ void beginCondDirPredictor()
     }
 }
 
+void predictLoadAddr(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t fetch_cycle, uint64_t oracle_load_addr) {
+  uint64_t predicted_addr = 0xdeadbeef;
+  uint64_t load_pc_index = pc & 0xFFFF;
+  uint64_t load_tag = (pc & 0xFFF0000) >> 16;
+  if(load_table[load_pc_index].tag == load_tag) {
+    if(load_table[load_pc_index].state == VALID) {
+      if(PERFECT_ADDR_PRED) predicted_addr = oracle_load_addr;
+      else predicted_addr = load_table[load_pc_index].last_addr + load_table[load_pc_index].stride;
+      uint64_t branch_pc = load_table[load_pc_index].br_pc;
+      uint64_t branch_pc_index = branch_pc & 0xFFFF;
+      uint64_t branch_tag = (branch_pc & 0xFFF0000) >> 16;
+      branch_table[branch_pc_index].predicted_load_addr = predicted_addr;
+      speculation_map[seq_no] = { seq_no, pc, predicted_addr, true};
+      load_table[load_pc_index].last_addr = predicted_addr;
+      load_table[load_pc_index].inflight_loads += 1;
+      
+      if(LV_DEBUG_FLAG) {
+        std::cout << "LAP Predicting: Sequence Number: " << seq_no
+                  << " | Load PC: 0x" << std::hex << pc << std::dec 
+                  << " | Predicted Addr: 0x" << std::hex << predicted_addr << std::dec
+                  << " | Branch PC: 0x" << std::hex << load_table[load_pc_index].br_pc << std::dec
+                  << " | Inflight Loads: " << load_table[load_pc_index].inflight_loads
+                  << std::endl;
+      }
+    } else if(load_table[load_pc_index].state == TRAINING) {
+      if(LV_DEBUG_FLAG) {
+        std::cout << "LAP Training: Sequence Number: " << seq_no
+                    << " | Load PC: 0x" << std::hex << pc << std::dec 
+                    << " | Branch PC: 0x" << std::hex << load_table[load_pc_index].br_pc << std::dec
+                    << std::endl;
+      }
+    } 
+  }
+}
+
 //
 // notify_instr_fetch(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t fetch_cycle)
 // 
@@ -141,29 +182,7 @@ void beginCondDirPredictor()
 //
 void notify_instr_fetch(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t fetch_cycle, uint64_t load_addr)
 {
-  uint64_t predicted_addr = 0xdeadbeef;
-  uint64_t load_pc_index = pc & 0xFFFF;
-  uint64_t load_tag = (pc & 0xFFF0000) >> 16;
-  if(load_table[load_pc_index].tag == load_tag && load_table[load_pc_index].valid) {
-    if(PERFECT_ADDR_PRED) predicted_addr = load_addr;
-    else predicted_addr = load_table[load_pc_index].last_addr + load_table[load_pc_index].stride;
-    uint64_t branch_pc = load_table[load_pc_index].br_pc;
-    uint64_t branch_pc_index = branch_pc & 0xFFFF;
-    uint64_t branch_tag = (branch_pc & 0xFFF0000) >> 16;
-    branch_table[branch_pc_index].predicted_load_addr = predicted_addr;
-    speculation_map[seq_no] = { seq_no, pc, predicted_addr, true};
-    load_table[load_pc_index].last_addr = predicted_addr;
-    load_table[load_pc_index].inflight_loads += 1;
-    
-    if(LV_DEBUG_FLAG) {
-      std::cout << "Address Predicting: Sequence Number: " << seq_no
-                << " | PC: 0x" << std::hex << pc << std::dec 
-                << " | Predicted Addr: 0x" << std::hex << predicted_addr << std::dec
-                << " | Load PC: 0x" << std::hex << load_table[load_pc_index].br_pc << std::dec
-                << " | Inflight Loads: " << load_table[load_pc_index].inflight_loads
-                << std::endl;
-    }
-  }
+  predictLoadAddr(seq_no, piece, pc, fetch_cycle, load_addr);
 }
 
 //
@@ -288,6 +307,63 @@ void notify_instr_decode(uint64_t seq_no, uint8_t piece, uint64_t pc, const Deco
 {
 }
 
+void updateLoadPredictor(uint64_t seq_no, uint8_t piece, uint64_t pc, const DecodeInfo& _decode_info, const uint64_t mem_va, const uint64_t mem_sz, const uint64_t agen_cycle) {
+  // updates load predictor table when addr is ready
+    uint64_t load_pc_index = pc & 0xFFFF;
+    uint64_t load_tag = (pc & 0xFFF0000) >> 16;
+    if(load_table[load_pc_index].tag == load_tag) {
+      if(load_table[load_pc_index].state == VALID) {
+        if(speculation_map[seq_no].valid) {
+          uint64_t pc = speculation_map[seq_no].pc;
+          uint64_t pc_index = pc & 0xFFFF;
+          uint64_t tag = (pc & 0xFFF0000) >> 16;
+          if(load_table[pc_index].inflight_loads != 0) {
+            load_table[pc_index].inflight_loads -= 1;
+          }
+          // check if the predicted address is correct
+          if(speculation_map[seq_no].predicted_addr != mem_va) {
+            if(load_table[pc_index].tag == tag) {
+
+              load_table[pc_index].last_addr = mem_va + (load_table[pc_index].stride * load_table[pc_index].inflight_loads);
+              uint64_t branch_pc = load_table[pc_index].br_pc;
+              uint64_t branch_pc_index = branch_pc & 0xFFFF;
+              uint64_t branch_tag = (branch_pc & 0xFFF0000) >> 16;
+              branch_table[branch_pc_index].predicted_load_addr = load_table[pc_index].last_addr + load_table[pc_index].stride;
+              if(LV_DEBUG_FLAG) {
+                std::cout << "LAP Resteer: Sequence Number: " << seq_no
+                          << " | PC: 0x" << std::hex << pc << std::dec 
+                          << " | Actual Addr: 0x" << std::hex << mem_va << std::dec
+                          << " | Inflight Loads: " << load_table[pc_index].inflight_loads
+                          << " | Resteered Addr: 0x" << std::hex << load_table[pc_index].last_addr << std::dec
+                          << " | Branch PC: 0x" << std::hex << branch_pc << std::dec
+                          << std::endl;
+              }
+            }
+          }
+          speculation_map[seq_no].valid = false;
+        }
+      } else if(load_table[load_pc_index].state == TRAINING) {
+        // check if the predicted address is correct
+        if(load_table[load_pc_index].last_addr != mem_va) {
+          load_table[load_pc_index].stride = mem_va - load_table[load_pc_index].last_addr;
+          load_table[load_pc_index].last_addr = mem_va;
+          load_table[load_pc_index].state = VALID;
+          uint64_t branch_pc = load_table[load_pc_index].br_pc;
+          uint64_t branch_pc_index = branch_pc & 0xFFFF;
+          uint64_t branch_tag = (branch_pc & 0xFFF0000) >> 16;
+          branch_table[branch_pc_index].predicted_load_addr = mem_va + load_table[load_pc_index].stride;
+          if(LV_DEBUG_FLAG) {
+                std::cout << "LAP Training Complete: Sequence Number: " << seq_no
+                          << " | PC: 0x" << std::hex << pc << std::dec
+                          << " | Actual Addr: 0x" << std::hex << mem_va << std::dec
+                          << " | Stride: 0x" << std::hex << load_table[load_pc_index].stride << std::dec
+                          << std::endl;
+          }
+        }
+      }
+    }
+}
+
 //
 // notify_agen_complete(uint64_t seq_no, uint8_t piece, uint64_t pc, const DecodeInfo& _decode_info, const uint64_t mem_va, const uint64_t mem_sz, const uint64_t agen_cycle)
 // 
@@ -296,17 +372,17 @@ void notify_instr_decode(uint64_t seq_no, uint8_t piece, uint64_t pc, const Deco
 //
 void notify_agen_complete(uint64_t seq_no, uint8_t piece, uint64_t pc, const DecodeInfo& _decode_info, const uint64_t mem_va, const uint64_t mem_sz, const uint64_t agen_cycle)
 {
-  if(pc == 0xfffff0d8f180 || pc == 0xfffff0d8f284) {
+  if(pc == 0xfffff0d8f1cc) {
     uint64_t target_pc = pc;
     uint64_t load_addr = mem_va;
     uint64_t load_addr_index = load_addr & 0xFFFF;
     uint64_t load_addr_tag = (load_addr & 0xFFF0000) >> 16;
     if(prediction_table[load_addr_index].tag == load_addr_tag) {
       if(DEBUG_FLAG) {
-        std::cout << "Target Load: Sequence Number: " << seq_no
-          << " | PC: 0x" << std::hex << pc << std::dec
-          << " | Address: 0x" << std::hex << load_addr << std::dec
-          << " | Taken: " << prediction_table[load_addr_index].taken << std::dec << std::endl;
+        // std::cout << "Target Load: Sequence Number: " << seq_no
+        //   << " | PC: 0x" << std::hex << pc << std::dec
+          std::cout << "Address: 0x" << std::hex << (load_addr & 0xFFFF) << std::dec << std::endl;
+          // << " | Taken: " << prediction_table[load_addr_index].taken << std::dec << std::endl;
       }
     } else {
       if(DEBUG_FLAG) {
@@ -391,36 +467,7 @@ void notify_agen_complete(uint64_t seq_no, uint8_t piece, uint64_t pc, const Dec
     }
   }
 
-  // updates load predictor table when addr is ready
-  if(speculation_map[seq_no].valid) {
-    uint64_t pc = speculation_map[seq_no].pc;
-    uint64_t pc_index = pc & 0xFFFF;
-    uint64_t tag = (pc & 0xFFF0000) >> 16;
-    if(load_table[pc_index].inflight_loads != 0) {
-      load_table[pc_index].inflight_loads -= 1;
-    }
-    // check if the predicted address is correct
-    if(speculation_map[seq_no].predicted_addr != mem_va) {
-      if(load_table[pc_index].tag == tag) {
-
-        load_table[pc_index].last_addr = mem_va + (load_table[pc_index].stride * load_table[pc_index].inflight_loads);
-        uint64_t branch_pc = load_table[pc_index].br_pc;
-        uint64_t branch_pc_index = branch_pc & 0xFFFF;
-        uint64_t branch_tag = (branch_pc & 0xFFF0000) >> 16;
-        branch_table[branch_pc_index].predicted_load_addr = load_table[pc_index].last_addr + load_table[pc_index].stride;
-        if(LV_DEBUG_FLAG) {
-          std::cout << "Address Predicting Resteer: Sequence Number: " << seq_no
-                    << " | PC: 0x" << std::hex << pc << std::dec 
-                    << " | Actual Addr: 0x" << std::hex << mem_va << std::dec
-                    << " | Inflight Loads: " << load_table[pc_index].inflight_loads
-                    << " | Resteered Addr: 0x" << std::hex << load_table[pc_index].last_addr << std::dec
-                    << " | Branch PC: 0x" << std::hex << branch_pc << std::dec
-                    << std::endl;
-        }
-      }
-    }
-    speculation_map[seq_no].valid = false;
-  }
+  updateLoadPredictor(seq_no, piece, pc, _decode_info, mem_va, mem_sz, agen_cycle);
 }
 
 //
@@ -875,13 +922,13 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
                   uint64_t load_pc = retire_op.pc;
                   uint64_t load_pc_index = load_pc & 0xFFFF;
                   uint64_t load_pc_tag = (load_pc & 0xFFF0000) >> 16;
-                  if(!load_table[load_pc_index].valid) {
+                  if(load_table[load_pc_index].state == INVALID) {
                     // add to the load table
                     load_table[load_pc_index].tag = load_pc_tag;
                     load_table[load_pc_index].br_pc = pc;
                     load_table[load_pc_index].last_addr = load_addr;
-                    load_table[load_pc_index].stride = 8;
-                    load_table[load_pc_index].valid = true;
+                    load_table[load_pc_index].stride = -1;
+                    load_table[load_pc_index].state = TRAINING;
                     if(LV_DEBUG_FLAG) {
                       std::cout << "Load Table Entry Created: " << std::endl;
                       std::cout << "Load PC: 0x" << std::hex << load_pc << std::dec << " | Load Addr: 0x" << std::hex << load_addr << std::dec 

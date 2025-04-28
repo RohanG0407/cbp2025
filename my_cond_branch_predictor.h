@@ -81,7 +81,6 @@ struct RetireOp
   ExecuteInfo exec_info;
 };
 
-
 class SampleCondPredictor
 {
         SampleHist active_hist;
