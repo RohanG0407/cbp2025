@@ -7,10 +7,21 @@
 
 enum BranchType
 {
+  NA,
   CBZ,
   CBNZ,
+  TBZ,
+  TBNZ
 };
 
+enum ALU_Operation
+{
+  UNKNOWN,
+  TST,
+  TEQ,
+  CMP,
+  CMN
+};
 
 struct BranchTableEntry
 {
@@ -18,11 +29,19 @@ struct BranchTableEntry
   uint64_t src_reg;
   uint64_t sat_ctr;
   bool override_tage_pred;
-  uint64_t store_triggers[8];
+  uint64_t store_triggers[32];
   uint64_t num_triggers;
   bool is_linked;
   BranchType br_type;
   uint64_t predicted_load_addr;
+  uint64_t prev_value;
+  bool prev_taken;
+  uint64_t branch_bit_mask; // Mask with 1 at the branch bit
+  bool bit_position_matters;
+  bool direction_zero_match;
+  bool bit_flag;
+  long long int correct_counter = 0;
+  long long int incorrect_counter = 0;
 };
 
 struct StoreTableEntry
@@ -38,6 +57,7 @@ struct TriggerTableEntry
   uint64_t value;
   uint64_t addr;
   BranchType br_type;
+  uint64_t branch_bit_mask;
 };
 
 struct PredictionTableEntry

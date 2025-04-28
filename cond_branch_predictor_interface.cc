@@ -30,12 +30,6 @@
 #define LV_DEBUG_FLAG false
 #define PERFECT_ADDR_PRED true
 #define STUPID_VALUE 8898
-//
-// beginCondDirPredictor()
-// 
-// This function is called by the simulator before the start of simulation.
-// It can be used for arbitrary initialization steps for the contestant's code.
-//
 
 // Branch Table Info
 #define BT_SIZE 65535
@@ -78,6 +72,13 @@ void beginLoadAddrPredictor() {
     load_table[i].inflight_loads = 0;
   }
 }
+
+//
+// beginCondDirPredictor()
+// 
+// This function is called by the simulator before the start of simulation.
+// It can be used for arbitrary initialization steps for the contestant's code.
+//
 
 void beginCondDirPredictor()
 { 
@@ -713,7 +714,9 @@ ALU_Operation reverse_engineer_aluOp (const uint64_t pc, const ExecuteInfo& exec
 
   // Supporting only two source operands for now
   if (src_reg_info.size() != 2) {
-    std::cout << "WARN:: Unsupported aluOp at PC: 0x" << std::hex << pc << "\n";
+    if(DEBUG_FLAG) {
+      std::cout << "WARN:: Unsupported src_reg_info size at PC: 0x" << std::hex << pc << "\n";
+    }
     return UNKNOWN;
   }
 
@@ -775,14 +778,24 @@ ALU_Operation reverse_engineer_aluOp (const uint64_t pc, const ExecuteInfo& exec
     detected_op_count++;
   }
 
-  std::cout << "\t\t\t TST | TEQ | CMP | CMN |\n";
-  std::cout << "r64 values:  ";
-  for (uint8_t r64_val: DEBUG_r64_possibilities) {
-    std::cout << "0x" << std::hex << static_cast<int>(r64_val) << " | ";
+  if (DEBUG_FLAG) {
+    std::cout << "\t\t\t TST | TEQ | CMP | CMN |\n";
+    std::cout << "r64 values:  ";
   }
-  std::cout << "\n";
-  if (detected_op_count != 1)
-    std::cout << "WARN:: reverse_engineer_aluOp(): Detected " << std::dec << detected_op_count << " possible operations. Couldn't identify unique alu operation.\n";
+
+  for (uint8_t r64_val: DEBUG_r64_possibilities) {
+    if(DEBUG_FLAG) {
+      std::cout << "0x" << std::hex << static_cast<int>(r64_val) << " | ";
+    }
+  }
+  if(DEBUG_FLAG) {
+    std::cout << "\n";
+  }
+  if (detected_op_count != 1) {
+    if(DEBUG_FLAG) { 
+      std::cout << "WARN:: reverse_engineer_aluOp(): Detected " << std::dec << detected_op_count << " possible operations. Couldn't identify unique alu operation.\n";
+    }
+  }
   
   return aluOp;
 }
