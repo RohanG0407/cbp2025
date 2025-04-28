@@ -38,7 +38,7 @@ def main():
         help='Root folder where mirrored outputs go'
     )
     parser.add_argument(
-        '--output-name', default='stats.txt',
+        '--output-name', default='new_stats.txt',
         help='Filename for cbp output in each trace folder'
     )
     parser.add_argument(
