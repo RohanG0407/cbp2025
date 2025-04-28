@@ -145,6 +145,14 @@ void predictLoadAddr(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t
   uint64_t load_pc_index = pc & 0xFFFF;
   uint64_t load_tag = (pc & 0xFFF0000) >> 16;
   if(load_table[load_pc_index].tag == load_tag) {
+    if(PERFECT_ADDR_PRED) {
+      predicted_addr = oracle_load_addr;
+      uint64_t branch_pc = load_table[load_pc_index].br_pc;
+      uint64_t branch_pc_index = branch_pc & 0xFFFF;
+      uint64_t branch_tag = (branch_pc & 0xFFF0000) >> 16;
+      branch_table[branch_pc_index].predicted_load_addr = predicted_addr;
+      return;
+    } 
     if(load_table[load_pc_index].state == VALID) {
       if(PERFECT_ADDR_PRED) predicted_addr = oracle_load_addr;
       else predicted_addr = load_table[load_pc_index].last_addr + load_table[load_pc_index].stride;
@@ -715,7 +723,7 @@ ALU_Operation reverse_engineer_aluOp (const uint64_t pc, const ExecuteInfo& exec
   // Supporting only two source operands for now
   if (src_reg_info.size() != 2) {
     if(DEBUG_FLAG) {
-      std::cout << "WARN:: Unsupported src_reg_info size at PC: 0x" << std::hex << pc << "\n";
+      std::cout << "WARN:: reverse_engineer_aluOp(): src_reg_info.size() != 2\n";
     }
     return UNKNOWN;
   }
@@ -778,24 +786,17 @@ ALU_Operation reverse_engineer_aluOp (const uint64_t pc, const ExecuteInfo& exec
     detected_op_count++;
   }
 
-  if (DEBUG_FLAG) {
-    std::cout << "\t\t\t TST | TEQ | CMP | CMN |\n";
+  if(DEBUG_FLAG) {
+      std::cout << "\t\t\t TST | TEQ | CMP | CMN |\n";
     std::cout << "r64 values:  ";
-  }
-
-  for (uint8_t r64_val: DEBUG_r64_possibilities) {
-    if(DEBUG_FLAG) {
+    for (uint8_t r64_val: DEBUG_r64_possibilities) {
       std::cout << "0x" << std::hex << static_cast<int>(r64_val) << " | ";
     }
-  }
-  if(DEBUG_FLAG) {
     std::cout << "\n";
-  }
-  if (detected_op_count != 1) {
-    if(DEBUG_FLAG) { 
+    if (detected_op_count != 1)
       std::cout << "WARN:: reverse_engineer_aluOp(): Detected " << std::dec << detected_op_count << " possible operations. Couldn't identify unique alu operation.\n";
-    }
   }
+
   
   return aluOp;
 }
