@@ -1,0 +1,128 @@
+=== Benchmark: compress_0 ===
+Extracted 10 branch PCs from stats: ['0xffffdfdf0814', '0xffffdfdf0a98', '0xffffdfdf097c', '0xffffdfdf08e0', '0xffffdfdf0ab8', '0xffffdfdf0910', '0xffffdfdf08b8', '0xffffdfdf0988', '0xffffdfde09d8', '0xffffdfdf0a30']
+
+Analyzing 1767640 entries; tracking PCs: ['0xffffdfdf0814', '0xffffdfdf0a98', '0xffffdfdf097c', '0xffffdfdf08e0', '0xffffdfdf0ab8', '0xffffdfdf0910', '0xffffdfdf08b8', '0xffffdfdf0988', '0xffffdfde09d8', '0xffffdfdf0a30']
+
+Results:
+0xffffdfdf0814: []
+0xffffdfdf0a98: []
+0xffffdfdf097c: []
+0xffffdfdf08e0: []
+0xffffdfdf0ab8: []
+0xffffdfdf0910: []
+0xffffdfdf08b8: []
+0xffffdfdf0988: []
+0xffffdfde09d8: []
+0xffffdfdf0a30: []
+=== Benchmark: compress_1 ===
+Extracted 10 branch PCs from stats: ['0xffffdfe32454', '0xffffdfe325bc', '0xffffdfe3253c', '0xffffdfe325dc', '0xffffdfe32484', '0xffffdfe32494', '0xffffdfe3282c', '0xffffdfc1f478', '0xffffdfe325ac', '0xffffdfe31de0']
+
+Analyzing 1748167 entries; tracking PCs: ['0xffffdfe32454', '0xffffdfe325bc', '0xffffdfe3253c', '0xffffdfe325dc', '0xffffdfe32484', '0xffffdfe32494', '0xffffdfe3282c', '0xffffdfc1f478', '0xffffdfe325ac', '0xffffdfe31de0']
+
+Results:
+0xffffdfe32454: []
+0xffffdfe325bc: []
+0xffffdfe3253c: []
+0xffffdfe325dc: []
+0xffffdfe32484: []
+0xffffdfe32494: []
+0xffffdfe3282c: []
+0xffffdfc1f478: []
+0xffffdfe325ac: []
+0xffffdfe31de0: []
+=== Benchmark: compress_2 ===
+Extracted 10 branch PCs from stats: ['0xffffdfe32454', '0xffffdfe325bc', '0xffffdfe32484', '0xffffdfe325dc', '0xffffdfe3253c', '0xffffdfe32494', '0xffffdfe3282c', '0xffffdfe325ac', '0xffffdfc1f478', '0xffffdfe31de0']
+
+Analyzing 1752554 entries; tracking PCs: ['0xffffdfe32454', '0xffffdfe325bc', '0xffffdfe32484', '0xffffdfe325dc', '0xffffdfe3253c', '0xffffdfe32494', '0xffffdfe3282c', '0xffffdfe325ac', '0xffffdfc1f478', '0xffffdfe31de0']
+
+Results:
+0xffffdfe32454: []
+0xffffdfe325bc: []
+0xffffdfe32484: []
+0xffffdfe325dc: []
+0xffffdfe3253c: []
+0xffffdfe32494: []
+0xffffdfe3282c: []
+0xffffdfe325ac: []
+0xffffdfc1f478: []
+0xffffdfe31de0: []
+=== Benchmark: compress_3 ===
+Extracted 10 branch PCs from stats: ['0xffffdfe185cc', '0xffffdfe167dc', '0xffffdfe185f0', '0xffffdfe18584', '0xffffdfe16800', '0xffffdfe18564', '0xffffdfe16268', '0xffffdfe15fe0', '0xffffdfe1617c', '0xffffdfe16198']
+
+Analyzing 1743136 entries; tracking PCs: ['0xffffdfe185cc', '0xffffdfe167dc', '0xffffdfe185f0', '0xffffdfe18584', '0xffffdfe16800', '0xffffdfe18564', '0xffffdfe16268', '0xffffdfe15fe0', '0xffffdfe1617c', '0xffffdfe16198']
+
+Results:
+0xffffdfe185cc: []
+0xffffdfe167dc: []
+0xffffdfe185f0: []
+0xffffdfe18584: []
+0xffffdfe16800: []
+0xffffdfe18564: []
+0xffffdfe16268: []
+0xffffdfe15fe0: []
+0xffffdfe1617c: []
+0xffffdfe16198: []
+=== Benchmark: compress_4 ===
+Extracted 10 branch PCs from stats: ['0xffffdfe325bc', '0xffffdfe32454', '0xffffdfe32484', '0xffffdfe325dc', '0xffffdfe32804', '0xffffdfe3282c', '0xffffdfe325ac', '0xffffdfe32494', '0xffffdfe31de0', '0xffffdfda6ec8']
+
+Analyzing 1746180 entries; tracking PCs: ['0xffffdfe325bc', '0xffffdfe32454', '0xffffdfe32484', '0xffffdfe325dc', '0xffffdfe32804', '0xffffdfe3282c', '0xffffdfe325ac', '0xffffdfe32494', '0xffffdfe31de0', '0xffffdfda6ec8']
+
+Results:
+0xffffdfe325bc: []
+0xffffdfe32454: []
+0xffffdfe32484: []
+0xffffdfe325dc: []
+0xffffdfe32804: []
+0xffffdfe3282c: []
+0xffffdfe325ac: []
+0xffffdfe32494: []
+0xffffdfe31de0: []
+0xffffdfda6ec8: []
+=== Benchmark: compress_5 ===
+Extracted 10 branch PCs from stats: ['0xffffdfe32454', '0xffffdfe325bc', '0xffffdfe32484', '0xffffdfe325dc', '0xffffdfe325ac', '0xffffdfe32804', '0xffffdfe3282c', '0xffffdfe32494', '0xffffdfe32948', '0xffffdfe31de0']
+
+Analyzing 1750369 entries; tracking PCs: ['0xffffdfe32454', '0xffffdfe325bc', '0xffffdfe32484', '0xffffdfe325dc', '0xffffdfe325ac', '0xffffdfe32804', '0xffffdfe3282c', '0xffffdfe32494', '0xffffdfe32948', '0xffffdfe31de0']
+
+Results:
+0xffffdfe32454: []
+0xffffdfe325bc: []
+0xffffdfe32484: []
+0xffffdfe325dc: []
+0xffffdfe325ac: []
+0xffffdfe32804: []
+0xffffdfe3282c: []
+0xffffdfe32494: []
+0xffffdfe32948: []
+0xffffdfe31de0: []
+=== Benchmark: compress_6 ===
+Extracted 10 branch PCs from stats: ['0xffffdfe32454', '0xffffdfe325bc', '0xffffdfe32484', '0xffffdfe325dc', '0xffffdfe325ac', '0xffffdfe32804', '0xffffdfe3282c', '0xffffdfe32494', '0xffffdfe32948', '0xffffdfe31de0']
+
+Analyzing 1750449 entries; tracking PCs: ['0xffffdfe32454', '0xffffdfe325bc', '0xffffdfe32484', '0xffffdfe325dc', '0xffffdfe325ac', '0xffffdfe32804', '0xffffdfe3282c', '0xffffdfe32494', '0xffffdfe32948', '0xffffdfe31de0']
+
+Results:
+0xffffdfe32454: []
+0xffffdfe325bc: []
+0xffffdfe32484: []
+0xffffdfe325dc: []
+0xffffdfe325ac: []
+0xffffdfe32804: []
+0xffffdfe3282c: []
+0xffffdfe32494: []
+0xffffdfe32948: []
+0xffffdfe31de0: []
+=== Benchmark: compress_7 ===
+Extracted 10 branch PCs from stats: ['0xffffdfe32454', '0xffffdfe325bc', '0xffffdfe3253c', '0xffffdfe32484', '0xffffdfe325dc', '0xffffdfc1f478', '0xffffdfe31de0', '0xffffdfe325ac', '0xffffdfe3282c', '0xffffdfc1f5a0']
+
+Analyzing 1728872 entries; tracking PCs: ['0xffffdfe32454', '0xffffdfe325bc', '0xffffdfe3253c', '0xffffdfe32484', '0xffffdfe325dc', '0xffffdfc1f478', '0xffffdfe31de0', '0xffffdfe325ac', '0xffffdfe3282c', '0xffffdfc1f5a0']
+
+Results:
+0xffffdfe32454: []
+0xffffdfe325bc: []
+0xffffdfe3253c: []
+0xffffdfe32484: []
+0xffffdfe325dc: []
+0xffffdfc1f478: []
+0xffffdfe31de0: []
+0xffffdfe325ac: []
+0xffffdfe3282c: []
+0xffffdfc1f5a0: []
