@@ -956,112 +956,119 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
 
         // loop thorugh last 8 entries in retire_op_queue and print out the instructions
         //std::cout << "Last 8 RetireOp Queue Entries:" << std::endl;
-        for(int i = 0; i < 8 && i < retire_op_queue.size(); i++) {
-          RetireOp retire_op = retire_op_queue[i];
+        uint64_t tracking_dep_reg_idx = _exec_info.dec_info.src_reg_info[0];
+        bool found_immediate_inst_producing_branch_reg = false;
+        bool found_load = false;
+        RetireOp retire_op;
+        for(int i = 0; i < retire_op_queue.size(); i++) {
+          retire_op = retire_op_queue[i];
           //std::cout << "PC: 0x" << std::hex << retire_op.pc << std::dec << " | " << retire_op.exec_info << std::endl;
           if(!(retire_op.exec_info.dec_info.dst_reg_info.has_value())) {
             continue;
           }
           uint64_t dest_reg_idx = retire_op.exec_info.dec_info.dst_reg_info.value();
           // check if branch register is same as load producing register
-          if(dest_reg_idx == _exec_info.dec_info.src_reg_info[0]) {
+          if(dest_reg_idx == tracking_dep_reg_idx) {
+            // if the instruction is a load, we can stop
+            if(retire_op.exec_info.dec_info.insn_class == InstClass::loadInstClass) {
+              found_load = true;
+            }
             //uint64_t dest_reg_val = retire_op.exec_info.dst_reg_value.value();
             //get_branch_bit_direction(pc_index, dest_reg_val, _resolve_dir);
             // check if the instruction is a load
-            if(retire_op.exec_info.dec_info.insn_class != InstClass::loadInstClass) {
-              // std::cout << "Producer is not a load, skipping..." << std::endl;
-              // std::cout << "PC: 0x" << std::hex << retire_op.pc << std::dec << " | " << retire_op.exec_info << std::endl;
-              // std::cout << "\t";
-              // for (auto src_reg: retire_op.exec_info.dec_info.src_reg_info) {
-              //   std::cout << " | r" << std::dec << src_reg << ": 0x" << std::hex << RegFile[src_reg];
-              // }
-              // std::cout << "\n";
+            // std::cout << "Producer is not a load, skipping..." << std::endl;
+            // std::cout << "PC: 0x" << std::hex << retire_op.pc << std::dec << " | " << retire_op.exec_info << std::endl;
+            // std::cout << "\t";
+            // for (auto src_reg: retire_op.exec_info.dec_info.src_reg_info) {
+            //   std::cout << " | r" << std::dec << src_reg << ": 0x" << std::hex << RegFile[src_reg];
+            // }
+            // std::cout << "\n";
 
-              ALU_Operation aluOp = reverse_engineer_aluOp(pc, retire_op.exec_info);
-              //std::cout << "ALU_op = " << aluOp << "\n\n";
+            ALU_Operation aluOp = reverse_engineer_aluOp(pc, retire_op.exec_info);
+            
+            //std::cout << "ALU_op = " << aluOp << "\n\n";
 
-              if (aluOp == UNKNOWN)
-                break;
-              break;
-            }
-            // print out address
-            uint64_t load_addr = retire_op.exec_info.mem_va.value();
-            // std::cout << "Load Address: " << std::hex << load_addr << std::dec << std::endl;
-
-            // check if address is in store table
-            uint64_t addr_index = load_addr & 0xFFFF;
-            uint64_t addr_tag = (load_addr & 0xFFF0000) >> 16;
-            if(store_table[addr_index].tag == addr_tag) {
-              // print out store table entry
-              // std::cout << "Store Table Entry: " << std::endl;
-              // std::cout << "Index: " << addr_index << " | Valid: " << ST[addr_index].is_valid << " | Zero: " << ST[addr_index].is_zero << std::endl;
-              // std::cout << "Linked to PC: 0x" << std::hex << ST[addr_index].pc << std::dec << std::endl;
-
-              uint64_t store_pc = store_table[addr_index].pc;
-              uint64_t store_value = store_table[addr_index].value;
-              uint64_t store_pc_index = store_pc & 0xFFFF;
-              uint64_t store_pc_tag = (store_pc & 0xFFF0000) >> 16; 
-
-              bool store_trigger_found = false;
-              for(int j = 0; j < branch_table[pc_index].num_triggers; j++) {
-                // check if the chain is already made
-                if(branch_table[pc_index].store_triggers[j] == store_pc) {
-                  store_trigger_found = true;
-		              trigger_table[store_pc_index].br_type = branch_table[pc_index].br_type;
-                  trigger_table[store_pc_index].branch_bit_mask = branch_table[pc_index].branch_bit_mask;
-                  break;
-                }
-              }
-
-	            if (!store_trigger_found) {
-    		        if (branch_table[pc_index].num_triggers >= 32) {
-        		      std::cerr << "ERROR: num_triggers=" << branch_table[pc_index].num_triggers << " at pc_index=" << pc_index << "\n";
-    			      }		 
-		            else {
-                  // std::cout << "Making chain with PC: 0x" << std::hex << store_pc << std::dec << " --> Branch PC: 0x" << std::hex << pc <<std::endl;
-                  // add the store pc to the chain
-
-                  branch_table[pc_index].store_triggers[branch_table[pc_index].num_triggers] = store_pc;
-                  branch_table[pc_index].num_triggers += 1;
-
-                  // add load to the load table
-                  uint64_t load_pc = retire_op.pc;
-                  uint64_t load_pc_index = load_pc & 0xFFFF;
-                  uint64_t load_pc_tag = (load_pc & 0xFFF0000) >> 16;
-                  if(load_table[load_pc_index].state == INVALID) {
-                    // add to the load table
-                    load_table[load_pc_index].tag = load_pc_tag;
-                    load_table[load_pc_index].br_pc = pc;
-                    load_table[load_pc_index].last_addr = load_addr;
-                    load_table[load_pc_index].stride = -1;
-                    load_table[load_pc_index].state = TRAINING;
-                    if(LV_DEBUG_FLAG) {
-                      std::cout << "Load Table Entry Created: " << std::endl;
-                      std::cout << "Load PC: 0x" << std::hex << load_pc << std::dec << " | Load Addr: 0x" << std::hex << load_addr << std::dec 
-                                << " | BR PC: 0x" << std::hex << pc << std::dec << " | Stride: " << load_table[load_pc_index].stride << std::endl;
-                    }
-                  } 
-
-                  if(trigger_table[store_pc_index].tag == 0) {
-                    // add to the trigger table
-                    trigger_table[store_pc_index].tag = store_pc_tag;
-                    trigger_table[store_pc_index].value = store_value;
-                    trigger_table[store_pc_index].addr = load_addr;
-                    trigger_table[store_pc_index].br_type = branch_table[pc_index].br_type;
-		                trigger_table[store_pc_index].branch_bit_mask = branch_table[pc_index].branch_bit_mask;
-                    
-                  } else {
-                    // update the trigger table
-                    trigger_table[store_pc_index].tag = store_pc_tag;
-                    trigger_table[store_pc_index].addr = load_addr;
-                  }
-                  
-                }
-              }
-
-              branch_table[pc_index].is_linked = true;
-            }
             break;
+          }
+        }
+        
+        if(found_load) {
+        // print out address
+          uint64_t load_addr = retire_op.exec_info.mem_va.value();
+          // std::cout << "Load Address: " << std::hex << load_addr << std::dec << std::endl;
+
+          // check if address is in store table
+          uint64_t addr_index = load_addr & 0xFFFF;
+          uint64_t addr_tag = (load_addr & 0xFFF0000) >> 16;
+          if(store_table[addr_index].tag == addr_tag) {
+            // print out store table entry
+            // std::cout << "Store Table Entry: " << std::endl;
+            // std::cout << "Index: " << addr_index << " | Valid: " << ST[addr_index].is_valid << " | Zero: " << ST[addr_index].is_zero << std::endl;
+            // std::cout << "Linked to PC: 0x" << std::hex << ST[addr_index].pc << std::dec << std::endl;
+
+            uint64_t store_pc = store_table[addr_index].pc;
+            uint64_t store_value = store_table[addr_index].value;
+            uint64_t store_pc_index = store_pc & 0xFFFF;
+            uint64_t store_pc_tag = (store_pc & 0xFFF0000) >> 16; 
+
+            bool store_trigger_found = false;
+            for(int j = 0; j < branch_table[pc_index].num_triggers; j++) {
+              // check if the chain is already made
+              if(branch_table[pc_index].store_triggers[j] == store_pc) {
+                store_trigger_found = true;
+                trigger_table[store_pc_index].br_type = branch_table[pc_index].br_type;
+                trigger_table[store_pc_index].branch_bit_mask = branch_table[pc_index].branch_bit_mask;
+                break;
+              }
+            }
+
+            if (!store_trigger_found) {
+              if (branch_table[pc_index].num_triggers >= 32) {
+                std::cerr << "ERROR: num_triggers=" << branch_table[pc_index].num_triggers << " at pc_index=" << pc_index << "\n";
+              }		 
+              else {
+                // std::cout << "Making chain with PC: 0x" << std::hex << store_pc << std::dec << " --> Branch PC: 0x" << std::hex << pc <<std::endl;
+                //add the store pc to the chain
+
+                branch_table[pc_index].store_triggers[branch_table[pc_index].num_triggers] = store_pc;
+                branch_table[pc_index].num_triggers += 1;
+
+                // add load to the load table
+                uint64_t load_pc = retire_op.pc;
+                uint64_t load_pc_index = load_pc & 0xFFFF;
+                uint64_t load_pc_tag = (load_pc & 0xFFF0000) >> 16;
+                if(load_table[load_pc_index].state == INVALID) {
+                  // add to the load table
+                  load_table[load_pc_index].tag = load_pc_tag;
+                  load_table[load_pc_index].br_pc = pc;
+                  load_table[load_pc_index].last_addr = load_addr;
+                  load_table[load_pc_index].stride = -1;
+                  load_table[load_pc_index].state = TRAINING;
+                  if(LV_DEBUG_FLAG) {
+                    std::cout << "Load Table Entry Created: " << std::endl;
+                    std::cout << "Load PC: 0x" << std::hex << load_pc << std::dec << " | Load Addr: 0x" << std::hex << load_addr << std::dec 
+                              << " | BR PC: 0x" << std::hex << pc << std::dec << " | Stride: " << load_table[load_pc_index].stride << std::endl;
+                  }
+                } 
+
+                if(trigger_table[store_pc_index].tag == 0) {
+                  // add to the trigger table
+                  trigger_table[store_pc_index].tag = store_pc_tag;
+                  trigger_table[store_pc_index].value = store_value;
+                  trigger_table[store_pc_index].addr = load_addr;
+                  trigger_table[store_pc_index].br_type = branch_table[pc_index].br_type;
+                  trigger_table[store_pc_index].branch_bit_mask = branch_table[pc_index].branch_bit_mask;
+                  
+                } else {
+                  // update the trigger table
+                  trigger_table[store_pc_index].tag = store_pc_tag;
+                  trigger_table[store_pc_index].addr = load_addr;
+                }
+                
+              }
+            }
+
+            branch_table[pc_index].is_linked = true;
           }
         }
       }
