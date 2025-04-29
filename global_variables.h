@@ -95,6 +95,7 @@ struct LoadTableEntry {
   uint8_t confidence_ctr;
   AddrPredictorState state; 
   uint64_t addr_history_reg;
+  uint64_t spec_addr_history_reg;
 };
 
 struct LinkTable {

@@ -65,6 +65,7 @@ void beginLoadAddrPredictor() {
     load_table[i].state = INVALID;
     load_table[i].inflight_loads = 0;
     load_table[i].addr_history_reg = 0;
+    load_table[i].spec_addr_history_reg = 0;
     load_table[i].confidence_ctr = 0;
   }
 
@@ -165,7 +166,7 @@ void predictLoadAddr(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t
       load_table[load_pc_index].inflight_loads += 1;
       
       if(LV_DEBUG_FLAG) {
-        std::cout << "LAP Predicting: Sequence Number: " << seq_no
+        std::cout << "LAP Stride Predicting: Sequence Number: " << seq_no
                   << " | Load PC: 0x" << std::hex << pc << std::dec 
                   << " | Predicted Addr: 0x" << std::hex << predicted_addr << std::dec
                   << " | Branch PC: 0x" << std::hex << load_table[load_pc_index].br_pc << std::dec
@@ -173,19 +174,25 @@ void predictLoadAddr(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t
                   << std::endl;
       }
     } else if(load_table[load_pc_index].state == VALID_CORRELATION) {
-      uint64_t current_history_reg = load_table[load_pc_index].addr_history_reg;
+      uint64_t current_history_reg = load_table[load_pc_index].spec_addr_history_reg;
       if(PERFECT_ADDR_PRED) predicted_addr = oracle_load_addr;
       else predicted_addr = link_table[current_history_reg].address;
       branch_table[branch_pc_index].predicted_load_addr = predicted_addr;
+      load_table[load_pc_index].inflight_loads += 1;
       if(LV_DEBUG_FLAG) {
-        std::cout << "LAP Predicting: Sequence Number: " << seq_no
+        std::cout << "LAP Correlation Predicting: Sequence Number: " << seq_no
                   << " | Load PC: 0x" << std::hex << pc << std::dec 
+                  << " | History Reg: 0x" << std::hex << current_history_reg << std::dec
                   << " | Predicted Addr: 0x" << std::hex << predicted_addr << std::dec
                   << " | Branch PC: 0x" << std::hex << load_table[load_pc_index].br_pc << std::dec
                   << " | Inflight Loads: " << load_table[load_pc_index].inflight_loads
                   << std::endl;
       }
+      // update spec history reg
+      uint64_t trimmed_address = (predicted_addr >> 2); // & LAP_SUBSET_MASK;
+      load_table[load_pc_index].spec_addr_history_reg = ((load_table[load_pc_index].spec_addr_history_reg << LAP_SHIFT_BITS) ^ trimmed_address) & LAP_HISTORY_MASK;
     } else if(load_table[load_pc_index].state == TRAINING) {
+      branch_table[branch_pc_index].predicted_load_addr = predicted_addr;
       if(LV_DEBUG_FLAG) {
         std::cout << "LAP Training: Sequence Number: " << seq_no
                     << " | Load PC: 0x" << std::hex << pc << std::dec 
@@ -365,43 +372,93 @@ void updateLoadPredictor(uint64_t seq_no, uint8_t piece, uint64_t pc, const Deco
           speculation_map[seq_no].valid = false;
         }
       } else if(load_table[load_pc_index].state == VALID_CORRELATION) {
-
+        if(load_table[load_pc_index].inflight_loads != 0) {
+          load_table[load_pc_index].inflight_loads -= 1;
+        }
         // correlation predictor
         uint64_t current_history_reg = load_table[load_pc_index].addr_history_reg;
         link_table[current_history_reg].address = mem_va;
         if(LV_DEBUG_FLAG) {
-          std::cout << "LAP Training: Sequence Number: " << seq_no
+          std::cout << "LAP Correlation Updating: Sequence Number: " << seq_no
+                    << " | PC: 0x" << std::hex << pc << std::dec 
+                    << " | History Reg: 0x" << std::hex << current_history_reg << std::dec
+                    << " | Actual Addr: 0x" << std::hex << mem_va << std::dec
+                    << " | Inflight Loads: " << load_table[load_pc_index].inflight_loads
+                    << std::endl;
+        }
+
+        uint64_t trimmed_address = (mem_va >> 2); // & LAP_SUBSET_MASK;
+        load_table[load_pc_index].addr_history_reg = ((load_table[load_pc_index].addr_history_reg << LAP_SHIFT_BITS) ^ trimmed_address) & LAP_HISTORY_MASK;
+        if(load_table[load_pc_index].inflight_loads == 0) load_table[load_pc_index].spec_addr_history_reg = load_table[load_pc_index].addr_history_reg;
+      } else if(load_table[load_pc_index].state == TRAINING) {
+         // correlation predictor
+        uint64_t current_history_reg = load_table[load_pc_index].addr_history_reg;
+        link_table[current_history_reg].address = mem_va;
+        uint64_t trimmed_address = (mem_va >> 2); // & LAP_SUBSET_MASK;
+        load_table[load_pc_index].addr_history_reg = ((load_table[load_pc_index].addr_history_reg << LAP_SHIFT_BITS) ^ trimmed_address) & LAP_HISTORY_MASK;
+         if(LV_DEBUG_FLAG) {
+          std::cout << "LAP Correlation Training: Sequence Number: " << seq_no
                     << " | PC: 0x" << std::hex << pc << std::dec 
                     << " | History Reg: 0x" << std::hex << current_history_reg << std::dec
                     << " | Actual Addr: 0x" << std::hex << mem_va << std::dec
                     << std::endl;
         }
 
-        uint64_t trimmed_address = (mem_va >> 2) & LAP_SUBSET_MASK;
-        load_table[load_pc_index].addr_history_reg = ((load_table[load_pc_index].addr_history_reg << LAP_SHIFT_BITS) ^ trimmed_address) & LAP_HISTORY_MASK;
-      } else if(load_table[load_pc_index].state == TRAINING) {
-         // correlation predictor
-        uint64_t current_history_reg = load_table[load_pc_index].addr_history_reg;
-        link_table[current_history_reg].address = mem_va;
-        uint64_t trimmed_address = (mem_va >> 2) & LAP_SUBSET_MASK;
-        load_table[load_pc_index].addr_history_reg = ((load_table[load_pc_index].addr_history_reg << LAP_SHIFT_BITS) ^ trimmed_address) & LAP_HISTORY_MASK;
-
         // stride predictor
-        // check if the predicted address is correct
-        if(load_table[load_pc_index].last_addr != mem_va) {
+        if(load_table[load_pc_index].stride == -1) {
           load_table[load_pc_index].stride = mem_va - load_table[load_pc_index].last_addr;
           load_table[load_pc_index].last_addr = mem_va;
-          load_table[load_pc_index].state = VALID_STRIDE;
-          uint64_t branch_pc = load_table[load_pc_index].br_pc;
-          uint64_t branch_pc_index = branch_pc & 0xFFFF;
-          uint64_t branch_tag = (branch_pc & 0xFFF0000) >> 16;
-          branch_table[branch_pc_index].predicted_load_addr = mem_va + load_table[load_pc_index].stride;
+          load_table[load_pc_index].confidence_ctr = 0;
           if(LV_DEBUG_FLAG) {
-                std::cout << "LAP Training Complete: Sequence Number: " << seq_no
+                std::cout << "LAP Stride Training: Sequence Number: " << seq_no
                           << " | PC: 0x" << std::hex << pc << std::dec
                           << " | Actual Addr: 0x" << std::hex << mem_va << std::dec
-                          << " | Stride: 0x" << std::hex << load_table[load_pc_index].stride << std::dec
+                          << " | Stride: 0x" << std::hex << load_table[load_pc_index].stride << std::dec 
+                          << " | Confidence: " << (int)load_table[load_pc_index].confidence_ctr
                           << std::endl;
+          }
+        } else {
+          uint64_t stored_stride = load_table[load_pc_index].stride;
+          uint64_t current_stride = mem_va - load_table[load_pc_index].last_addr;
+          if(current_stride == stored_stride) {
+            load_table[load_pc_index].confidence_ctr += 1;
+          } else {
+            // if you fail to find stride once, reset the confidence + stride and switch to correlation
+            load_table[load_pc_index].confidence_ctr = 0;
+            load_table[load_pc_index].stride = -1;
+            load_table[load_pc_index].state = VALID_CORRELATION;
+            if(LV_DEBUG_FLAG) {
+              std::cout << "LAP Correlation Training Complete: Sequence Number: " << seq_no
+                          << " | PC: 0x" << std::hex << pc << std::dec 
+                          << " | Actual Addr: 0x" << std::hex << mem_va << std::dec
+                          << std::endl;
+            }
+            return;
+          }
+          load_table[load_pc_index].last_addr = mem_va;
+          if(load_table[load_pc_index].confidence_ctr == LAP_STRIDE_MAX_CONFIDENCE) {
+            load_table[load_pc_index].state = VALID_STRIDE;
+            uint64_t branch_pc = load_table[load_pc_index].br_pc;
+            uint64_t branch_pc_index = branch_pc & 0xFFFF;
+            uint64_t branch_tag = (branch_pc & 0xFFF0000) >> 16;
+            branch_table[branch_pc_index].predicted_load_addr = mem_va + load_table[load_pc_index].stride;
+            if(LV_DEBUG_FLAG) {
+              std::cout << "LAP Stride Training Complete: Sequence Number: " << seq_no
+                        << " | PC: 0x" << std::hex << pc << std::dec 
+                        << " | Actual Addr: 0x" << std::hex << mem_va << std::dec
+                        << " | Stride: 0x" << std::hex << load_table[load_pc_index].stride << std::dec 
+                        << " | Confidence: " << (int)load_table[load_pc_index].confidence_ctr
+                        << std::endl;
+            }
+          } else {
+            if(LV_DEBUG_FLAG) {
+                std::cout << "LAP Stride Training: Sequence Number: " << seq_no
+                          << " | PC: 0x" << std::hex << pc << std::dec
+                          << " | Actual Addr: 0x" << std::hex << mem_va << std::dec
+                          << " | Stride: 0x" << std::hex << load_table[load_pc_index].stride << std::dec 
+                          << " | Confidence: " << (int)load_table[load_pc_index].confidence_ctr
+                          << std::endl;
+            }
           }
         }
 
@@ -676,7 +733,7 @@ void get_branch_bit_direction(uint16_t pc_index,  uint64_t dest_reg_val, const b
 //		std::cout << "Branch bit mask this cycle is " << branch_bit_mask << " branch_table[pc_index].prev_taken " << branch_table[pc_index].prev_taken << " _resolve_dir " << _resolve_dir << " unchanged_bits" << unchanged_bits << " changed_bits " << changed_bits;
 		uint64_t prev_branch_bit_mask = branch_table[pc_index].branch_bit_mask;
                 branch_table[pc_index].branch_bit_mask &= branch_bit_mask;
-//		std::cout << "previous value: " << branch_table[pc_index].prev_value << " this time value : " << dest_reg_val << " changed_bits: " << changed_bits << "unchanged_bits" << unchanged_bits << " branch_bit_mask " << branch_bit_mask << "branch_table[pc_index].branch_bit_mask" << branch_table[pc_index].branch_bit_mask << "\n";
+//		std::cout << "previous value: " << branch_table[pc _index].prev_value << " this time value : " << dest_reg_val << " changed_bits: " << changed_bits << "unchanged_bits" << unchanged_bits << " branch_bit_mask " << branch_bit_mask << "branch_table[pc_index].branch_bit_mask" << branch_table[pc_index].branch_bit_mask << "\n";
 		bool prev_direction = branch_table[pc_index].direction_zero_match;
 		branch_table[pc_index].direction_zero_match = !(((dest_reg_val & branch_table[pc_index].branch_bit_mask) == 0) ^ _resolve_dir);
 		bool prediction =!(((dest_reg_val & branch_table[pc_index].branch_bit_mask) == 0) ^ branch_table[pc_index].direction_zero_match);
@@ -925,7 +982,6 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
 
               if (aluOp == UNKNOWN)
                 break;
-
               break;
             }
             // print out address
