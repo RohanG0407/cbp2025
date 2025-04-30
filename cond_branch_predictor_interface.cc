@@ -117,6 +117,7 @@ void beginCondDirPredictor()
     branch_table[i].direction_zero_match = true;
     branch_table[i].bit_flag = false;
     branch_table[i].flag_br = false;
+    branch_table[i].value_prediction_map.clear();
   }
 
   // initial store_table setup
@@ -140,6 +141,7 @@ void beginCondDirPredictor()
     {
       trigger_table[i].src_flag[k] = 0;
     }
+    trigger_table[i].value_prediction_map.clear();
   }
 
   // initial prediction_table setup
@@ -182,10 +184,7 @@ void predictLoadAddr(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t
     }
     if (load_table[load_pc_index].state == VALID_STRIDE)
     {
-      if (PERFECT_ADDR_PRED)
-        predicted_addr = oracle_load_addr;
-      else
-        predicted_addr = load_table[load_pc_index].last_addr + load_table[load_pc_index].stride;
+      predicted_addr = load_table[load_pc_index].last_addr + load_table[load_pc_index].stride;
       branch_table[branch_pc_index].predicted_load_addr = predicted_addr;
       speculation_map[seq_no] = {seq_no, pc, predicted_addr, true};
       load_table[load_pc_index].last_addr = predicted_addr;
@@ -204,10 +203,7 @@ void predictLoadAddr(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t
     else if (load_table[load_pc_index].state == VALID_CORRELATION)
     {
       uint64_t current_history_reg = load_table[load_pc_index].spec_addr_history_reg;
-      if (PERFECT_ADDR_PRED)
-        predicted_addr = oracle_load_addr;
-      else
-        predicted_addr = link_table[current_history_reg].address;
+      predicted_addr = link_table[current_history_reg].address;
       branch_table[branch_pc_index].predicted_load_addr = predicted_addr;
       load_table[load_pc_index].inflight_loads += 1;
       if (LV_DEBUG_FLAG)
@@ -611,16 +607,21 @@ void notify_agen_complete(uint64_t seq_no, uint8_t piece, uint64_t pc, const Dec
       // std::cout << " the trigger table prediction is \n" << trigger_table[store_pc_index].br_type << "\n";
       if (trigger_table[store_pc_index].flag_br)
       {
-        if (dest_val >= 16)
-        {
-          // std::cout << "ERROR ERROR flag values going above 16\n";
-          uint64_t dest_module_val = dest_val % 16;
-          prediction_table[store_addr_index].taken = trigger_table[store_pc_index].src_flag[dest_module_val];
-        }
-        else
-        {
-          prediction_table[store_addr_index].taken = trigger_table[store_pc_index].src_flag[dest_val];
-        }
+        // if (dest_val >= 16)
+        // {
+        //   // std::cout << "ERROR ERROR flag values going above 16\n";
+        //   uint64_t dest_module_val = dest_val % 16;
+        //   prediction_table[store_addr_index].taken = trigger_table[store_pc_index].src_flag[dest_module_val];
+        // }
+        // else
+        // {
+        //   prediction_table[store_addr_index].taken = trigger_table[store_pc_index].src_flag[dest_val];
+        // }
+        prediction_table[store_addr_index].taken = trigger_table[store_pc_index].value_prediction_map[dest_val];
+        // std::cout << "Triggered Value Prediction Map: "
+        //           << "Sequence Number: " << seq_no << std::hex
+        //           << " | PC 0x" << pc << " | Store Value: 0x" << dest_val << std::dec
+        //           << " | Prediction: " << prediction_table[store_addr_index].taken << std::endl;
         //   std::cout << " weird table prediction is \n" << prediction_table[store_addr_index].taken << " For value " << dest_val << "\n";
       }
       else if (trigger_table[store_pc_index].br_type == CBZ)
@@ -1042,7 +1043,7 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
     }
 
     // append to misprediction list of pc's where entry saturation counter = max
-    if (branch_table[pc_index].tag == tag && branch_table[pc_index].sat_ctr == BT_SAT_COUNTER_MAX)
+    if (branch_table[pc_index].tag == tag && (branch_table[pc_index].sat_ctr == BT_SAT_COUNTER_MAX || branch_table[pc_index].is_linked))
     {
       // append full 64-bit pc to misprediction list
       high_mispred_pc.insert(pc);
@@ -1142,7 +1143,13 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
       {
         // print out address
         uint64_t load_addr = retire_op.exec_info.mem_va.value();
+        uint64_t load_value = retire_op.exec_info.dst_reg_value.value();
         // std::cout << "Load Address: " << std::hex << load_addr << std::dec << std::endl;
+        branch_table[pc_index].value_prediction_map[load_value] = _resolve_dir;
+        // std::cout << "Training Value Prediction Map: "
+        //           << "Sequence Number: " << seq_no << std::hex
+        //           << " | PC 0x" << pc << " | Load Value: 0x" << load_value << std::dec
+        //           << " | Prediction: " << _resolve_dir << std::endl;
 
         // check if address is in store table
         uint64_t addr_index = load_addr & 0xFFFF;
@@ -1168,9 +1175,9 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
                 // std::cout << "before known set\n";
                 for (int k = 0; k < 16; k++)
                 {
-
                   trigger_table[store_pc_index].src_flag[k] = branch_table[pc_index].src_flag[k];
                 }
+                trigger_table[store_pc_index].value_prediction_map = branch_table[pc_index].value_prediction_map;
                 // std::cout << "after known set\n";
               }
               else
@@ -1255,13 +1262,13 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
       // }
       for (int i = 0; i < BT_SIZE; i++)
       {
-        if (branch_table[i].sat_ctr < 5)
+        if (branch_table[i].sat_ctr < 10)
         {
           branch_table[i].sat_ctr = 0;
         }
         else
         {
-          branch_table[i].sat_ctr -= 5;
+          branch_table[i].sat_ctr -= 10;
         }
       }
       branch_inst_count = 0;
