@@ -43,7 +43,8 @@ struct BranchTableEntry
   long long int correct_counter = 0;
   long long int incorrect_counter = 0;
   bool src_flag[16];
-   bool flag_br;
+  bool flag_br;
+  std::unordered_map<uint64_t, bool> value_prediction_map;
 };
 
 struct StoreTableEntry
@@ -53,7 +54,7 @@ struct StoreTableEntry
   uint64_t value;
 };
 
-struct TriggerTableEntry 
+struct TriggerTableEntry
 {
   uint64_t tag;
   uint64_t value;
@@ -61,7 +62,8 @@ struct TriggerTableEntry
   BranchType br_type;
   uint64_t branch_bit_mask;
   bool src_flag[16];
-   bool flag_br;
+  bool flag_br;
+  std::unordered_map<uint64_t, bool> value_prediction_map;
 };
 
 struct PredictionTableEntry
@@ -76,7 +78,8 @@ struct RetireOp
   ExecuteInfo exec_info;
 };
 
-enum AddrPredictorState {
+enum AddrPredictorState
+{
   INVALID,
   TRAINING,
   VALID_STRIDE,
@@ -90,29 +93,31 @@ constexpr uint64_t LAP_HISTORY_MASK = (1 << LAP_HISTORY_BITS) - 1;
 constexpr uint64_t LAP_SUBSET_MASK = (1 << LAP_SHIFT_BITS) - 1;
 constexpr uint8_t LAP_STRIDE_MAX_CONFIDENCE = 3;
 
-struct LoadTableEntry {
+struct LoadTableEntry
+{
   uint64_t tag;
   uint64_t br_pc;
   uint64_t last_addr;
-  uint64_t  stride;
+  uint64_t stride;
   uint64_t inflight_loads;
   uint8_t confidence_ctr;
-  AddrPredictorState state; 
+  AddrPredictorState state;
   uint64_t addr_history_reg;
   uint64_t spec_addr_history_reg;
 };
 
-struct LinkTable {
+struct LinkTable
+{
   uint64_t address;
 };
 
-struct SpeculativeInfo {
+struct SpeculativeInfo
+{
   uint64_t seq_no;
   uint64_t pc;
   uint64_t predicted_addr;
   bool valid;
 };
-
 
 // Branch Table Info
 #define BT_SIZE 65535
