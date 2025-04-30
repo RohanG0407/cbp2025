@@ -971,8 +971,13 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
           if(dest_reg_idx == tracking_dep_reg_idx) {
             // if the instruction is a load, we can stop
             if(retire_op.exec_info.dec_info.insn_class == InstClass::loadInstClass) {
+              //std::cout << "Load PC: 0x" << std::hex << retire_op.pc << std::dec << " | " << retire_op.exec_info.dec_info << std::endl;
               found_load = true;
+              break;
+            } else if (found_immediate_inst_producing_branch_reg) {
+              break;
             }
+            
             //uint64_t dest_reg_val = retire_op.exec_info.dst_reg_value.value();
             //get_branch_bit_direction(pc_index, dest_reg_val, _resolve_dir);
             // check if the instruction is a load
@@ -984,11 +989,24 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
             // }
             // std::cout << "\n";
 
-            ALU_Operation aluOp = reverse_engineer_aluOp(pc, retire_op.exec_info);
+            //ALU_Operation aluOp = reverse_engineer_aluOp(pc, retire_op.exec_info);
+
+            if(retire_op.exec_info.dec_info.insn_class == InstClass::aluInstClass) {
+              if(retire_op.exec_info.dec_info.src_reg_info.size() == 1) {
+                // if the instruction is a single source operand instruction
+                tracking_dep_reg_idx = retire_op.exec_info.dec_info.src_reg_info[0];
+                //std::cout << "ALU PC: 0x" << std::hex << retire_op.pc << std::dec << " | " << retire_op.exec_info.dec_info << std::endl;
+                found_immediate_inst_producing_branch_reg = true;
+              } else {
+                break;
+              }
+            } else {
+              break;
+            }
             
             //std::cout << "ALU_op = " << aluOp << "\n\n";
 
-            break;
+           //break;
           }
         }
         
@@ -1001,11 +1019,6 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
           uint64_t addr_index = load_addr & 0xFFFF;
           uint64_t addr_tag = (load_addr & 0xFFF0000) >> 16;
           if(store_table[addr_index].tag == addr_tag) {
-            // print out store table entry
-            // std::cout << "Store Table Entry: " << std::endl;
-            // std::cout << "Index: " << addr_index << " | Valid: " << ST[addr_index].is_valid << " | Zero: " << ST[addr_index].is_zero << std::endl;
-            // std::cout << "Linked to PC: 0x" << std::hex << ST[addr_index].pc << std::dec << std::endl;
-
             uint64_t store_pc = store_table[addr_index].pc;
             uint64_t store_value = store_table[addr_index].value;
             uint64_t store_pc_index = store_pc & 0xFFFF;
