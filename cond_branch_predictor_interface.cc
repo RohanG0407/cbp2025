@@ -1065,7 +1065,7 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
 		if(branch_table[pc_index].flag_br)
  		  {
  			  trigger_table[store_pc_index].flag_br = 1;
- 			  std::cout << "for store pc index " << store_pc_index << "setting flag br \n";
+ 			  // pc index " << store_pc_index << "setting flag br \n";
 			  //std::cout << "before known set\n";
  			  for (int k = 0; k < 16; k++)
  			  {
