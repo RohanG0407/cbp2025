@@ -42,6 +42,8 @@ struct BranchTableEntry
   bool bit_flag;
   long long int correct_counter = 0;
   long long int incorrect_counter = 0;
+  bool src_flag[16];
+   bool flag_br;
 };
 
 struct StoreTableEntry
@@ -58,6 +60,8 @@ struct TriggerTableEntry
   uint64_t addr;
   BranchType br_type;
   uint64_t branch_bit_mask;
+  bool src_flag[16];
+   bool flag_br;
 };
 
 struct PredictionTableEntry
