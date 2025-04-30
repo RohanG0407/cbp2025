@@ -34,6 +34,7 @@ struct BranchTableEntry
   bool is_linked;
   BranchType br_type;
   uint64_t predicted_load_addr;
+  //Structures for bit position reverse-engineering
   uint64_t prev_value;
   bool prev_taken;
   uint64_t branch_bit_mask; // Mask with 1 at the branch bit
@@ -42,6 +43,9 @@ struct BranchTableEntry
   bool bit_flag;
   long long int correct_counter = 0;
   long long int incorrect_counter = 0;
+  //Structures for src branch reverse engineering 
+  bool src_flag[16];
+  bool flag_br;
 };
 
 struct StoreTableEntry
@@ -58,6 +62,8 @@ struct TriggerTableEntry
   uint64_t addr;
   BranchType br_type;
   uint64_t branch_bit_mask;
+  bool src_flag[16];
+  bool flag_br;
 };
 
 struct PredictionTableEntry

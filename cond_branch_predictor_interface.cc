@@ -95,6 +95,9 @@ void beginCondDirPredictor()
         for(int j = 0; j <32; j++) {
             branch_table[i].store_triggers[j] = 0;
         }
+	for(int k = 0; k <16; k++) {
+            branch_table[i].src_flag[k] = 0;
+        }
         branch_table[i].num_triggers = 0;
         branch_table[i].is_linked = false;
         branch_table[i].br_type = NA;
@@ -105,6 +108,7 @@ void beginCondDirPredictor()
         branch_table[i].bit_position_matters = false;
         branch_table[i].direction_zero_match = true;
         branch_table[i].bit_flag = false;
+	branch_table[i].flag_br = false;
     }
 
     // initial store_table setup
@@ -120,7 +124,11 @@ void beginCondDirPredictor()
         trigger_table[i].value = 0;
         trigger_table[i].addr = 0;
         trigger_table[i].br_type = CBZ;
-	      trigger_table[i].branch_bit_mask = UINT64_MAX;
+	trigger_table[i].branch_bit_mask = UINT64_MAX;
+	trigger_table[i].flag_br = 0;
+	for(int k = 0; k <16; k++) {
+            trigger_table[i].src_flag[k] = 0;
+        }
     }
 
     // initial prediction_table setup
@@ -462,11 +470,19 @@ void notify_agen_complete(uint64_t seq_no, uint8_t piece, uint64_t pc, const Dec
       // check if the value is in the trigger table
       trigger_table[store_pc_index].value = dest_val;
       trigger_table[store_pc_index].addr = store_addr;
-      
+      if(store_pc_index == 37824)
+      {
+	      std::cout << " prediction for weird branch happening" << trigger_table[store_pc_index].flag_br << "\n";
+      }
       // if in the trigger table, update the prediction table
       prediction_table[store_addr_index].tag = store_addr_tag;
       //std::cout << " the trigger table prediction is \n" << trigger_table[store_pc_index].br_type << "\n";
-      if(trigger_table[store_pc_index].br_type == CBZ) {
+      if(trigger_table[store_pc_index].flag_br)
+      {
+	      prediction_table[store_addr_index].taken = trigger_table[store_pc_index].src_flag[dest_val];
+	      std::cout << " weird table prediction is \n" << prediction_table[store_addr_index].taken << " For value " << dest_val << "\n";
+      }
+      else if(trigger_table[store_pc_index].br_type == CBZ) {
         prediction_table[store_addr_index].taken = (dest_val == 0) ? true : false;
 	//std::cout << " the trigger table prediction cbz is \n" << trigger_table[store_pc_index].br_type << "  taken or not taken?" << prediction_table[store_addr_index].taken << "\n";
       } 
@@ -743,6 +759,16 @@ void get_branch_bit_direction(uint16_t pc_index,  uint64_t dest_reg_val, const b
 
 void learn_src_branch_behaivour(uint16_t pc_index,  uint64_t dest_reg_val, const bool _resolve_dir)
 {
+	if(dest_reg_val >= 16)
+	{
+		std::cout << "SOMETHING IS WRONG, this is not src branch, cant have value more than 16!!! \n";
+	        exit(0);	
+	}
+
+	if(_resolve_dir == 1)
+	{
+		branch_table[pc_index].src_flag[dest_reg_val] = 1;
+	}
 }
 
 uint64_t pack_r64 (bool N, bool Z, bool C, bool V) {
@@ -879,10 +905,10 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
         // append full 64-bit pc to misprediction list
         high_mispred_pc.insert(pc);
         uint64_t dest_reg_val = RegFile[_exec_info.dec_info.src_reg_info[0]];
-        //if(pc_index == 37824 )
-        //{
-        //	std::cout<< "src reg for weird branch!!" << _exec_info.dec_info.src_reg_info[0]<< "\n";
-        //}
+        if(pc_index == 37824 )
+        {
+        	std::cout<< "src reg for weird branch!!" << _exec_info.dec_info.src_reg_info[0]<< "\n";
+        }
         if(_exec_info.dec_info.src_reg_info[0] != 64)
         {
           get_branch_bit_direction(pc_index, dest_reg_val, _resolve_dir);
@@ -891,6 +917,7 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
         else
         {
           learn_src_branch_behaivour(pc_index, dest_reg_val, _resolve_dir);
+	  branch_table[pc_index].flag_br = 1;
         }
         //learning branch direction and bit (TBZ vs CBZ)
         // print the branch we are going to analyze
@@ -951,8 +978,20 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
                 // check if the chain is already made
                 if(branch_table[pc_index].store_triggers[j] == store_pc) {
                   store_trigger_found = true;
-		              trigger_table[store_pc_index].br_type = branch_table[pc_index].br_type;
-                  trigger_table[store_pc_index].branch_bit_mask = branch_table[pc_index].branch_bit_mask;
+		  if(branch_table[pc_index].flag_br)
+		  {
+			  trigger_table[store_pc_index].flag_br = 1;
+			  std::cout << "for store pc index " << store_pc_index << "setting flag br \n";
+			  for (int k = 0; k < 16; k++)
+			  {
+			  trigger_table[store_pc_index].src_flag[k] = branch_table[pc_index].src_flag[k];
+			  }
+		  }
+		  else
+		  {
+		  	trigger_table[store_pc_index].br_type = branch_table[pc_index].br_type;
+                  	trigger_table[store_pc_index].branch_bit_mask = branch_table[pc_index].branch_bit_mask;
+		  }
                   break;
                 }
               }
@@ -992,8 +1031,13 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
                     trigger_table[store_pc_index].value = store_value;
                     trigger_table[store_pc_index].addr = load_addr;
                     trigger_table[store_pc_index].br_type = branch_table[pc_index].br_type;
-		                trigger_table[store_pc_index].branch_bit_mask = branch_table[pc_index].branch_bit_mask;
-                    
+		    trigger_table[store_pc_index].branch_bit_mask = branch_table[pc_index].branch_bit_mask;
+                    trigger_table[store_pc_index].flag_br = branch_table[pc_index].flag_br;
+		    for(int k = 0; k < 16; k++)
+		    {
+                    	trigger_table[store_pc_index].src_flag[k] = branch_table[pc_index].src_flag[k];
+		    }
+
                   } else {
                     // update the trigger table
                     trigger_table[store_pc_index].tag = store_pc_tag;
