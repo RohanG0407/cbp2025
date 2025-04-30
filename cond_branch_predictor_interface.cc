@@ -30,6 +30,7 @@
 #define LV_DEBUG_FLAG false
 #define PERFECT_ADDR_PRED true
 #define STUPID_VALUE 8898
+#define SUPPORT_ALU_OPS false
 
 // Branch Table Info
 BranchTableEntry branch_table[BT_SIZE]; // 2^16 entries - 1
@@ -659,17 +660,7 @@ void notify_agen_complete(uint64_t seq_no, uint8_t piece, uint64_t pc, const Dec
                   << " | BranchType: " << trigger_table[store_pc_index].br_type
                   << " | Stored Prediction: " << prediction_table[store_addr_index].taken << std::endl;
       }
-    }
 
-    if (store_table[store_addr_index].tag == store_addr_tag)
-    {
-      // check if the value is in the store table
-      store_table[store_addr_index].pc = store_pc;
-      store_table[store_addr_index].value = dest_val;
-    }
-    else
-    {
-      // add to the store table
       store_table[store_addr_index].tag = store_addr_tag;
       store_table[store_addr_index].pc = store_pc;
       store_table[store_addr_index].value = dest_val;
@@ -1100,7 +1091,11 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
             found_load = true;
             break;
           }
-          else if (found_immediate_inst_producing_branch_reg)
+
+          if (!SUPPORT_ALU_OPS)
+            break; // disable support for ALU Operations
+
+          if (found_immediate_inst_producing_branch_reg)
           {
             break;
           }
