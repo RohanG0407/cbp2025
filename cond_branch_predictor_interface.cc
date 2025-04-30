@@ -661,11 +661,11 @@ void notify_agen_complete(uint64_t seq_no, uint8_t piece, uint64_t pc, const Dec
                   << " | BranchType: " << trigger_table[store_pc_index].br_type
                   << " | Stored Prediction: " << prediction_table[store_addr_index].taken << std::endl;
       }
-
-      store_table[store_addr_index].tag = store_addr_tag;
-      store_table[store_addr_index].pc = store_pc;
-      store_table[store_addr_index].value = dest_val;
     }
+
+    store_table[store_addr_index].tag = store_addr_tag;
+    store_table[store_addr_index].pc = store_pc;
+    store_table[store_addr_index].value = dest_val;
   }
 
   updateLoadPredictor(seq_no, piece, pc, _decode_info, mem_va, mem_sz, agen_cycle);
