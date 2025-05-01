@@ -63,6 +63,7 @@ struct TriggerTableEntry
 struct PredictionTableEntry
 {
   bool taken;
+  bool valid;
 };
 
 struct RetireOp
@@ -155,7 +156,7 @@ extern TriggerTableEntry trigger_table[TT_SIZE]; // 4096 entries * (16 bits for 
 #define PT_BITS 16
 #define PT_SIZE 1 << PT_BITS
 #define PT_MASK ((1 << PT_BITS) - 1)
-extern PredictionTableEntry prediction_table[PT_SIZE]; // 65536 entries * (1 bit for taken/not-taken) = 8 KB 
+extern PredictionTableEntry prediction_table[PT_SIZE]; // 65536 entries * (1 bit for taken/not-taken, 1 for valid) = 16 KB 
 
 // RetireOp Queue
 extern std::deque<RetireOp> retire_op_queue; // 16 entires * (136 bytes per entry) = 2.125 KB
