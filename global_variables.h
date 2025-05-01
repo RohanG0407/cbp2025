@@ -26,7 +26,7 @@ enum ALU_Operation
 struct BranchTableEntry
 {
   uint64_t tag;
-  uint64_t src_reg;
+  // uint64_t src_reg;
   uint64_t sat_ctr;
   bool is_linked;
   BranchType br_type;
@@ -83,7 +83,6 @@ constexpr int LAP_SHIFT_BITS = 4;
 constexpr int LAP_HISTORY_LENGTH = 4;
 constexpr int LAP_HISTORY_BITS = LAP_HISTORY_LENGTH * LAP_SHIFT_BITS;
 constexpr uint64_t LAP_HISTORY_MASK = (1 << LAP_HISTORY_BITS) - 1;
-constexpr uint64_t LAP_SUBSET_MASK = (1 << LAP_SHIFT_BITS) - 1;
 constexpr uint8_t LAP_STRIDE_MAX_CONFIDENCE = 3;
 
 struct LoadTableEntry
@@ -114,10 +113,24 @@ struct SpeculativeInfo
 
 // Branch Table Info
 #define BT_BITS 16
+#define BT_TAG_BITS 16
 #define BT_SIZE 1 << BT_BITS
+#define BT_MASK ((1 << BT_BITS) - 1)
+#define BT_TAG_MASK ((1 << BT_TAG_BITS) - 1) << BT_BITS
 #define BT_SAT_COUNTER_MAX 31
-extern BranchTableEntry branch_table[BT_SIZE]; // 2^16 entries - 1
-extern std::unordered_set<uint64_t> high_mispred_pc;
+extern BranchTableEntry branch_table[BT_SIZE];  // X entries * (16 bits for tag
+                                                //                 10 bits saturation counter
+                                                //                 1 bits for is linked       
+                                                //                 64 bits for predicted load addr
+                                                //                 64 bits for prev value
+                                                //                 1 bit for prev taken
+                                                //                 64 bits for branch bit mask
+                                                //                 1 bit for bit position matters
+                                                //                 1 bit for direction zero match
+                                                //                 1 bit for bit flag
+                                                //                 16 bits for src flag
+                                                //                 1 bit for flag br) = 224 bits * X entries
+  extern std::unordered_set<uint64_t> high_mispred_pc;
 
 // Store Table Info
 #define ST_BITS 12
@@ -166,7 +179,7 @@ extern LoadTableEntry load_table[LDT_SIZE]; // X entries * (16 bits for tag
 
 #define LKT_BITS 16
 #define LKT_SIZE 1 << LKT_BITS
-extern LinkTable link_table[LKT_SIZE];
+extern LinkTable link_table[LKT_SIZE]; // X entries * (64 bits for address) = 64 bits * X entries
 extern std::unordered_map<uint64_t, SpeculativeInfo> speculation_map; // speculative history not counted to total budget
 
 
