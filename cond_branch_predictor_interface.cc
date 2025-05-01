@@ -33,20 +33,20 @@
 #define SUPPORT_ALU_OPS false
 
 // Branch Table Info
-BranchTableEntry branch_table[BT_SIZE]; // 2^16 entries - 1
+BranchTableEntry branch_table[BT_SIZE]; 
 std::unordered_set<uint64_t> high_mispred_pc;
 
 // Store Table Info
-StoreTableEntry store_table[ST_SIZE]; // 4096 entries * (64 bits for pc + 16 bits tag) = 40 KB
+StoreTableEntry store_table[ST_SIZE]; 
 
 // Store Chain Info
-TriggerTableEntry trigger_table[TT_SIZE]; // 2^16 entries - 1
+TriggerTableEntry trigger_table[TT_SIZE]; 
 
 // Prediction Table Info
-PredictionTableEntry prediction_table[PT_SIZE]; // 65536 entries * (1 bit for taken/not-taken) = 8 KB 
+PredictionTableEntry prediction_table[PT_SIZE]; 
 
 // Value Predictor Load Table
-LoadTableEntry load_table[LDT_SIZE]; // 2^16 entries - 1
+LoadTableEntry load_table[LDT_SIZE];
 std::unordered_map<uint64_t, SpeculativeInfo> speculation_map;
 LinkTable link_table[LKT_SIZE];
 
@@ -94,7 +94,6 @@ void beginCondDirPredictor()
   // initial branch_table setup
   for (int i = 0; i < BT_SIZE; i++)
   {
-    branch_table[i].src_reg = 0;
     branch_table[i].sat_ctr = 0;
     branch_table[i].tag = 0;
     for (int k = 0; k < 16; k++)
@@ -161,23 +160,22 @@ void predictLoadAddr(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t
   uint64_t load_table_tag = ((pc >> 2) & LDT_TAG_MASK) >> LDT_BITS;
 
   uint64_t branch_pc = load_table[load_table_idx].br_pc;
-  uint64_t branch_pc_index = branch_pc & 0xFFFF;
-  uint64_t branch_tag = (branch_pc & 0xFFF0000) >> 16;
+
+
+  uint64_t branch_table_idx = (branch_pc >> 2) & BT_MASK;
+  uint64_t branch_table_tag = ((branch_pc >> 2) & BT_TAG_MASK) >> BT_BITS;
   if (load_table[load_table_idx].tag == load_table_tag)
   {
     if (PERFECT_ADDR_PRED)
     {
       predicted_addr = oracle_load_addr;
-      uint64_t branch_pc = load_table[load_table_idx].br_pc;
-      uint64_t branch_pc_index = branch_pc & 0xFFFF;
-      uint64_t branch_tag = (branch_pc & 0xFFF0000) >> 16;
-      branch_table[branch_pc_index].predicted_load_addr = predicted_addr;
+      branch_table[branch_table_idx].predicted_load_addr = predicted_addr;
       return;
     }
     if (load_table[load_table_idx].state == VALID_STRIDE)
     {
       predicted_addr = load_table[load_table_idx].last_addr + load_table[load_table_idx].stride;
-      branch_table[branch_pc_index].predicted_load_addr = predicted_addr;
+      branch_table[branch_table_idx].predicted_load_addr = predicted_addr;
       speculation_map[seq_no] = {seq_no, pc, predicted_addr, true};
       load_table[load_table_idx].last_addr = predicted_addr;
       load_table[load_table_idx].inflight_loads += 1;
@@ -196,7 +194,7 @@ void predictLoadAddr(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t
     {
       uint64_t current_history_reg = load_table[load_table_idx].spec_addr_history_reg;
       predicted_addr = link_table[current_history_reg].address;
-      branch_table[branch_pc_index].predicted_load_addr = predicted_addr;
+      branch_table[branch_table_idx].predicted_load_addr = predicted_addr;
       load_table[load_table_idx].inflight_loads += 1;
       if (LV_DEBUG_FLAG)
       {
@@ -209,12 +207,12 @@ void predictLoadAddr(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t
                   << std::endl;
       }
       // update spec history reg
-      uint64_t trimmed_address = (predicted_addr >> 2); // & LAP_SUBSET_MASK;
+      uint64_t trimmed_address = (predicted_addr >> 2); 
       load_table[load_table_idx].spec_addr_history_reg = ((load_table[load_table_idx].spec_addr_history_reg << LAP_SHIFT_BITS) ^ trimmed_address) & LAP_HISTORY_MASK;
     }
     else if (load_table[load_table_idx].state == TRAINING)
     {
-      branch_table[branch_pc_index].predicted_load_addr = predicted_addr;
+      branch_table[branch_table_idx].predicted_load_addr = predicted_addr;
       if (LV_DEBUG_FLAG)
       {
         std::cout << "LAP Training: Sequence Number: " << seq_no
@@ -249,21 +247,21 @@ bool get_cond_dir_prediction(uint64_t seq_no, uint8_t piece, uint64_t pc, const 
   const bool tage_sc_l_pred = cbp2016_tage_sc_l.predict(seq_no, piece, pc);
   bool my_prediction = cond_predictor_impl.predict(seq_no, piece, pc, tage_sc_l_pred);
 
-  uint64_t pc_index = pc & 0xFFFF;
-  uint64_t tag = (pc & 0xFFF0000) >> 16;
-  if (branch_table[pc_index].tag == tag && branch_table[pc_index].is_linked)
+  uint64_t branch_table_idx = (pc >> 2) & BT_MASK;
+  uint64_t branch_table_tag = ((pc >> 2) & BT_TAG_MASK) >> BT_BITS;
+  if (branch_table[branch_table_idx].tag == branch_table_tag && branch_table[branch_table_idx].is_linked)
   {
     if (DEBUG_FLAG)
     {
       std::cout << "--------------------------------------------------" << std::endl;
       std::cout << "Branch Predicting: Sequence Number: " << seq_no
                 << " | PC: 0x" << std::hex << pc << std::dec
-                << " | Branch Type: " << branch_table[pc_index].br_type
+                << " | Branch Type: " << branch_table[branch_table_idx].br_type
                 << std::endl;
     }
 
     // our custom predictor
-    uint64_t pred_load_addr = branch_table[pc_index].predicted_load_addr;
+    uint64_t pred_load_addr = branch_table[branch_table_idx].predicted_load_addr;
     if (DEBUG_FLAG)
     {
       std::cout << "Branch Predicting: Predicted Load Address: 0x" << std::hex << pred_load_addr << std::dec
@@ -344,10 +342,10 @@ void spec_update(uint64_t seq_no, uint8_t piece, uint64_t pc, InstClass inst_cla
     cbp2016_tage_sc_l.history_update(seq_no, piece, pc, br_type, pred_dir, resolve_dir, next_pc);
     cond_predictor_impl.history_update(seq_no, piece, pc, resolve_dir, next_pc);
 
-    uint64_t pc_index = pc & 0xFFFF;
-    uint64_t tag = (pc & 0xFFF0000) >> 16;
+    uint64_t branch_table_idx = (pc >> 2) & BT_MASK;
+    uint64_t branch_table_tag = ((pc >> 2) & BT_TAG_MASK) >> BT_BITS;
 
-    if (branch_table[pc_index].tag == tag && branch_table[pc_index].is_linked)
+    if (branch_table[branch_table_idx].tag == branch_table_tag && branch_table[branch_table_idx].is_linked)
     {
       if (DEBUG_FLAG)
       {
@@ -402,9 +400,8 @@ void updateLoadPredictor(uint64_t seq_no, uint8_t piece, uint64_t pc, const Deco
 
             load_table[spec_load_table_idx].last_addr = mem_va + (load_table[spec_load_table_idx].stride * load_table[spec_load_table_idx].inflight_loads);
             uint64_t branch_pc = load_table[spec_load_table_idx].br_pc;
-            uint64_t branch_pc_index = branch_pc & 0xFFFF;
-            uint64_t branch_tag = (branch_pc & 0xFFF0000) >> 16;
-            branch_table[branch_pc_index].predicted_load_addr = load_table[spec_load_table_idx].last_addr + load_table[spec_load_table_idx].stride;
+            uint64_t branch_table_idx = (branch_pc >> 2) & BT_MASK;
+            branch_table[branch_table_idx].predicted_load_addr = load_table[spec_load_table_idx].last_addr + load_table[spec_load_table_idx].stride;
             if (LV_DEBUG_FLAG)
             {
               std::cout << "LAP Resteer: Sequence Number: " << seq_no
@@ -439,7 +436,7 @@ void updateLoadPredictor(uint64_t seq_no, uint8_t piece, uint64_t pc, const Deco
                   << std::endl;
       }
 
-      uint64_t trimmed_address = (mem_va >> 2); // & LAP_SUBSET_MASK;
+      uint64_t trimmed_address = (mem_va >> 2);
       load_table[load_table_idx].addr_history_reg = ((load_table[load_table_idx].addr_history_reg << LAP_SHIFT_BITS) ^ trimmed_address) & LAP_HISTORY_MASK;
       if (load_table[load_table_idx].inflight_loads == 0)
         load_table[load_table_idx].spec_addr_history_reg = load_table[load_table_idx].addr_history_reg;
@@ -449,7 +446,7 @@ void updateLoadPredictor(uint64_t seq_no, uint8_t piece, uint64_t pc, const Deco
       // correlation predictor
       uint64_t current_history_reg = load_table[load_table_idx].addr_history_reg;
       link_table[current_history_reg].address = mem_va;
-      uint64_t trimmed_address = (mem_va >> 2); // & LAP_SUBSET_MASK;
+      uint64_t trimmed_address = (mem_va >> 2); 
       load_table[load_table_idx].addr_history_reg = ((load_table[load_table_idx].addr_history_reg << LAP_SHIFT_BITS) ^ trimmed_address) & LAP_HISTORY_MASK;
       if (LV_DEBUG_FLAG)
       {
@@ -504,8 +501,7 @@ void updateLoadPredictor(uint64_t seq_no, uint8_t piece, uint64_t pc, const Deco
         {
           load_table[load_table_idx].state = VALID_STRIDE;
           uint64_t branch_pc = load_table[load_table_idx].br_pc;
-          uint64_t branch_pc_index = branch_pc & 0xFFFF;
-          uint64_t branch_tag = (branch_pc & 0xFFF0000) >> 16;
+          uint64_t branch_pc_index = (branch_pc >> 2) & 0xFFFF;
           branch_table[branch_pc_index].predicted_load_addr = mem_va + load_table[load_table_idx].stride;
           if (LV_DEBUG_FLAG)
           {
@@ -689,20 +685,20 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
       cbp2016_tage_sc_l.update(seq_no, piece, pc, _resolve_dir, pred_dir, _next_pc);
       cond_predictor_impl.update(seq_no, piece, pc, _resolve_dir, pred_dir, _next_pc);
 
-      uint16_t pc_index = pc & 0xFFFF;
-      uint64_t tag = (pc & 0xFFF0000) >> 16;
-      if (tag == branch_table[pc_index].tag)
+      uint64_t branch_table_idx = (pc >> 2) & BT_MASK;
+      uint64_t branch_table_tag = ((pc >> 2) & BT_TAG_MASK) >> BT_BITS;
+      if (branch_table[branch_table_idx].tag == branch_table_tag)
       {
-        if (branch_table[pc_index].is_linked)
+        if (branch_table[branch_table_idx].is_linked)
         {
           if (pred_dir == _resolve_dir)
           {
-            branch_table[pc_index].correct_counter += 1;
+            branch_table[branch_table_idx].correct_counter += 1;
           }
           else
           {
-            branch_table[pc_index].incorrect_counter += 1;
-            if (branch_table[pc_index].incorrect_counter > 1000)
+            branch_table[branch_table_idx].incorrect_counter += 1;
+            if (branch_table[branch_table_idx].incorrect_counter > 1000)
             {
               // std::cout << " pc_index" << pc_index << " correct counter " << branch_table[pc_index].correct_counter << " incorrect counter " << branch_table[pc_index].incorrect_counter << "branch type " << branch_table[pc_index].br_type << "\n";
             }
@@ -717,26 +713,26 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
   }
 }
 
-void get_branch_bit_direction(uint16_t pc_index, uint64_t dest_reg_val, const bool _resolve_dir)
+void get_branch_bit_direction(uint16_t branch_table_idx, uint64_t dest_reg_val, const bool _resolve_dir)
 {
-  if (branch_table[pc_index].br_type > 5)
+  if (branch_table[branch_table_idx].br_type > 5)
   {
     std::cout << "ERROR ERROR " << dest_reg_val << "\n";
     exit(0);
   }
   // std::cout << "branch bit drection started for pc_index:" << pc_index <<" val : "<< dest_reg_val << "dir: "<< _resolve_dir << " \n";
-  if (branch_table[pc_index].bit_position_matters == false)
+  if (branch_table[branch_table_idx].bit_position_matters == false)
   {
 
     if (dest_reg_val == 0)
     {
       // std::cout << "under 0  check for  pc_index:" << pc_index << "br_type: " << branch_table[pc_index].br_type <<"\n";
-      if (branch_table[pc_index].br_type == 0)
+      if (branch_table[branch_table_idx].br_type == 0)
       {
-        branch_table[pc_index].br_type = _resolve_dir ? CBZ : CBNZ;
+        branch_table[branch_table_idx].br_type = _resolve_dir ? CBZ : CBNZ;
         //      std::cout << "under 0 na  check for  pc_index:" << pc_index << "new br set" << branch_table[pc_index].br_type << "\n";
       }
-      else if (branch_table[pc_index].br_type == 1)
+      else if (branch_table[branch_table_idx].br_type == 1)
       {
         if (_resolve_dir)
         {
@@ -745,12 +741,12 @@ void get_branch_bit_direction(uint16_t pc_index, uint64_t dest_reg_val, const bo
         }
         else
         {
-          branch_table[pc_index].br_type = CBNZ;
-          branch_table[pc_index].bit_position_matters = true;
+          branch_table[branch_table_idx].br_type = CBNZ;
+          branch_table[branch_table_idx].bit_position_matters = true;
           // std::cout << "under zero  check POSITION CHANGE  for  pc_index:" << pc_index << "new value " << branch_table[pc_index].br_type << "\n";
         }
       }
-      else if (branch_table[pc_index].br_type == 2)
+      else if (branch_table[branch_table_idx].br_type == 2)
       {
         if (!(_resolve_dir))
         {
@@ -759,8 +755,8 @@ void get_branch_bit_direction(uint16_t pc_index, uint64_t dest_reg_val, const bo
         }
         else
         {
-          branch_table[pc_index].br_type = CBZ;
-          branch_table[pc_index].bit_position_matters = true;
+          branch_table[branch_table_idx].br_type = CBZ;
+          branch_table[branch_table_idx].bit_position_matters = true;
           // std::cout << "under zero  check POSITION CHANGE  for  pc_index:" << pc_index << "new value " << branch_table[pc_index].br_type << "\n";
         }
       }
@@ -768,13 +764,13 @@ void get_branch_bit_direction(uint16_t pc_index, uint64_t dest_reg_val, const bo
     else
     {
       // std::cout << "under non-zero  check for  pc_index:" << pc_index << "br_type: " << branch_table[pc_index].br_type <<"\n";
-      if (branch_table[pc_index].br_type == 0)
+      if (branch_table[branch_table_idx].br_type == 0)
       {
 
-        branch_table[pc_index].br_type = _resolve_dir ? CBNZ : CBZ;
+        branch_table[branch_table_idx].br_type = _resolve_dir ? CBNZ : CBZ;
         //       std::cout << "under non-zero with na check for  pc_index:" << pc_index << "new br type " << branch_table[pc_index].br_type << "\n";
       }
-      else if (branch_table[pc_index].br_type == 2)
+      else if (branch_table[branch_table_idx].br_type == 2)
       {
         //    std::cout << "entered cbnz check!!! \n";
         if (_resolve_dir)
@@ -784,12 +780,12 @@ void get_branch_bit_direction(uint16_t pc_index, uint64_t dest_reg_val, const bo
         }
         else
         {
-          branch_table[pc_index].br_type = CBZ;
-          branch_table[pc_index].bit_position_matters = true;
+          branch_table[branch_table_idx].br_type = CBZ;
+          branch_table[branch_table_idx].bit_position_matters = true;
           //	      std::cout << "under non-zero  check POSITION CHANGE  for  pc_index:" << pc_index << "new value " << branch_table[pc_index].br_type << "\n";
         }
       }
-      else if (branch_table[pc_index].br_type == 1)
+      else if (branch_table[branch_table_idx].br_type == 1)
       {
         //    std::cout << "entered cbz check!!! \n";
         if (!(_resolve_dir))
@@ -799,47 +795,47 @@ void get_branch_bit_direction(uint16_t pc_index, uint64_t dest_reg_val, const bo
         }
         else
         {
-          branch_table[pc_index].br_type = CBNZ;
-          branch_table[pc_index].bit_position_matters = true;
+          branch_table[branch_table_idx].br_type = CBNZ;
+          branch_table[branch_table_idx].bit_position_matters = true;
           //        std::cout << "under non-zero  check POSITION CHANGE  for  pc_index:" << pc_index << "new value " << branch_table[pc_index].br_type << "\n";
         }
       }
     }
   }
-  if (branch_table[pc_index].bit_position_matters == true)
+  if (branch_table[branch_table_idx].bit_position_matters == true)
   {
     //	 std::cout << "Have entered tbz test for branch pc_index " << pc_index << "branch bit mask is" << branch_table[pc_index].branch_bit_mask << "\n";
-    if (branch_table[pc_index].prev_value != STUPID_VALUE)
+    if (branch_table[branch_table_idx].prev_value != STUPID_VALUE)
     {
-      uint64_t changed_bits = branch_table[pc_index].prev_value ^ dest_reg_val;
+      uint64_t changed_bits = branch_table[branch_table_idx].prev_value ^ dest_reg_val;
       uint64_t unchanged_bits = ~changed_bits;
-      uint64_t branch_bit_mask = (_resolve_dir == branch_table[pc_index].prev_taken) ? unchanged_bits : changed_bits;
+      uint64_t branch_bit_mask = (_resolve_dir == branch_table[branch_table_idx].prev_taken) ? unchanged_bits : changed_bits;
       //		std::cout << "Branch bit mask this cycle is " << branch_bit_mask << " branch_table[pc_index].prev_taken " << branch_table[pc_index].prev_taken << " _resolve_dir " << _resolve_dir << " unchanged_bits" << unchanged_bits << " changed_bits " << changed_bits;
-      uint64_t prev_branch_bit_mask = branch_table[pc_index].branch_bit_mask;
-      branch_table[pc_index].branch_bit_mask &= branch_bit_mask;
+      uint64_t prev_branch_bit_mask = branch_table[branch_table_idx].branch_bit_mask;
+      branch_table[branch_table_idx].branch_bit_mask &= branch_bit_mask;
       //		std::cout << "previous value: " << branch_table[pc _index].prev_value << " this time value : " << dest_reg_val << " changed_bits: " << changed_bits << "unchanged_bits" << unchanged_bits << " branch_bit_mask " << branch_bit_mask << "branch_table[pc_index].branch_bit_mask" << branch_table[pc_index].branch_bit_mask << "\n";
-      bool prev_direction = branch_table[pc_index].direction_zero_match;
-      branch_table[pc_index].direction_zero_match = !(((dest_reg_val & branch_table[pc_index].branch_bit_mask) == 0) ^ _resolve_dir);
-      bool prediction = !(((dest_reg_val & branch_table[pc_index].branch_bit_mask) == 0) ^ branch_table[pc_index].direction_zero_match);
-      if (prev_direction != branch_table[pc_index].direction_zero_match && branch_table[pc_index].branch_bit_mask == prev_branch_bit_mask && prediction != _resolve_dir)
+      bool prev_direction = branch_table[branch_table_idx].direction_zero_match;
+      branch_table[branch_table_idx].direction_zero_match = !(((dest_reg_val & branch_table[branch_table_idx].branch_bit_mask) == 0) ^ _resolve_dir);
+      bool prediction = !(((dest_reg_val & branch_table[branch_table_idx].branch_bit_mask) == 0) ^ branch_table[branch_table_idx].direction_zero_match);
+      if (prev_direction != branch_table[branch_table_idx].direction_zero_match && branch_table[branch_table_idx].branch_bit_mask == prev_branch_bit_mask && prediction != _resolve_dir)
       {
         //			std::cout << "have entered fatal phase prediction is " << prediction << " resolve dir is " <<  _resolve_dir << "prev direction " << prev_direction << " this direction " << branch_table[pc_index].direction_zero_match << "\n";
-        if (!(branch_table[pc_index].bit_flag))
+        if (!(branch_table[branch_table_idx].bit_flag))
         {
-          branch_bit_mask = branch_table[pc_index].direction_zero_match ? dest_reg_val : branch_table[pc_index].prev_value;
-          branch_table[pc_index].branch_bit_mask &= branch_bit_mask;
+          branch_bit_mask = branch_table[branch_table_idx].direction_zero_match ? dest_reg_val : branch_table[branch_table_idx].prev_value;
+          branch_table[branch_table_idx].branch_bit_mask &= branch_bit_mask;
         }
         else
         {
-          branch_bit_mask = branch_table[pc_index].direction_zero_match ? branch_table[pc_index].prev_value : dest_reg_val;
-          branch_table[pc_index].branch_bit_mask &= branch_bit_mask;
+          branch_bit_mask = branch_table[branch_table_idx].direction_zero_match ? branch_table[branch_table_idx].prev_value : dest_reg_val;
+          branch_table[branch_table_idx].branch_bit_mask &= branch_bit_mask;
         }
       }
     }
-    branch_table[pc_index].prev_value = dest_reg_val;
-    branch_table[pc_index].prev_taken = _resolve_dir;
+    branch_table[branch_table_idx].prev_value = dest_reg_val;
+    branch_table[branch_table_idx].prev_taken = _resolve_dir;
 
-    uint64_t mask = branch_table[pc_index].branch_bit_mask;
+    uint64_t mask = branch_table[branch_table_idx].branch_bit_mask;
     int bit_count = 0;
     for (int i = 0; i < 64; i++)
     {
@@ -848,29 +844,29 @@ void get_branch_bit_direction(uint16_t pc_index, uint64_t dest_reg_val, const bo
     }
     if (bit_count > 0)
     {
-      branch_table[pc_index].direction_zero_match = !(((dest_reg_val & branch_table[pc_index].branch_bit_mask) == 0) ^ _resolve_dir);
+      branch_table[branch_table_idx].direction_zero_match = !(((dest_reg_val & branch_table[branch_table_idx].branch_bit_mask) == 0) ^ _resolve_dir);
 
       if (bit_count == 1)
       {
         // std::cout << " TB direction found its " << branch_table[pc_index].direction_zero_match << "hope this helps \n";
       }
-      if (branch_table[pc_index].direction_zero_match)
+      if (branch_table[branch_table_idx].direction_zero_match)
       {
-        branch_table[pc_index].br_type = TBZ;
+        branch_table[branch_table_idx].br_type = TBZ;
         // std::cout << " TB direction set to  " << branch_table[pc_index].direction_zero_match << " br type is now " << branch_table[pc_index].br_type << "\n";
       }
       else
       {
-        branch_table[pc_index].br_type = TBNZ;
+        branch_table[branch_table_idx].br_type = TBNZ;
         // std::cout << " TB direction set to  " << branch_table[pc_index].direction_zero_match << " br type is now " << branch_table[pc_index].br_type << "\n";
       }
     }
     else
     {
-      if (!(branch_table[pc_index].bit_flag))
+      if (!(branch_table[branch_table_idx].bit_flag))
       {
-        branch_table[pc_index].bit_flag = true;
-        branch_table[pc_index].branch_bit_mask = UINT64_MAX;
+        branch_table[branch_table_idx].bit_flag = true;
+        branch_table[branch_table_idx].branch_bit_mask = UINT64_MAX;
       }
       else
       {
@@ -881,7 +877,7 @@ void get_branch_bit_direction(uint16_t pc_index, uint64_t dest_reg_val, const bo
   }
 }
 
-void learn_src_branch_behaivour(uint16_t pc_index, uint64_t dest_reg_val, const bool _resolve_dir)
+void learn_src_branch_behaivour(uint16_t branch_table_idx, uint64_t dest_reg_val, const bool _resolve_dir)
 {
   if (dest_reg_val >= 16)
   {
@@ -891,7 +887,7 @@ void learn_src_branch_behaivour(uint16_t pc_index, uint64_t dest_reg_val, const 
 
   if (_resolve_dir == 1)
   {
-    branch_table[pc_index].src_flag[dest_reg_val] = 1;
+    branch_table[branch_table_idx].src_flag[dest_reg_val] = 1;
   }
 }
 
@@ -1010,36 +1006,36 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
   {
     const bool _resolve_dir = _exec_info.taken.value();
 
-    uint16_t pc_index = pc & 0xFFFF;
-    uint64_t tag = (pc & 0xFFF0000) >> 16;
+    uint64_t branch_table_idx = (pc >> 2) & BT_MASK;
+    uint64_t branch_table_tag = ((pc >> 2) & BT_TAG_MASK) >> BT_BITS;
 
     // mechanism to find highly mispredicted branches
     if (_exec_info.dec_info.src_reg_info.size() > 0)
     {
-      if (tag == branch_table[pc_index].tag)
+      if (branch_table[branch_table_idx].tag == branch_table_tag)
       {
         if (_resolve_dir != pred_dir)
         {
-          if (branch_table[pc_index].sat_ctr < BT_SAT_COUNTER_MAX)
+          if (branch_table[branch_table_idx].sat_ctr < BT_SAT_COUNTER_MAX)
           {
-            branch_table[pc_index].sat_ctr += 1;
+            branch_table[branch_table_idx].sat_ctr += 1;
           }
         }
       }
       else
       {
-        if (branch_table[pc_index].sat_ctr == 0 && !(branch_table[pc_index].is_linked))
+        if (branch_table[branch_table_idx].sat_ctr == 0 && !(branch_table[branch_table_idx].is_linked))
         {
-          branch_table[pc_index].tag = tag;
-          branch_table[pc_index].src_reg = _exec_info.dec_info.src_reg_info[0];
-          branch_table[pc_index].sat_ctr = 1;
-          branch_table[pc_index].is_linked = false;
+          branch_table[branch_table_idx].tag = branch_table_tag;
+          //branch_table[pc_index].src_reg = _exec_info.dec_info.src_reg_info[0];
+          branch_table[branch_table_idx].sat_ctr = 1;
+          branch_table[branch_table_idx].is_linked = false;
         }
       }
     }
 
     // append to misprediction list of pc's where entry saturation counter = max
-    if (branch_table[pc_index].tag == tag && (branch_table[pc_index].sat_ctr == BT_SAT_COUNTER_MAX || branch_table[pc_index].is_linked))
+    if (branch_table[branch_table_idx].tag == branch_table_tag && (branch_table[branch_table_idx].sat_ctr == BT_SAT_COUNTER_MAX || branch_table[branch_table_idx].is_linked))
     {
       // append full 64-bit pc to misprediction list
       high_mispred_pc.insert(pc);
@@ -1050,13 +1046,13 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
       // }
       if (_exec_info.dec_info.src_reg_info[0] != 64)
       {
-        get_branch_bit_direction(pc_index, dest_reg_val, _resolve_dir);
+        get_branch_bit_direction(branch_table_idx, dest_reg_val, _resolve_dir);
         // std::cout << " debug br type " << branch_table[pc_index].br_type;
       }
       else
       {
-        learn_src_branch_behaivour(pc_index, dest_reg_val, _resolve_dir);
-        branch_table[pc_index].flag_br = 1;
+        learn_src_branch_behaivour(branch_table_idx, dest_reg_val, _resolve_dir);
+        branch_table[branch_table_idx].flag_br = 1;
       }
       // learning branch direction and bit (TBZ vs CBZ)
       //  print the branch we are going to analyze
@@ -1141,7 +1137,7 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
         uint64_t load_addr = retire_op.exec_info.mem_va.value();
         uint64_t load_value = retire_op.exec_info.dst_reg_value.value();
         // std::cout << "Load Address: " << std::hex << load_addr << std::dec << std::endl;
-        branch_table[pc_index].value_prediction_map[load_value] = _resolve_dir;
+        branch_table[branch_table_idx].value_prediction_map[load_value] = _resolve_dir;
         // std::cout << "Training Value Prediction Map: "
         //           << "Sequence Number: " << seq_no << std::hex
         //           << " | PC 0x" << pc << " | Load Value: 0x" << load_value << std::dec
@@ -1159,22 +1155,22 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
           if(trigger_table[trigger_table_idx].tag == trigger_table_tag) {
             // store exists already in trigger table
             store_trigger_found = true;
-            if (branch_table[pc_index].flag_br)
+            if (branch_table[branch_table_idx].flag_br)
             {
               trigger_table[trigger_table_idx].flag_br = 1;
               // pc index " << store_pc_index << "setting flag br \n";
               // std::cout << "before known set\n";
               for (int k = 0; k < 16; k++)
               {
-                trigger_table[trigger_table_idx].src_flag[k] = branch_table[pc_index].src_flag[k];
+                trigger_table[trigger_table_idx].src_flag[k] = branch_table[branch_table_idx].src_flag[k];
               }
-              trigger_table[trigger_table_idx].value_prediction_map = branch_table[pc_index].value_prediction_map;
+              trigger_table[trigger_table_idx].value_prediction_map = branch_table[branch_table_idx].value_prediction_map;
               // std::cout << "after known set\n";
             }
             else
             {
-              trigger_table[trigger_table_idx].br_type = branch_table[pc_index].br_type;
-              trigger_table[trigger_table_idx].branch_bit_mask = branch_table[pc_index].branch_bit_mask;
+              trigger_table[trigger_table_idx].br_type = branch_table[branch_table_idx].br_type;
+              trigger_table[trigger_table_idx].branch_bit_mask = branch_table[branch_table_idx].branch_bit_mask;
             }
           }
 
@@ -1204,19 +1200,18 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
           {
             // add to the trigger table
             trigger_table[trigger_table_idx].tag = trigger_table_tag;
-            //trigger_table[store_pc_index].addr = load_addr;
-            trigger_table[trigger_table_idx].br_type = branch_table[pc_index].br_type;
-            trigger_table[trigger_table_idx].branch_bit_mask = branch_table[pc_index].branch_bit_mask;
-            trigger_table[trigger_table_idx].flag_br = branch_table[pc_index].flag_br;
+            trigger_table[trigger_table_idx].br_type = branch_table[branch_table_idx].br_type;
+            trigger_table[trigger_table_idx].branch_bit_mask = branch_table[branch_table_idx].branch_bit_mask;
+            trigger_table[trigger_table_idx].flag_br = branch_table[branch_table_idx].flag_br;
             // std::cout << "before unknown set\n";
             for (int k = 0; k < 16; k++)
             {
-              trigger_table[trigger_table_idx].src_flag[k] = branch_table[pc_index].src_flag[k];
+              trigger_table[trigger_table_idx].src_flag[k] = branch_table[branch_table_idx].src_flag[k];
             }
             // std::cout << "after  unknown set\n";
           }
 
-          branch_table[pc_index].is_linked = true;
+          branch_table[branch_table_idx].is_linked = true;
         }
       }
     }
