@@ -1,0 +1,3604 @@
+5000000 instrs 
+threshold is0alu type 0resolve_dir0
+is src branch 
+ pc_index 32524 load_value,1direction0
+threshold is1alu type 1resolve_dir0
+is src branch 
+ pc_index 32524 load_value,1direction0
+threshold is1alu type 1resolve_dir1
+is src branch 
+ pc_index 32524 load_value,50331648direction1
+ _resolve dir 1 pred_dir 0
+threshold is1alu type 1resolve_dir1
+is src branch 
+ pc_index 32524 load_value,1093664768direction1
+ _resolve dir 1 pred_dir 1
+threshold is1alu type 1resolve_dir1
+is src branch 
+NOTE lets understand learning behaivour valid bits one after other111011
+ pc_index 32524 load_value,0direction1
+ _resolve dir 1 pred_dir 1
+threshold is1alu type 1resolve_dir1
+is src branch 
+NOTE lets understand learning behaivour valid bits one after other111011
+ pc_index 32524 load_value,68157440direction1
+ _resolve dir 0 pred_dir 0
+threshold is1alu type 1resolve_dir0
+is src branch 
+NOTE lets understand learning behaivour valid bits one after other111011
+ pc_index 32524 load_value,1direction0
+ _resolve dir 0 pred_dir 1
+threshold is50331648alu type 1resolve_dir0
+is src branch 
+NOTE lets understand learning behaivour valid bits one after other111011
+ pc_index 32524 load_value,1direction0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+threshold is50331648alu type 1resolve_dir0
+is src branch 
+NOTE lets understand learning behaivour valid bits one after other111011
+ pc_index 32524 load_value,4direction0
+threshold is50331648alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  100663296 threshold is 50331648
+ pc_index 32524 load_value,100663296direction1
+ _resolve dir 0 pred_dir 0
+threshold is50331648alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  4 threshold is 50331648
+ pc_index 32524 load_value,4direction0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 1
+threshold is50331648alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 50331648
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 0 pred_dir 1
+threshold is16777216alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  67108864 threshold is 16777216
+ pc_index 32524 load_value,67108864direction1
+ _resolve dir 0 pred_dir 0
+threshold is16777216alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  1 threshold is 16777216
+ pc_index 32524 load_value,1direction0
+threshold is16777216alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 16777216
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 1
+threshold is16777216alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 16777216
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 1 pred_dir 1
+ _resolve dir 0 pred_dir 0
+threshold is16777216alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  0 threshold is 16777216
+ pc_index 32524 load_value,0direction1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 4 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  3840 threshold is 0
+ pc_index 32524 load_value,3840direction1
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 4 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 4 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 4 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 4 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 4 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 4 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 4 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  4 threshold is 0
+ pc_index 32524 load_value,4direction0
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  4 threshold is 0
+ pc_index 32524 load_value,4direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 1 pred_dir 1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 4 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 4 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  50331648 threshold is 0
+ pc_index 32524 load_value,50331648direction1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 4 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  4 threshold is 0
+ pc_index 32524 load_value,4direction0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  100663296 threshold is 0
+ pc_index 32524 load_value,100663296direction1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  4 threshold is 0
+ pc_index 32524 load_value,4direction0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 4 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 4 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 4 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  10 threshold is 0
+ pc_index 32524 load_value,10direction0
+ _resolve dir 0 pred_dir 1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  12 threshold is 0
+ pc_index 32524 load_value,12direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  50331648 threshold is 0
+ pc_index 32524 load_value,50331648direction1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 1 pred_dir 1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 1 pred_dir 1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  285216512 threshold is 0
+ pc_index 32524 load_value,285216512direction1
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 0 pred_dir 1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  5 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,5direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  150994944 threshold is 0
+ pc_index 32524 load_value,150994944direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  50331648 threshold is 0
+ pc_index 32524 load_value,50331648direction1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  4 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,4direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  100663296 threshold is 0
+ pc_index 32524 load_value,100663296direction1
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  4 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,4direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  285216512 threshold is 0
+ pc_index 32524 load_value,285216512direction1
+ _resolve dir 1 pred_dir 1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  4 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,4direction0
+10000000 instrs 
+15000000 instrs 
+prediction is being made, on address index :224prediction is :1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+prediction is being made, on address index :256prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+prediction is being made, on address index :1648prediction is :1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+prediction is being made, on address index :1680prediction is :0
+ _resolve dir 1 pred_dir 0
+prediction is being made, on address index :1520prediction is :0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+prediction is being made, on address index :1552prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+prediction is being made, on address index :38128prediction is :0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+prediction is being made, on address index :38512prediction is :1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+prediction is being made, on address index :38544prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+prediction is being made, on address index :38576prediction is :0
+prediction is being made, on address index :38832prediction is :1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 1
+prediction is being made, on address index :38864prediction is :0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  150994944 threshold is 0
+ pc_index 32524 load_value,150994944direction1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+prediction is being made, on address index :38896prediction is :0
+ _resolve dir 0 pred_dir 0
+prediction is being made, on address index :38928prediction is :0
+prediction is being made, on address index :38960prediction is :1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  50331648 threshold is 0
+ pc_index 32524 load_value,50331648direction1
+prediction is being made, on address index :39152prediction is :0
+prediction is being made, on address index :39184prediction is :0
+ _resolve dir 0 pred_dir 0
+prediction is being made, on address index :39216prediction is :0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  4 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,4direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  100663296 threshold is 0
+ pc_index 32524 load_value,100663296direction1
+prediction is being made, on address index :39344prediction is :0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  4 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,4direction0
+prediction is being made, on address index :10832prediction is :1
+ _resolve dir 1 pred_dir 1
+prediction is being made, on address index :10864prediction is :0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  150994944 threshold is 0
+ pc_index 32524 load_value,150994944direction1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+prediction is being made, on address index :10896prediction is :0
+prediction is being made, on address index :10928prediction is :0
+prediction is being made, on address index :10960prediction is :1
+prediction is being made, on address index :11152prediction is :0
+prediction is being made, on address index :11184prediction is :0
+prediction is being made, on address index :11216prediction is :1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+prediction is being made, on address index :11344prediction is :0
+prediction is being made, on address index :11440prediction is :1
+ _resolve dir 1 pred_dir 1
+prediction is being made, on address index :11472prediction is :0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  50331648 threshold is 0
+ pc_index 32524 load_value,50331648direction1
+ _resolve dir 1 pred_dir 1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  4 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,4direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  100663296 threshold is 0
+ pc_index 32524 load_value,100663296direction1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  4 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,4direction0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  150994944 threshold is 0
+ pc_index 32524 load_value,150994944direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+prediction is being made, on address index :11504prediction is :0
+prediction is being made, on address index :11536prediction is :0
+prediction is being made, on address index :11568prediction is :1
+prediction is being made, on address index :11760prediction is :0
+prediction is being made, on address index :11792prediction is :0
+prediction is being made, on address index :11824prediction is :1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+prediction is being made, on address index :26936prediction is :1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  50331648 threshold is 0
+ pc_index 32524 load_value,50331648direction1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  4 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,4direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  100663296 threshold is 0
+ pc_index 32524 load_value,100663296direction1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  4 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,4direction0
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+prediction is being made, on address index :26968prediction is :0
+prediction is being made, on address index :27000prediction is :0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+prediction is being made, on address index :27032prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :27128prediction is :1
+prediction is being made, on address index :27160prediction is :0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+prediction is being made, on address index :27384prediction is :0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  10 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,10direction0
+prediction is being made, on address index :27416prediction is :1
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  12 threshold is 0
+ pc_index 32524 load_value,12direction0
+prediction is being made, on address index :27448prediction is :1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :27512prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  50331648 threshold is 0
+ pc_index 32524 load_value,50331648direction1
+prediction is being made, on address index :27256prediction is :0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+prediction is being made, on address index :27288prediction is :0
+prediction is being made, on address index :27320prediction is :0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+prediction is being made, on address index :27768prediction is :0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+prediction is being made, on address index :27800prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+prediction is being made, on address index :27832prediction is :0
+prediction is being made, on address index :27960prediction is :1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+prediction is being made, on address index :27992prediction is :0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  150994944 threshold is 0
+ pc_index 32524 load_value,150994944direction1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+prediction is being made, on address index :28024prediction is :1
+ _resolve dir 0 pred_dir 1
+prediction is being made, on address index :28056prediction is :0
+prediction is being made, on address index :28088prediction is :1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  50331648 threshold is 0
+ pc_index 32524 load_value,50331648direction1
+prediction is being made, on address index :28280prediction is :0
+prediction is being made, on address index :28312prediction is :0
+prediction is being made, on address index :28344prediction is :0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  4 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,4direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  100663296 threshold is 0
+ pc_index 32524 load_value,100663296direction1
+prediction is being made, on address index :28472prediction is :0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  4 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,4direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  5 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,5direction0
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  4 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,4direction0
+prediction is being made, on address index :28648prediction is :1
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+prediction is being made, on address index :28680prediction is :0
+prediction is being made, on address index :28712prediction is :0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :30720prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  5 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,5direction0
+prediction is being made, on address index :30784prediction is :0
+prediction is being made, on address index :30816prediction is :0
+prediction is being made, on address index :29160prediction is :1
+prediction is being made, on address index :29192prediction is :1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+prediction is being made, on address index :29416prediction is :1
+ _resolve dir 1 pred_dir 1
+prediction is being made, on address index :29448prediction is :1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+prediction is being made, on address index :28048prediction is :1
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  10 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,10direction0
+prediction is being made, on address index :28080prediction is :1
+ _resolve dir 0 pred_dir 1
+prediction is being made, on address index :28112prediction is :1
+prediction is being made, on address index :28144prediction is :1
+prediction is being made, on address index :28176prediction is :0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+prediction is being made, on address index :28208prediction is :0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  12 threshold is 0
+ pc_index 32524 load_value,12direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :28240prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :28272prediction is :1
+prediction is being made, on address index :28304prediction is :1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  50331648 threshold is 0
+ pc_index 32524 load_value,50331648direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+prediction is being made, on address index :29640prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :28816prediction is :1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+prediction is being made, on address index :28848prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+prediction is being made, on address index :28880prediction is :0
+prediction is being made, on address index :29672prediction is :1
+prediction is being made, on address index :29704prediction is :0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  150994944 threshold is 0
+ pc_index 32524 load_value,150994944direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+prediction is being made, on address index :29736prediction is :0
+prediction is being made, on address index :29800prediction is :1
+prediction is being made, on address index :29072prediction is :0
+prediction is being made, on address index :29104prediction is :0
+prediction is being made, on address index :29136prediction is :0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  50331648 threshold is 0
+ pc_index 32524 load_value,50331648direction1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  4 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,4direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  100663296 threshold is 0
+ pc_index 32524 load_value,100663296direction1
+prediction is being made, on address index :29264prediction is :0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  4 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,4direction0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+prediction is being made, on address index :29600prediction is :0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :29696prediction is :1
+prediction is being made, on address index :29728prediction is :0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+prediction is being made, on address index :29952prediction is :0
+prediction is being made, on address index :29984prediction is :1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  10 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,10direction0
+prediction is being made, on address index :30016prediction is :1
+prediction is being made, on address index :30080prediction is :0
+ _resolve dir 1 pred_dir 0
+prediction is being made, on address index :30112prediction is :1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  12 threshold is 0
+ pc_index 32524 load_value,12direction0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  50331648 threshold is 0
+ pc_index 32524 load_value,50331648direction1
+prediction is being made, on address index :29824prediction is :0
+prediction is being made, on address index :29856prediction is :0
+prediction is being made, on address index :29888prediction is :0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+prediction is being made, on address index :30336prediction is :0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+prediction is being made, on address index :30368prediction is :0
+ _resolve dir 1 pred_dir 0
+prediction is being made, on address index :30400prediction is :0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+prediction is being made, on address index :30592prediction is :0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+prediction is being made, on address index :30624prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :1776prediction is :1
+prediction is being made, on address index :1808prediction is :0
+prediction is being made, on address index :1840prediction is :0
+prediction is being made, on address index :1872prediction is :0
+prediction is being made, on address index :30912prediction is :1
+prediction is being made, on address index :30944prediction is :0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  5 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,5direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  10 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,10direction0
+prediction is being made, on address index :31360prediction is :1
+prediction is being made, on address index :31424prediction is :0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  12 threshold is 0
+ pc_index 32524 load_value,12direction0
+ _resolve dir 1 pred_dir 0
+prediction is being made, on address index :31456prediction is :0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  50331648 threshold is 0
+ pc_index 32524 load_value,50331648direction1
+prediction is being made, on address index :31200prediction is :0
+prediction is being made, on address index :31232prediction is :0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+prediction is being made, on address index :31264prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :31680prediction is :0
+prediction is being made, on address index :31712prediction is :0
+prediction is being made, on address index :31776prediction is :0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+ _resolve dir 1 pred_dir 1
+prediction is being made, on address index :1936prediction is :0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+prediction is being made, on address index :1968prediction is :0
+prediction is being made, on address index :2000prediction is :0
+prediction is being made, on address index :32000prediction is :1
+prediction is being made, on address index :32032prediction is :0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  5 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,5direction0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+prediction is being made, on address index :60816prediction is :1
+prediction is being made, on address index :60848prediction is :1
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+prediction is being made, on address index :61328prediction is :1
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  10 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,10direction0
+prediction is being made, on address index :61360prediction is :1
+ _resolve dir 0 pred_dir 1
+prediction is being made, on address index :61392prediction is :1
+prediction is being made, on address index :61424prediction is :1
+prediction is being made, on address index :61456prediction is :0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+prediction is being made, on address index :61488prediction is :0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  12 threshold is 0
+ pc_index 32524 load_value,12direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :61520prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :61584prediction is :1
+prediction is being made, on address index :60944prediction is :0
+prediction is being made, on address index :60976prediction is :0
+prediction is being made, on address index :61008prediction is :0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  50331648 threshold is 0
+ pc_index 32524 load_value,50331648direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+prediction is being made, on address index :61040prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+prediction is being made, on address index :62128prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+prediction is being made, on address index :61072prediction is :1
+prediction is being made, on address index :61104prediction is :0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  150994944 threshold is 0
+ pc_index 32524 load_value,150994944direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+prediction is being made, on address index :61136prediction is :0
+prediction is being made, on address index :61168prediction is :0
+prediction is being made, on address index :61200prediction is :1
+prediction is being made, on address index :62416prediction is :1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  50331648 threshold is 0
+ pc_index 32524 load_value,50331648direction1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  4 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,4direction0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  100663296 threshold is 0
+ pc_index 32524 load_value,100663296direction1
+prediction is being made, on address index :62712prediction is :0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  4 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,4direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+prediction is being made, on address index :62744prediction is :1
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  5 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,5direction0
+prediction is being made, on address index :62776prediction is :0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+prediction is being made, on address index :62904prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+prediction is being made, on address index :62936prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+prediction is being made, on address index :62968prediction is :0
+prediction is being made, on address index :63096prediction is :1
+prediction is being made, on address index :63128prediction is :0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  150994944 threshold is 0
+ pc_index 32524 load_value,150994944direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+prediction is being made, on address index :63160prediction is :0
+prediction is being made, on address index :63192prediction is :0
+prediction is being made, on address index :63224prediction is :1
+prediction is being made, on address index :63416prediction is :0
+prediction is being made, on address index :63448prediction is :0
+prediction is being made, on address index :63480prediction is :1
+ _resolve dir 0 pred_dir 0
+prediction is being made, on address index :63608prediction is :0
+prediction is being made, on address index :63704prediction is :1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  50331648 threshold is 0
+ pc_index 32524 load_value,50331648direction1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  4 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,4direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  100663296 threshold is 0
+ pc_index 32524 load_value,100663296direction1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  4 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,4direction0
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+prediction is being made, on address index :63736prediction is :0
+prediction is being made, on address index :63768prediction is :0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+prediction is being made, on address index :63800prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :64088prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+prediction is being made, on address index :64120prediction is :1
+ _resolve dir 0 pred_dir 1
+prediction is being made, on address index :28840prediction is :0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  5 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,5direction0
+prediction is being made, on address index :28904prediction is :0
+prediction is being made, on address index :28936prediction is :0
+prediction is being made, on address index :64216prediction is :1
+prediction is being made, on address index :64248prediction is :1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+prediction is being made, on address index :64472prediction is :1
+prediction is being made, on address index :64504prediction is :0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+prediction is being made, on address index :2160prediction is :1
+prediction is being made, on address index :2224prediction is :0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  10 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,10direction0
+prediction is being made, on address index :2256prediction is :0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  12 threshold is 0
+ pc_index 32524 load_value,12direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :2288prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  50331648 threshold is 0
+ pc_index 32524 load_value,50331648direction1
+prediction is being made, on address index :64600prediction is :0
+prediction is being made, on address index :64632prediction is :0
+prediction is being made, on address index :64664prediction is :0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+prediction is being made, on address index :3448prediction is :0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+prediction is being made, on address index :3544prediction is :1
+prediction is being made, on address index :3576prediction is :0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+prediction is being made, on address index :3672prediction is :1
+prediction is being made, on address index :3704prediction is :0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+prediction is being made, on address index :3800prediction is :1
+prediction is being made, on address index :3832prediction is :0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+prediction is being made, on address index :4312prediction is :1
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  10 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,10direction0
+prediction is being made, on address index :4344prediction is :1
+ _resolve dir 0 pred_dir 1
+prediction is being made, on address index :4376prediction is :1
+prediction is being made, on address index :4472prediction is :0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  12 threshold is 0
+ pc_index 32524 load_value,12direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :4504prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :4536prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :3928prediction is :0
+prediction is being made, on address index :3960prediction is :0
+prediction is being made, on address index :3992prediction is :0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  50331648 threshold is 0
+ pc_index 32524 load_value,50331648direction1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+prediction is being made, on address index :4024prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :4952prediction is :0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  4 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,4direction0
+prediction is being made, on address index :14352prediction is :0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+prediction is being made, on address index :14384prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :63896prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+prediction is being made, on address index :63928prediction is :0
+prediction is being made, on address index :63960prediction is :0
+prediction is being made, on address index :63992prediction is :0
+prediction is being made, on address index :14672prediction is :1
+prediction is being made, on address index :14704prediction is :0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  5 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,5direction0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  10 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,10direction0
+prediction is being made, on address index :26416prediction is :1
+ _resolve dir 0 pred_dir 1
+prediction is being made, on address index :26448prediction is :1
+prediction is being made, on address index :26512prediction is :0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+prediction is being made, on address index :26544prediction is :0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  12 threshold is 0
+ pc_index 32524 load_value,12direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :26576prediction is :1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  50331648 threshold is 0
+ pc_index 32524 load_value,50331648direction1
+prediction is being made, on address index :26256prediction is :0
+prediction is being made, on address index :26288prediction is :0
+prediction is being made, on address index :26320prediction is :0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+prediction is being made, on address index :26352prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :26768prediction is :0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  4 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,4direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+prediction is being made, on address index :12368prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+prediction is being made, on address index :12400prediction is :0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+prediction is being made, on address index :12656prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+prediction is being made, on address index :12688prediction is :1
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  5 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,5direction0
+prediction is being made, on address index :12848prediction is :1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+prediction is being made, on address index :12976prediction is :0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+prediction is being made, on address index :13008prediction is :1
+ _resolve dir 0 pred_dir 1
+prediction is being made, on address index :13168prediction is :0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  5 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,5direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+ _resolve dir 0 pred_dir 1
+prediction is being made, on address index :13360prediction is :0
+prediction is being made, on address index :13456prediction is :0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  5 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,5direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+ _resolve dir 1 pred_dir 1
+prediction is being made, on address index :13584prediction is :0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+prediction is being made, on address index :13936prediction is :0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  10 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,10direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  12 threshold is 0
+ pc_index 32524 load_value,12direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  50331648 threshold is 0
+ pc_index 32524 load_value,50331648direction1
+prediction is being made, on address index :13712prediction is :0
+prediction is being made, on address index :14192prediction is :0
+prediction is being made, on address index :15680prediction is :1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  4 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,4direction0
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+prediction is being made, on address index :15712prediction is :0
+prediction is being made, on address index :15744prediction is :0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 12 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+prediction is being made, on address index :15776prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :64544prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+prediction is being made, on address index :64576prediction is :1
+ _resolve dir 0 pred_dir 1
+prediction is being made, on address index :64608prediction is :0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  266 threshold is 0
+ pc_index 32524 load_value,266direction0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  8714 threshold is 0
+ pc_index 32524 load_value,8714direction0
+prediction is being made, on address index :64736prediction is :1
+prediction is being made, on address index :64768prediction is :0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+prediction is being made, on address index :64864prediction is :1
+prediction is being made, on address index :64896prediction is :0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  10 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,10direction0
+prediction is being made, on address index :65152prediction is :1
+ _resolve dir 0 pred_dir 1
+prediction is being made, on address index :65184prediction is :1
+prediction is being made, on address index :65216prediction is :1
+prediction is being made, on address index :65248prediction is :0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  12 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,12direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :65280prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :65312prediction is :1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  50331648 threshold is 0
+ pc_index 32524 load_value,50331648direction1
+prediction is being made, on address index :64992prediction is :0
+prediction is being made, on address index :65024prediction is :0
+prediction is being made, on address index :65056prediction is :0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+prediction is being made, on address index :65088prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :5376prediction is :1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+prediction is being made, on address index :5408prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+prediction is being made, on address index :5952prediction is :1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+prediction is being made, on address index :5984prediction is :1
+ _resolve dir 0 pred_dir 1
+prediction is being made, on address index :6016prediction is :0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  5 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,5direction0
+prediction is being made, on address index :4056prediction is :1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+prediction is being made, on address index :4088prediction is :1
+prediction is being made, on address index :4120prediction is :0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+ _resolve dir 0 pred_dir 0
+prediction is being made, on address index :4152prediction is :0
+prediction is being made, on address index :2032prediction is :1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 1
+prediction is being made, on address index :2064prediction is :0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  150994944 threshold is 0
+ pc_index 32524 load_value,150994944direction1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+prediction is being made, on address index :2096prediction is :0
+prediction is being made, on address index :2128prediction is :0
+prediction is being made, on address index :2352prediction is :0
+prediction is being made, on address index :2384prediction is :0
+prediction is being made, on address index :2416prediction is :0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  50331648 threshold is 0
+ pc_index 32524 load_value,50331648direction1
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  4 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,4direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  100663296 threshold is 0
+ pc_index 32524 load_value,100663296direction1
+prediction is being made, on address index :38704prediction is :1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+prediction is being made, on address index :38736prediction is :1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+prediction is being made, on address index :2544prediction is :0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  4 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,4direction0
+prediction is being made, on address index :2576prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+prediction is being made, on address index :2608prediction is :1
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  4 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,4direction0
+prediction is being made, on address index :42024prediction is :1
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  4 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,4direction0
+prediction is being made, on address index :2960prediction is :1
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+prediction is being made, on address index :2992prediction is :0
+prediction is being made, on address index :3024prediction is :0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+prediction is being made, on address index :3056prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :14480prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+prediction is being made, on address index :14512prediction is :0
+prediction is being made, on address index :14544prediction is :0
+prediction is being made, on address index :14576prediction is :0
+prediction is being made, on address index :3344prediction is :1
+prediction is being made, on address index :3376prediction is :0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  5 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,5direction0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+prediction is being made, on address index :3760prediction is :1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 1
+prediction is being made, on address index :3792prediction is :1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  10 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,10direction0
+prediction is being made, on address index :3856prediction is :0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+prediction is being made, on address index :3888prediction is :0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  12 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,12direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :3920prediction is :1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  50331648 threshold is 0
+ pc_index 32524 load_value,50331648direction1
+prediction is being made, on address index :3600prediction is :0
+prediction is being made, on address index :3632prediction is :0
+prediction is being made, on address index :3664prediction is :0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+prediction is being made, on address index :4184prediction is :1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :4216prediction is :1
+prediction is being made, on address index :4248prediction is :0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+prediction is being made, on address index :4408prediction is :0
+ _resolve dir 1 pred_dir 0
+prediction is being made, on address index :4440prediction is :1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+prediction is being made, on address index :2640prediction is :1
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+prediction is being made, on address index :2672prediction is :0
+prediction is being made, on address index :2736prediction is :0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :5312prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+prediction is being made, on address index :5344prediction is :0
+ _resolve dir 0 pred_dir 0
+prediction is being made, on address index :5568prediction is :0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+prediction is being made, on address index :5600prediction is :0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+prediction is being made, on address index :5696prediction is :1
+prediction is being made, on address index :5728prediction is :1
+ _resolve dir 1 pred_dir 1
+prediction is being made, on address index :5824prediction is :1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+prediction is being made, on address index :5856prediction is :0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+prediction is being made, on address index :11936prediction is :1
+prediction is being made, on address index :11968prediction is :0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+prediction is being made, on address index :12064prediction is :1
+prediction is being made, on address index :12096prediction is :0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+prediction is being made, on address index :12320prediction is :1
+prediction is being made, on address index :12352prediction is :1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+prediction is being made, on address index :12864prediction is :1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  10 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,10direction0
+prediction is being made, on address index :12896prediction is :1
+prediction is being made, on address index :12960prediction is :0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+prediction is being made, on address index :12992prediction is :0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  12 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,12direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :13024prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :13056prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :13088prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :13120prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :13152prediction is :1
+prediction is being made, on address index :13184prediction is :1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  50331648 threshold is 0
+ pc_index 32524 load_value,50331648direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  50331648 threshold is 0
+ pc_index 32524 load_value,50331648direction1
+prediction is being made, on address index :12480prediction is :0
+prediction is being made, on address index :12512prediction is :0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+prediction is being made, on address index :12544prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :13472prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+prediction is being made, on address index :13504prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+prediction is being made, on address index :13728prediction is :0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+prediction is being made, on address index :13760prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+prediction is being made, on address index :13792prediction is :1
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+prediction is being made, on address index :13920prediction is :1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 0 pred_dir 1
+prediction is being made, on address index :14048prediction is :0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+prediction is being made, on address index :14080prediction is :0
+ _resolve dir 1 pred_dir 0
+prediction is being made, on address index :14112prediction is :1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+ _resolve dir 0 pred_dir 1
+prediction is being made, on address index :14240prediction is :0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+prediction is being made, on address index :14272prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+prediction is being made, on address index :14304prediction is :1
+ _resolve dir 0 pred_dir 1
+prediction is being made, on address index :14432prediction is :0
+prediction is being made, on address index :14464prediction is :0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+prediction is being made, on address index :14624prediction is :1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+prediction is being made, on address index :14656prediction is :1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 0 pred_dir 0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  0 threshold is 0
+ pc_index 32524 load_value,0direction1
+prediction is being made, on address index :14752prediction is :1
+prediction is being made, on address index :14784prediction is :0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  16777216 threshold is 0
+ pc_index 32524 load_value,16777216direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  67108864 threshold is 0
+ pc_index 32524 load_value,67108864direction1
+ _resolve dir 0 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  10 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,10direction0
+prediction is being made, on address index :12608prediction is :1
+ _resolve dir 0 pred_dir 1
+prediction is being made, on address index :12704prediction is :0
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 1
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 1the value is  12 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,12direction0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  184549376 threshold is 0
+ pc_index 32524 load_value,184549376direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :12736prediction is :0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 0the value is  33554432 threshold is 0
+ pc_index 32524 load_value,33554432direction1
+prediction is being made, on address index :12768prediction is :1
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value is  50331648 threshold is 0
+ pc_index 32524 load_value,50331648direction1
+prediction is being made, on address index :14880prediction is :0
+prediction is being made, on address index :14976prediction is :0
+ _resolve dir 0 pred_dir 0
+ _resolve dir 0 pred_dir 0
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 1
+threshold is0alu type 2resolve_dir0
+is src branch 
+the resolved and pred dir respectively are: 0 0the value is  1 threshold is 0
+ something went wrong, a value is different from threshold for pc_index 32524branch type is 2 all four values are
+50331648 0 1 8714 threshold is 0
+ pc_index 32524 load_value,1direction0
+ _resolve dir 1 pred_dir 0
+threshold is0alu type 2resolve_dir1
+is src branch 
+the resolved and pred dir respectively are: 1 1the value i
