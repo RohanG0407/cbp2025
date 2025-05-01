@@ -23,6 +23,21 @@ enum ALU_Operation
   CMN
 };
 
+enum aluop
+{
+ EQ,
+ ENQ,
+ HQ,
+ LQ,
+ AT,
+ ANT
+};
+
+struct alu_reverse_table
+{
+	uint64_t value;
+	bool valid;
+};
 struct BranchTableEntry
 {
   uint64_t tag;
@@ -42,7 +57,12 @@ struct BranchTableEntry
   long long int incorrect_counter = 0;
   bool src_flag[16];
   bool flag_br;
-  std::unordered_map<uint64_t, bool> value_prediction_map;
+ // std::unordered_map<uint64_t, bool> value_prediction_map;
+ bool is_alu;
+ alu_reverse_table alu_result_entries[6];
+ aluop alu_type;
+ uint64_t threshold;
+ bool override_alu;
 };
 
 struct StoreTableEntry
@@ -58,7 +78,11 @@ struct TriggerTableEntry
   uint64_t branch_bit_mask;
   bool src_flag[16];
   bool flag_br;
-  std::unordered_map<uint64_t, bool> value_prediction_map;
+  //std::unordered_map<uint64_t, bool> value_prediction_map;
+  bool is_alu;
+  aluop alu_type;
+  uint64_t threshold;
+  bool override_alu;
 };
 
 struct PredictionTableEntry
