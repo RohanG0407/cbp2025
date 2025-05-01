@@ -31,7 +31,7 @@
 #define PERFECT_ADDR_PRED true
 #define STUPID_VALUE 8898
 #define SUPPORT_ALU_OPS true
-
+#define ALU_OVERRIDE true
 // Branch Table Info
 BranchTableEntry branch_table[BT_SIZE]; // 2^16 entries - 1
 std::unordered_set<uint64_t> high_mispred_pc;
@@ -125,6 +125,7 @@ void beginCondDirPredictor()
     }
     branch_table[i].alu_type = EQ;
     branch_table[i].threshold = 0;
+    trigger_table[i].override_alu = false;
   }
 
   // initial store_table setup
@@ -151,6 +152,7 @@ void beginCondDirPredictor()
     trigger_table[i].is_alu = false;
     trigger_table[i].alu_type = EQ;
     trigger_table[i].threshold = 0;
+    trigger_table[i].override_alu = false;
   }
 
   // initial prediction_table setup
@@ -291,7 +293,7 @@ bool get_cond_dir_prediction(uint64_t seq_no, uint8_t piece, uint64_t pc, const 
     if (prediction_table[addr_index].tag == addr_tag)
     {
       my_prediction = prediction_table[addr_index].taken;
-      if(pc_index == 32524)
+      if(pc_index == 58464 || pc_index == 33084 || pc_index == 56364)
       {
 	      std::cout << "prediction is being made, on address index :" << addr_index << "prediction is :" << my_prediction << "\n";
       }
@@ -619,7 +621,7 @@ void notify_agen_complete(uint64_t seq_no, uint8_t piece, uint64_t pc, const Dec
       prediction_table[store_addr_index].tag = store_addr_tag;
       // std::cout << " the trigger table prediction is \n" << trigger_table[store_pc_index].br_type << "\n";
       //
-      if(trigger_table[store_pc_index].is_alu)
+      if(trigger_table[store_pc_index].is_alu && !(trigger_table[store_pc_index].override_alu))
       {
 	      if(trigger_table[store_pc_index].alu_type == EQ)
 	      {
@@ -746,7 +748,7 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
           if (pred_dir == _resolve_dir)
           {
             branch_table[pc_index].correct_counter += 1;
-	    if(pc_index == 32524)
+	    if(pc_index == 58464 || pc_index == 33084 || pc_index == 56364)
             {
                //std::cout << " pc_index" << pc_index << " correct counter " << branch_table[pc_index].correct_counter << " incorrect counter " << branch_table[pc_index].incorrect_counter << "branch type " << branch_table[pc_index].br_type << "\n";
               std::cout << " _resolve dir " << _resolve_dir << " pred_dir " << pred_dir <<"\n";
@@ -756,7 +758,7 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
           {
             branch_table[pc_index].incorrect_counter += 1;
             //if (pc_index == 33084 || 54540 || 12080 || 11912)
-	    if(pc_index == 32524)
+	    if(pc_index == 58464 || pc_index == 33084 || pc_index == 56364)
             {
                //std::cout << " pc_index" << pc_index << " correct counter " << branch_table[pc_index].correct_counter << " incorrect counter " << branch_table[pc_index].incorrect_counter << "branch type " << branch_table[pc_index].br_type << "\n";
               std::cout << " _resolve dir " << _resolve_dir << " pred_dir " << pred_dir <<"\n";
@@ -777,7 +779,7 @@ void get_branch_bit_direction(uint16_t pc_index, uint64_t dest_reg_val, const bo
   if (branch_table[pc_index].br_type > 5)
   {
     std::cout << "ERROR ERROR " << dest_reg_val << "\n";
-    exit(0);
+    //exit(0);
   }
   // std::cout << "branch bit drection started for pc_index:" << pc_index <<" val : "<< dest_reg_val << "dir: "<< _resolve_dir << " \n";
   if (branch_table[pc_index].bit_position_matters == false)
@@ -863,7 +865,7 @@ void get_branch_bit_direction(uint16_t pc_index, uint64_t dest_reg_val, const bo
   }
   if (branch_table[pc_index].bit_position_matters == true)
   {
-	  if(pc_index == 32524)
+	  if(pc_index == 58464 || pc_index == 33084 || pc_index == 56364)
 	  {
 	 std::cout << "Have entered tbz test for branch pc_index " << pc_index << "branch bit mask is" << branch_table[pc_index].branch_bit_mask << "\n";
 	  }
@@ -910,8 +912,8 @@ void get_branch_bit_direction(uint16_t pc_index, uint64_t dest_reg_val, const bo
 
       if (bit_count == 1)
       {
-	      if(pc_index == 32524){
-         std::cout << " TB direction found its " << branch_table[pc_index].direction_zero_match << "hope this helps \n";
+	      if(pc_index == 58464 || pc_index == 33084 || pc_index == 56364){
+         //std::cout << " TB direction found its " << branch_table[pc_index].direction_zero_match << "hope this helps \n";
 	      }
 	}
       if (branch_table[pc_index].direction_zero_match)
@@ -945,8 +947,8 @@ void learn_src_branch_behaivour(uint16_t pc_index, uint64_t dest_reg_val, const 
 {
   if (dest_reg_val >= 16)
   {
-    std::cout << "SOMETHING IS WRONG, this is not src branch, cant have value more than 16!!! \n";
-    exit(0);
+    //std::cout << "SOMETHING IS WRONG, this is not src branch, cant have value more than 16!!! \n";
+    //exit(0);
   }
 
   if (_resolve_dir == 1)
@@ -1174,26 +1176,27 @@ void value_correlator(uint16_t pc_index, uint64_t load_val, const bool _resolve_
 		}
 		else
 		{
-			std::cout << "no condition held weird in count 2\n";
-			exit(0);
+			//std::cout << "no condition held weird in count 2\n";
+			branch_table[pc_index].override_alu = true;
+			//exit(0);
 		}
 	}
 	else if(count == 3)
 	{
-		if(pc_index ==32524)
+		if(pc_index == 58464 || pc_index == 33084 || pc_index == 56364)
 		{
-			std::cout << "NOTE lets understand learning behaivour valid bits one after other" << branch_table[pc_index].alu_result_entries[0].valid << branch_table[pc_index].alu_result_entries[1].valid << branch_table[pc_index].alu_result_entries[2].valid << branch_table[pc_index].alu_result_entries[3].valid << branch_table[pc_index].alu_result_entries[4].valid << branch_table[pc_index].alu_result_entries[5].valid << "\n";
+			//std::cout << "NOTE lets understand learning behaivour valid bits one after other" << branch_table[pc_index].alu_result_entries[0].valid << branch_table[pc_index].alu_result_entries[1].valid << branch_table[pc_index].alu_result_entries[2].valid << branch_table[pc_index].alu_result_entries[3].valid << branch_table[pc_index].alu_result_entries[4].valid << branch_table[pc_index].alu_result_entries[5].valid << "\n";
 		}
 		if(branch_table[pc_index].alu_result_entries[0].valid && branch_table[pc_index].alu_result_entries[1].valid) // 2 in taken, 1 in not taken
 		{
-			if(pc_index ==11752) {std::cout << "non going mad print\n";}
+			//if(pc_index ==11752) {std::cout << "non going mad print\n";}
 			if(_resolve_dir)   //we can keep predicting taken
 			{
 				if(pred_dir != _resolve_dir)
 				{
-					if(pc_index ==11752) {std::cout << "mismatch is threshold and value " << branch_table[pc_index].threshold << " " << load_val << "\n";}
+					//if(pc_index ==11752) {std::cout << "mismatch is threshold and value " << branch_table[pc_index].threshold << " " << load_val << "\n";}
 					branch_table[pc_index].threshold = branch_table[pc_index].alu_result_entries[2].value;
-					if(pc_index ==11752) {std::cout << "updated threshold " << branch_table[pc_index].threshold << "\n";}
+					//if(pc_index ==11752) {std::cout << "updated threshold " << branch_table[pc_index].threshold << "\n";}
 				}
 			}
 			else
@@ -1206,7 +1209,7 @@ void value_correlator(uint16_t pc_index, uint64_t load_val, const bool _resolve_
                                 	branch_table[pc_index].alu_type = (branch_table[pc_index].alu_result_entries[0].value > branch_table[pc_index].alu_result_entries[2].value)?HQ : LQ;
 					if(pc_index ==11752)
 					{
-						std::cout << "pc entered place to go to 4 count, should be assignned hq lq :" << branch_table[pc_index].alu_type << "\n";
+						//std::cout << "pc entered place to go to 4 count, should be assignned hq lq :" << branch_table[pc_index].alu_type << "\n";
 					}
 					if(branch_table[pc_index].alu_type == HQ)
 					{
@@ -1248,24 +1251,24 @@ void value_correlator(uint16_t pc_index, uint64_t load_val, const bool _resolve_
 		}
 		else
 		{
-			std::cout << "something went wrong in count 3 not possible case\n";
-			exit(0);
+			//std::cout << "something went wrong in count 3 not possible case\n";
+			branch_table[pc_index].override_alu = true;
 		}
 
 
 	}
 	else if(count == 4)
 	{
-		if(pc_index == 32524)
+		if(pc_index == 58464 || pc_index == 33084 || pc_index == 56364)
 		{
-			std::cout << "the resolved and pred dir respectively are: " << _resolve_dir << " " << pred_dir << "the value is  " << load_val << " threshold is " << branch_table[pc_index].threshold << "\n";
+			//std::cout << "the resolved and pred dir respectively are: " << _resolve_dir << " " << pred_dir << "the value is  " << load_val << " threshold is " << branch_table[pc_index].threshold << "\n";
 		}
 
 	if(_resolve_dir)
 	{
 		if(!(branch_table[pc_index].alu_result_entries[5].valid) || !(branch_table[pc_index].alu_result_entries[4].valid) || !(branch_table[pc_index].alu_result_entries[3].valid) || !(branch_table[pc_index].alu_result_entries[2].valid) || !(branch_table[pc_index].alu_result_entries[1].valid) || !(branch_table[pc_index].alu_result_entries[0].valid))
 		{
-			std::cout << "something didnt get learnt!!!" << branch_table[pc_index].alu_result_entries[0].valid << branch_table[pc_index].alu_result_entries[1].valid << branch_table[pc_index].alu_result_entries[2].valid << branch_table[pc_index].alu_result_entries[3].valid << branch_table[pc_index].alu_result_entries[4].valid << branch_table[pc_index].alu_result_entries[5].valid << "\n";
+			//std::cout << "something didnt get learnt!!!" << branch_table[pc_index].alu_result_entries[0].valid << branch_table[pc_index].alu_result_entries[1].valid << branch_table[pc_index].alu_result_entries[2].valid << branch_table[pc_index].alu_result_entries[3].valid << branch_table[pc_index].alu_result_entries[4].valid << branch_table[pc_index].alu_result_entries[5].valid << "\n";
 			exit(0);
 		}
 		
@@ -1282,7 +1285,8 @@ void value_correlator(uint16_t pc_index, uint64_t load_val, const bool _resolve_
 				}
 				else if(load_val > pivot  && load_val < branch_table[pc_index].alu_result_entries[4].value)
 				{
-					std::cout <<" something went wrong, a value is different from threshold for pc_index " << pc_index << "branch type is " << branch_table[pc_index].alu_type << " all four values are\n" << branch_table[pc_index].alu_result_entries[0].value << " " << branch_table[pc_index].alu_result_entries[1].value << " " << branch_table[pc_index].alu_result_entries[2].value << " " << branch_table[pc_index].alu_result_entries[3].value << " threshold is " << branch_table[pc_index].alu_result_entries[4].value << "\n";
+					//std::cout <<" something went wrong, a value is different from threshold for pc_index " << pc_index << "branch type is " << branch_table[pc_index].alu_type << " all four values are\n" << branch_table[pc_index].alu_result_entries[0].value << " " << branch_table[pc_index].alu_result_entries[1].value << " " << branch_table[pc_index].alu_result_entries[2].value << " " << branch_table[pc_index].alu_result_entries[3].value << " threshold is " << branch_table[pc_index].alu_result_entries[4].value << "\n";
+				   branch_table[pc_index].override_alu = true;
 				}
 			}
 			else if(branch_table[pc_index].alu_type == LQ)
@@ -1296,14 +1300,16 @@ void value_correlator(uint16_t pc_index, uint64_t load_val, const bool _resolve_
                                 }
                                 else if(load_val < pivot  && load_val > branch_table[pc_index].alu_result_entries[4].value)
                                 {
-                                        std::cout <<" something went wrong, a value is different from threshold for pc_index " << pc_index << "branch type is " << branch_table[pc_index].alu_type << " all four values are\n" << branch_table[pc_index].alu_result_entries[0].value << " " << branch_table[pc_index].alu_result_entries[1].value << " " << branch_table[pc_index].alu_result_entries[2].value << " " << branch_table[pc_index].alu_result_entries[3].value << " threshold is " << branch_table[pc_index].alu_result_entries[4].value << "\n";
+					branch_table[pc_index].override_alu = true;
+                                        //std::cout <<" something went wrong, a value is different from threshold for pc_index " << pc_index << "branch type is " << branch_table[pc_index].alu_type << " all four values are\n" << branch_table[pc_index].alu_result_entries[0].value << " " << branch_table[pc_index].alu_result_entries[1].value << " " << branch_table[pc_index].alu_result_entries[2].value << " " << branch_table[pc_index].alu_result_entries[3].value << " threshold is " << branch_table[pc_index].alu_result_entries[4].value << "\n";
                                 }
 
 			}
 			else
 			{
-				std::cout << "error in count 4, non lq hq branch\n";
-				exit(0);
+				//std::cout << "error in count 4, non lq hq branch\n";
+				//exit(0);
+				branch_table[pc_index].override_alu = true;
 			}
 
 
@@ -1314,8 +1320,8 @@ void value_correlator(uint16_t pc_index, uint64_t load_val, const bool _resolve_
 	{
 		if(!(branch_table[pc_index].alu_result_entries[5].valid) || !(branch_table[pc_index].alu_result_entries[4].valid) || !(branch_table[pc_index].alu_result_entries[3].valid) || !(branch_table[pc_index].alu_result_entries[2].valid) || !(branch_table[pc_index].alu_result_entries[1].valid) || !(branch_table[pc_index].alu_result_entries[0].valid))
                 {
-                        std::cout << "something didnt get learnt!!!" << branch_table[pc_index].alu_result_entries[0].valid << branch_table[pc_index].alu_result_entries[1].valid << branch_table[pc_index].alu_result_entries[2].valid << branch_table[pc_index].alu_result_entries[3].valid << branch_table[pc_index].alu_result_entries[4].valid << branch_table[pc_index].alu_result_entries[5].valid << "\n";
-                        exit(0);
+                        //std::cout << "something didnt get learnt!!!" << branch_table[pc_index].alu_result_entries[0].valid << branch_table[pc_index].alu_result_entries[1].valid << branch_table[pc_index].alu_result_entries[2].valid << branch_table[pc_index].alu_result_entries[3].valid << branch_table[pc_index].alu_result_entries[4].valid << branch_table[pc_index].alu_result_entries[5].valid << "\n";
+                        branch_table[pc_index].override_alu = true;
                 }
 
                         uint64_t pivot2 = 0;
@@ -1331,7 +1337,8 @@ void value_correlator(uint16_t pc_index, uint64_t load_val, const bool _resolve_
                                 }
                                 else if(load_val < pivot2  && load_val > branch_table[pc_index].alu_result_entries[4].value)
                                 {
-                                        std::cout <<" something went wrong, a value is different from threshold for pc_index " << pc_index << "branch type is " << branch_table[pc_index].alu_type << " all four values are\n" << branch_table[pc_index].alu_result_entries[0].value << " " << branch_table[pc_index].alu_result_entries[1].value << " " << branch_table[pc_index].alu_result_entries[2].value << " " << branch_table[pc_index].alu_result_entries[3].value << " threshold is " << branch_table[pc_index].alu_result_entries[4].value << "\n";
+                                       branch_table[pc_index].override_alu = true;
+					// std::cout <<" something went wrong, a value is different from threshold for pc_index " << pc_index << "branch type is " << branch_table[pc_index].alu_type << " all four values are\n" << branch_table[pc_index].alu_result_entries[0].value << " " << branch_table[pc_index].alu_result_entries[1].value << " " << branch_table[pc_index].alu_result_entries[2].value << " " << branch_table[pc_index].alu_result_entries[3].value << " threshold is " << branch_table[pc_index].alu_result_entries[4].value << "\n";
                                 }
                         }
                         else if(branch_table[pc_index].alu_type == LQ)
@@ -1345,14 +1352,15 @@ void value_correlator(uint16_t pc_index, uint64_t load_val, const bool _resolve_
                                 }
                                 else if(load_val > pivot2  && load_val < branch_table[pc_index].alu_result_entries[4].value)
                                 {
-                                        std::cout <<" something went wrong, a value is different from threshold for pc_index " << pc_index << "branch type is " << branch_table[pc_index].alu_type << " all four values are\n" << branch_table[pc_index].alu_result_entries[0].value << " " << branch_table[pc_index].alu_result_entries[1].value << " " << branch_table[pc_index].alu_result_entries[2].value << " " << branch_table[pc_index].alu_result_entries[3].value << " threshold is " << branch_table[pc_index].alu_result_entries[4].value << "\n";
+					branch_table[pc_index].override_alu = true;
+                                      //  std::cout <<" something went wrong, a value is different from threshold for pc_index " << pc_index << "branch type is " << branch_table[pc_index].alu_type << " all four values are\n" << branch_table[pc_index].alu_result_entries[0].value << " " << branch_table[pc_index].alu_result_entries[1].value << " " << branch_table[pc_index].alu_result_entries[2].value << " " << branch_table[pc_index].alu_result_entries[3].value << " threshold is " << branch_table[pc_index].alu_result_entries[4].value << "\n";
                                 }
 
                         }
                         else
                         {
-                                std::cout << "error in count 4, non lq hq branch\n";
-                                exit(0);
+                                //std::cout << "error in count 4, non lq hq branch\n";
+                                branch_table[pc_index].override_alu = true;
                         }
 
 		
@@ -1361,24 +1369,19 @@ void value_correlator(uint16_t pc_index, uint64_t load_val, const bool _resolve_
 	}
 	else
 	{
-		if(count == 0)
-		{
-			std::cout << "count value is 0 what I am doing here!!!!";
-		}
-		std::cout << "error count value is\n" << count;
-		exit(0);
+		branch_table[pc_index].override_alu = true;
 	}
 
 
-if(pc_index == 11752)
-{
-	uint64_t tempo;
-	if(branch_table[pc_index].alu_type == ENQ)
-		tempo = branch_table[pc_index].alu_result_entries[1].value;
-	else
-		tempo = branch_table[pc_index].alu_result_entries[3].value;
-	std::cout << "count: " << count << "threshold: " << branch_table[pc_index].threshold << " alu type " << branch_table[pc_index].alu_type << " val 1 " << branch_table[pc_index].alu_result_entries[0].value << " val 2 " << tempo  << " val 3 " << branch_table[pc_index].alu_result_entries[2].value << "\n";
-}
+//if(pc_index == 11752)
+//{
+//	uint64_t tempo;
+//	if(branch_table[pc_index].alu_type == ENQ)
+//		tempo = branch_table[pc_index].alu_result_entries[1].value;
+//	else
+//		tempo = branch_table[pc_index].alu_result_entries[3].value;
+//	std::cout << "count: " << count << "threshold: " << branch_table[pc_index].threshold << " alu type " << branch_table[pc_index].alu_type << " val 1 " << branch_table[pc_index].alu_result_entries[0].value << " val 2 " << tempo  << " val 3 " << branch_table[pc_index].alu_result_entries[2].value << "\n";
+//}
 
 }
 
@@ -1433,9 +1436,9 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
       // append full 64-bit pc to misprediction list
       high_mispred_pc.insert(pc);
       uint64_t dest_reg_val = RegFile[_exec_info.dec_info.src_reg_info[0]];
-      if(pc_index == 32524)
+      if(pc_index == 58464 || pc_index == 33084 || pc_index == 56364)
       {
-	      std::cout << "threshold is" << branch_table[pc_index].threshold << "alu type " << branch_table[pc_index].alu_type << "resolve_dir" << _resolve_dir << "\n";; 
+	      //std::cout << "threshold is" << branch_table[pc_index].threshold << "alu type " << branch_table[pc_index].alu_type << "resolve_dir" << _resolve_dir << "\n";; 
       }
       // if(pc_index == 37824 )
       //{
@@ -1443,17 +1446,17 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
       // }
       if (_exec_info.dec_info.src_reg_info[0] != 64)
       {
-	if(pc_index == 32524){
-		std::cout << "its a non src brancgh \n";
+	if(pc_index == 58464 || pc_index == 33084 || pc_index == 56364){
+	//	std::cout << "its a non src brancgh \n";
 	}
         get_branch_bit_direction(pc_index, dest_reg_val, _resolve_dir);
         // std::cout << " debug br type " << branch_table[pc_index].br_type;
       }
       else
       {
-	      if(pc_index == 32524)
+	      if(pc_index == 58464 || pc_index == 33084 || pc_index == 56364)
 	      {
-		      std::cout << "is src branch \n";
+		     // std::cout << "is src branch \n";
 	      }
         learn_src_branch_behaivour(pc_index, dest_reg_val, _resolve_dir);
         branch_table[pc_index].flag_br = 1;
@@ -1547,7 +1550,7 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
 	if(branch_table[pc_index].is_alu)
       	{
         	value_correlator(pc_index, load_value, _resolve_dir, pred_dir);
-		if(pc_index == 32524)
+		if(pc_index == 58464 || pc_index == 33084 || pc_index == 56364)
 		{
 			std::cout << " pc_index " << pc_index << " load_value," << load_value << "direction" <<  _resolve_dir << "\n";
 		}
@@ -1578,6 +1581,7 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
 	      trigger_table[store_pc_index].is_alu = branch_table[pc_index].is_alu;
   	      trigger_table[store_pc_index].alu_type = branch_table[pc_index].alu_type;
   	      trigger_table[store_pc_index].threshold = branch_table[pc_index].threshold;
+	      trigger_table[store_pc_index].override_alu = branch_table[pc_index].override_alu;
               if (branch_table[pc_index].flag_br)
               {
                 trigger_table[store_pc_index].flag_br = 1;
@@ -1645,6 +1649,7 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
 		trigger_table[store_pc_index].is_alu = branch_table[pc_index].is_alu;
                 trigger_table[store_pc_index].alu_type = branch_table[pc_index].alu_type;
                 trigger_table[store_pc_index].threshold = branch_table[pc_index].threshold;
+		trigger_table[store_pc_index].override_alu = branch_table[pc_index].override_alu;
                 // std::cout << "before unknown set\n";
                 for (int k = 0; k < 16; k++)
                 {

@@ -64,6 +64,7 @@ struct BranchTableEntry
  alu_reverse_table alu_result_entries[6];
  aluop alu_type;
  uint64_t threshold;
+ bool override_alu;
 };
 
 struct StoreTableEntry
@@ -86,6 +87,7 @@ struct TriggerTableEntry
   bool is_alu;
   aluop alu_type;
   uint64_t threshold;
+  bool override_alu;
 };
 
 struct PredictionTableEntry
