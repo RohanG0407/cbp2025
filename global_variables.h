@@ -28,6 +28,7 @@ struct BranchTableEntry
   uint64_t tag;
   // uint64_t src_reg;
   uint64_t sat_ctr;
+  bool override_tage;
   bool is_linked;
   BranchType br_type;
   uint64_t predicted_load_addr;
