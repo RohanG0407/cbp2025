@@ -111,6 +111,7 @@ void beginCondDirPredictor()
     branch_table[i].bit_flag = false;
     branch_table[i].flag_br = false;
     branch_table[i].value_prediction_map.clear();
+    branch_table[i].override_tage = false;
   }
 
   // initial store_table setup
@@ -267,7 +268,7 @@ bool get_cond_dir_prediction(uint64_t seq_no, uint8_t piece, uint64_t pc, const 
                 << std::endl;
     }
     uint64_t addr_index = (pred_load_addr >> 2) & PT_MASK;
-    if (prediction_table[addr_index].valid)
+    if (prediction_table[addr_index].valid && branch_table[branch_table_idx].override_tage)
     {
       my_prediction = prediction_table[addr_index].taken;
       if (DEBUG_FLAG)
@@ -279,7 +280,7 @@ bool get_cond_dir_prediction(uint64_t seq_no, uint8_t piece, uint64_t pc, const 
     }
     else
     {
-       if (DEBUG_FLAG)
+      if (DEBUG_FLAG)
       {
         std::cout << "Branch Predicting with TAGE!";
       }
@@ -584,18 +585,18 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
         // {
         //   prediction_table[store_addr_index].taken = trigger_table[store_pc_index].src_flag[dest_val];
         // }
-        if(_exec_info.mem_sz.value() == 16)
+        if (_exec_info.mem_sz.value() == 16)
         {
-          for(uint64_t i = 0; i < 16; i += 4)
+          for (uint64_t i = 0; i < 16; i += 4)
           {
             pred_table_idx = ((store_addr + i) >> 2) & PT_MASK;
             prediction_table[pred_table_idx].taken = trigger_table[trigger_table_idx].src_flag[dest_val];
             prediction_table[pred_table_idx].valid = true;
           }
         }
-        else if(_exec_info.mem_sz.value() == 8)
+        else if (_exec_info.mem_sz.value() == 8)
         {
-          for(uint64_t i = 0; i < 8; i += 4)
+          for (uint64_t i = 0; i < 8; i += 4)
           {
             pred_table_idx = ((store_addr + i) >> 2) & PT_MASK;
             prediction_table[pred_table_idx].taken = trigger_table[trigger_table_idx].src_flag[dest_val];
@@ -616,18 +617,18 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
       }
       else if (trigger_table[trigger_table_idx].br_type == CBZ)
       {
-        if(_exec_info.mem_sz.value() == 16)
+        if (_exec_info.mem_sz.value() == 16)
         {
-          for(uint64_t i = 0; i < 16; i += 4)
+          for (uint64_t i = 0; i < 16; i += 4)
           {
             pred_table_idx = ((store_addr + i) >> 2) & PT_MASK;
             prediction_table[pred_table_idx].taken = (dest_val == 0) ? true : false;
             prediction_table[pred_table_idx].valid = true;
           }
         }
-        else if(_exec_info.mem_sz.value() == 8)
+        else if (_exec_info.mem_sz.value() == 8)
         {
-          for(uint64_t i = 0; i < 8; i += 4)
+          for (uint64_t i = 0; i < 8; i += 4)
           {
             pred_table_idx = ((store_addr + i) >> 2) & PT_MASK;
             prediction_table[pred_table_idx].taken = (dest_val == 0) ? true : false;
@@ -644,18 +645,18 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
       }
       else if (trigger_table[trigger_table_idx].br_type == CBNZ)
       {
-        if(_exec_info.mem_sz.value() == 16)
+        if (_exec_info.mem_sz.value() == 16)
         {
-          for(uint64_t i = 0; i < 16; i += 4)
+          for (uint64_t i = 0; i < 16; i += 4)
           {
             pred_table_idx = ((store_addr + i) >> 2) & PT_MASK;
             prediction_table[pred_table_idx].taken = (dest_val != 0) ? true : false;
             prediction_table[pred_table_idx].valid = true;
           }
         }
-        else if(_exec_info.mem_sz.value() == 8)
+        else if (_exec_info.mem_sz.value() == 8)
         {
-          for(uint64_t i = 0; i < 8; i += 4)
+          for (uint64_t i = 0; i < 8; i += 4)
           {
             pred_table_idx = ((store_addr + i) >> 2) & PT_MASK;
             prediction_table[pred_table_idx].taken = (dest_val != 0) ? true : false;
@@ -672,18 +673,18 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
       }
       else if (trigger_table[trigger_table_idx].br_type == TBZ)
       {
-        if(_exec_info.mem_sz.value() == 16)
+        if (_exec_info.mem_sz.value() == 16)
         {
-          for(uint64_t i = 0; i < 16; i += 4)
+          for (uint64_t i = 0; i < 16; i += 4)
           {
             pred_table_idx = ((store_addr + i) >> 2) & PT_MASK;
             prediction_table[pred_table_idx].taken = ((dest_val & trigger_table[trigger_table_idx].branch_bit_mask) == 0) ? true : false;
             prediction_table[pred_table_idx].valid = true;
           }
         }
-        else if(_exec_info.mem_sz.value() == 8)
+        else if (_exec_info.mem_sz.value() == 8)
         {
-          for(uint64_t i = 0; i < 8; i += 4)
+          for (uint64_t i = 0; i < 8; i += 4)
           {
             pred_table_idx = ((store_addr + i) >> 2) & PT_MASK;
             prediction_table[pred_table_idx].taken = ((dest_val & trigger_table[trigger_table_idx].branch_bit_mask) == 0) ? true : false;
@@ -700,18 +701,18 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
       }
       else if (trigger_table[trigger_table_idx].br_type == TBNZ)
       {
-        if(_exec_info.mem_sz.value() == 16)
+        if (_exec_info.mem_sz.value() == 16)
         {
-          for(uint64_t i = 0; i < 16; i += 4)
+          for (uint64_t i = 0; i < 16; i += 4)
           {
             pred_table_idx = ((store_addr + i) >> 2) & PT_MASK;
             prediction_table[pred_table_idx].taken = ((dest_val & trigger_table[trigger_table_idx].branch_bit_mask) != 0) ? true : false;
             prediction_table[pred_table_idx].valid = true;
           }
         }
-        else if(_exec_info.mem_sz.value() == 8)
+        else if (_exec_info.mem_sz.value() == 8)
         {
-          for(uint64_t i = 0; i < 8; i += 4)
+          for (uint64_t i = 0; i < 8; i += 4)
           {
             pred_table_idx = ((store_addr + i) >> 2) & PT_MASK;
             prediction_table[pred_table_idx].taken = ((dest_val & trigger_table[trigger_table_idx].branch_bit_mask) != 0) ? true : false;
@@ -728,17 +729,17 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
       }
       else if (trigger_table[trigger_table_idx].br_type == NA)
       {
-        if(_exec_info.mem_sz.value() == 16)
+        if (_exec_info.mem_sz.value() == 16)
         {
-          for(uint64_t i = 0; i < 16; i += 4)
+          for (uint64_t i = 0; i < 16; i += 4)
           {
             pred_table_idx = ((store_addr + i) >> 2) & PT_MASK;
             prediction_table[pred_table_idx].valid = false;
           }
         }
-        else if(_exec_info.mem_sz.value() == 8)
+        else if (_exec_info.mem_sz.value() == 8)
         {
-          for(uint64_t i = 0; i < 8; i += 4)
+          for (uint64_t i = 0; i < 8; i += 4)
           {
             pred_table_idx = ((store_addr + i) >> 2) & PT_MASK;
             prediction_table[pred_table_idx].valid = false;
@@ -1139,6 +1140,16 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
           {
             branch_table[branch_table_idx].sat_ctr += 1;
           }
+        } else {
+          if(branch_table[branch_table_idx].sat_ctr > 0 && (branch_table[branch_table_idx].is_linked))
+          {
+            branch_table[branch_table_idx].sat_ctr -= 1;
+          }
+        }
+
+        if(branch_table[branch_table_idx].sat_ctr == BT_SAT_COUNTER_MAX)
+        {
+          branch_table[branch_table_idx].override_tage = false;
         }
       }
       else
@@ -1331,8 +1342,12 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
             }
             // std::cout << "after  unknown set\n";
           }
-
-          branch_table[branch_table_idx].is_linked = true;
+          if (!branch_table[branch_table_idx].is_linked)
+          {
+            branch_table[branch_table_idx].sat_ctr = 0;
+            branch_table[branch_table_idx].override_tage = true;
+            branch_table[branch_table_idx].is_linked = true;
+          }
         }
       }
     }
@@ -1346,13 +1361,16 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
       // }
       for (int i = 0; i < BT_SIZE; i++)
       {
-        if (branch_table[i].sat_ctr < 10)
+        if (!branch_table[i].is_linked)
         {
-          branch_table[i].sat_ctr = 0;
-        }
-        else
-        {
-          branch_table[i].sat_ctr -= 10;
+          if (branch_table[i].sat_ctr < 10)
+          {
+            branch_table[i].sat_ctr = 0;
+          }
+          else
+          {
+            branch_table[i].sat_ctr -= 10;
+          }
         }
       }
       branch_inst_count = 0;
