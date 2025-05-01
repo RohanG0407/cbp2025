@@ -28,9 +28,6 @@ struct BranchTableEntry
   uint64_t tag;
   uint64_t src_reg;
   uint64_t sat_ctr;
-  bool override_tage_pred;
-  uint64_t store_triggers[32];
-  uint64_t num_triggers;
   bool is_linked;
   BranchType br_type;
   uint64_t predicted_load_addr;
@@ -56,8 +53,6 @@ struct StoreTableEntry
 struct TriggerTableEntry
 {
   uint64_t tag;
-  uint64_t value;
-  uint64_t addr;
   BranchType br_type;
   uint64_t branch_bit_mask;
   bool src_flag[16];
@@ -67,7 +62,7 @@ struct TriggerTableEntry
 
 struct PredictionTableEntry
 {
-  uint64_t tag;
+  //uint64_t tag;
   bool taken;
 };
 
@@ -138,8 +133,10 @@ extern StoreTableEntry store_table[ST_SIZE]; // 4096 entries * (64 bits for pc +
 extern TriggerTableEntry trigger_table[SC_SIZE]; // 2^16 entries - 1
 
 // Prediction Table Info
-#define PT_SIZE 65535
-extern PredictionTableEntry prediction_table[PT_SIZE]; // 2^16 entries - 1
+#define PT_BITS 16
+#define PT_SIZE 1 << PT_BITS
+#define PT_MASK ((1 << PT_BITS) - 1)
+extern PredictionTableEntry prediction_table[PT_SIZE]; // 65536 entries * (1 bit for taken/not-taken) = 8 KB 
 
 // Value Predictor Load Table
 #define LT_SIZE 65535
