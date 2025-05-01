@@ -43,7 +43,7 @@ StoreTableEntry store_table[ST_SIZE]; // 4096 entries * (64 bits for pc + 16 bit
 TriggerTableEntry trigger_table[SC_SIZE]; // 2^16 entries - 1
 
 // Prediction Table Info
-PredictionTableEntry prediction_table[PT_SIZE]; // 2^16 entries - 1
+PredictionTableEntry prediction_table[PT_SIZE]; // 65536 entries * (1 bit for taken/not-taken) = 8 KB 
 
 // Value Predictor Load Table
 LoadTableEntry load_table[LT_SIZE]; // 2^16 entries - 1
@@ -97,16 +97,10 @@ void beginCondDirPredictor()
     branch_table[i].src_reg = 0;
     branch_table[i].sat_ctr = 0;
     branch_table[i].tag = 0;
-    branch_table[i].override_tage_pred = false;
-    for (int j = 0; j < 32; j++)
-    {
-      branch_table[i].store_triggers[j] = 0;
-    }
     for (int k = 0; k < 16; k++)
     {
       branch_table[i].src_flag[k] = 0;
     }
-    branch_table[i].num_triggers = 0;
     branch_table[i].is_linked = false;
     branch_table[i].br_type = NA;
     branch_table[i].predicted_load_addr = 0;
@@ -131,8 +125,8 @@ void beginCondDirPredictor()
   for (int i = 0; i < SC_SIZE; i++)
   {
     trigger_table[i].tag = 0;
-    trigger_table[i].value = 0;
-    trigger_table[i].addr = 0;
+    // trigger_table[i].value = 0;
+    // trigger_table[i].addr = 0;
     trigger_table[i].br_type = CBZ;
     trigger_table[i].branch_bit_mask = UINT64_MAX;
     trigger_table[i].flag_br = 0;
@@ -146,7 +140,7 @@ void beginCondDirPredictor()
   // initial prediction_table setup
   for (int i = 0; i < PT_SIZE; i++)
   {
-    prediction_table[i].tag = 0;
+    //prediction_table[i].tag = 0;
     prediction_table[i].taken = false;
   }
 
@@ -276,28 +270,35 @@ bool get_cond_dir_prediction(uint64_t seq_no, uint8_t piece, uint64_t pc, const 
       std::cout << "Branch Predicting: Predicted Load Address: 0x" << std::hex << pred_load_addr << std::dec
                 << std::endl;
     }
-    uint64_t addr_index = pred_load_addr & 0xFFFF;
+    uint64_t addr_index = pred_load_addr & PT_MASK;
     uint64_t addr_tag = (pred_load_addr & 0xFFF0000) >> 16;
-    if (prediction_table[addr_index].tag == addr_tag)
+    my_prediction = prediction_table[addr_index].taken;
+    if (DEBUG_FLAG)
     {
-      my_prediction = prediction_table[addr_index].taken;
-      // std::cout << "Branch Predicting with custom predictor!";
-      //     std::cout << " | Predicted Addr: 0x" << std::hex << pred_load_addr << std::dec
-      //               << " | Custom Prediction: " << my_prediction << "did position matter: "<< branch_table[pc_index].bit_position_matters << " branch type: " << branch_table[pc_index].br_type << std::endl;
-      if (DEBUG_FLAG)
-      {
-        std::cout << "Branch Predicting with custom predictor!";
-        std::cout << " | Predicted Addr: 0x" << std::hex << pred_load_addr << std::dec
-                  << " | Custom Prediction: " << my_prediction << std::endl;
-      }
+      std::cout << "Branch Predicting with custom predictor!";
+      std::cout << " | Predicted Addr: 0x" << std::hex << pred_load_addr << std::dec
+                << " | Custom Prediction: " << my_prediction << std::endl;
     }
-    else
-    {
-      if (DEBUG_FLAG)
-      {
-        std::cout << "Branch Predicting with TAGE!" << std::endl;
-      }
-    }
+    // if (prediction_table[addr_index].tag == addr_tag)
+    // {
+    //   //my_prediction = prediction_table[addr_index].taken;
+    //   // std::cout << "Branch Predicting with custom predictor!";
+    //   //     std::cout << " | Predicted Addr: 0x" << std::hex << pred_load_addr << std::dec
+    //   //               << " | Custom Prediction: " << my_prediction << "did position matter: "<< branch_table[pc_index].bit_position_matters << " branch type: " << branch_table[pc_index].br_type << std::endl;
+    //   if (DEBUG_FLAG)
+    //   {
+    //     std::cout << "Branch Predicting with custom predictor!";
+    //     std::cout << " | Predicted Addr: 0x" << std::hex << pred_load_addr << std::dec
+    //               << " | Custom Prediction: " << my_prediction << std::endl;
+    //   }
+    // }
+    // else
+    // {
+    //   if (DEBUG_FLAG)
+    //   {
+    //     std::cout << "Branch Predicting with TAGE!" << std::endl;
+    //   }
+    // }
   }
   return my_prediction;
 }
@@ -542,33 +543,34 @@ void updateLoadPredictor(uint64_t seq_no, uint8_t piece, uint64_t pc, const Deco
 //
 void notify_agen_complete(uint64_t seq_no, uint8_t piece, uint64_t pc, const DecodeInfo &_decode_info, const uint64_t mem_va, const uint64_t mem_sz, const uint64_t agen_cycle)
 {
-  if (pc == 0xFFFFF0D8F180)
-  {
-    uint64_t target_pc = pc;
-    uint64_t load_addr = mem_va;
-    uint64_t load_addr_index = load_addr & 0xFFFF;
-    uint64_t load_addr_tag = (load_addr & 0xFFF0000) >> 16;
-    if (prediction_table[load_addr_index].tag == load_addr_tag)
-    {
-      if (DEBUG_FLAG)
-      {
-        // std::cout << "Target Load: Sequence Number: " << seq_no
-        //   << " | PC: 0x" << std::hex << pc << std::dec
-        std::cout << "Address: 0x" << std::hex << (load_addr & 0xFFFF) << std::dec << std::endl;
-        // << " | Taken: " << prediction_table[load_addr_index].taken << std::dec << std::endl;
-      }
-    }
-    else
-    {
-      if (DEBUG_FLAG)
-      {
-        std::cout << "Target Load: Sequence Number: " << seq_no
-                  << " | PC: 0x" << std::hex << pc << std::dec
-                  << " | Address: 0x" << std::hex << load_addr << std::dec
-                  << " | Taken: Unknown" << std::endl;
-      }
-    }
-  }
+  // if (pc == 0xFFFFF0D8F180)
+  // {
+  //   uint64_t target_pc = pc;
+  //   uint64_t load_addr = mem_va;
+  //   uint64_t load_addr_index = load_addr & 0xFFFF;
+  //   uint64_t load_addr_tag = (load_addr & 0xFFF0000) >> 16;
+  //   uint64_t pred_table_idx = load_addr & PT_MASK;
+  //   if (prediction_table[pred_table_idx].tag == load_addr_tag)
+  //   {
+  //     if (DEBUG_FLAG)
+  //     {
+  //       // std::cout << "Target Load: Sequence Number: " << seq_no
+  //       //   << " | PC: 0x" << std::hex << pc << std::dec
+  //       std::cout << "Address: 0x" << std::hex << (load_addr & 0xFFFF) << std::dec << std::endl;
+  //       // << " | Taken: " << prediction_table[load_addr_index].taken << std::dec << std::endl;
+  //     }
+  //   }
+  //   else
+  //   {
+  //     if (DEBUG_FLAG)
+  //     {
+  //       std::cout << "Target Load: Sequence Number: " << seq_no
+  //                 << " | PC: 0x" << std::hex << pc << std::dec
+  //                 << " | Address: 0x" << std::hex << load_addr << std::dec
+  //                 << " | Taken: Unknown" << std::endl;
+  //     }
+  //   }
+  // }
 
   if (_decode_info.insn_class == InstClass::storeInstClass)
   {
@@ -594,15 +596,14 @@ void notify_agen_complete(uint64_t seq_no, uint8_t piece, uint64_t pc, const Dec
     uint64_t store_pc = pc;
     uint64_t store_pc_index = store_pc & 0xFFFF;
     uint64_t store_pc_tag = (store_pc & 0xFFF0000) >> 16;
+    uint64_t pred_table_idx = store_addr & PT_MASK;
     // check if in trigger table
     if (trigger_table[store_pc_index].tag == store_pc_tag)
     {
       // check if the value is in the trigger table
-      trigger_table[store_pc_index].value = dest_val;
-      trigger_table[store_pc_index].addr = store_addr;
 
       // if in the trigger table, update the prediction table
-      prediction_table[store_addr_index].tag = store_addr_tag;
+      //prediction_table[pred_table_idx].tag = store_addr_tag;
       // std::cout << " the trigger table prediction is \n" << trigger_table[store_pc_index].br_type << "\n";
       if (trigger_table[store_pc_index].flag_br)
       {
@@ -616,7 +617,7 @@ void notify_agen_complete(uint64_t seq_no, uint8_t piece, uint64_t pc, const Dec
         // {
         //   prediction_table[store_addr_index].taken = trigger_table[store_pc_index].src_flag[dest_val];
         // }
-        prediction_table[store_addr_index].taken = trigger_table[store_pc_index].value_prediction_map[dest_val];
+        prediction_table[pred_table_idx].taken = trigger_table[store_pc_index].value_prediction_map[dest_val];
         // std::cout << "Triggered Value Prediction Map: "
         //           << "Sequence Number: " << seq_no << std::hex
         //           << " | PC 0x" << pc << " | Store Value: 0x" << dest_val << std::dec
@@ -625,27 +626,27 @@ void notify_agen_complete(uint64_t seq_no, uint8_t piece, uint64_t pc, const Dec
       }
       else if (trigger_table[store_pc_index].br_type == CBZ)
       {
-        prediction_table[store_addr_index].taken = (dest_val == 0) ? true : false;
+        prediction_table[pred_table_idx].taken = (dest_val == 0) ? true : false;
         // std::cout << " the trigger table prediction cbz is \n" << trigger_table[store_pc_index].br_type << "  taken or not taken?" << prediction_table[store_addr_index].taken << "\n";
       }
       else if (trigger_table[store_pc_index].br_type == CBNZ)
       {
-        prediction_table[store_addr_index].taken = (dest_val != 0) ? true : false;
+        prediction_table[pred_table_idx].taken = (dest_val != 0) ? true : false;
         // std::cout << " the trigger table prediction is cbnz \n" << trigger_table[store_pc_index].br_type << "  taken or not taken?" << prediction_table[store_addr_index].taken << "\n";
       }
       else if (trigger_table[store_pc_index].br_type == TBZ)
       {
-        prediction_table[store_addr_index].taken = ((dest_val & trigger_table[store_pc_index].branch_bit_mask) == 0) ? true : false;
+        prediction_table[pred_table_idx].taken = ((dest_val & trigger_table[store_pc_index].branch_bit_mask) == 0) ? true : false;
         // std::cout << " the trigger table prediction is tbz \n" << trigger_table[store_pc_index].br_type << "  taken or not taken?" << prediction_table[store_addr_index].taken << "\n";
       }
       else if (trigger_table[store_pc_index].br_type == TBNZ)
       {
-        prediction_table[store_addr_index].taken = ((dest_val & trigger_table[store_pc_index].branch_bit_mask) != 0) ? true : false;
+        prediction_table[pred_table_idx].taken = ((dest_val & trigger_table[store_pc_index].branch_bit_mask) != 0) ? true : false;
         // std::cout << " the trigger table prediction is tbnz \n" << trigger_table[store_pc_index].br_type << "  taken or not taken?" << prediction_table[store_addr_index].taken << "\n";
       }
       else if (trigger_table[store_pc_index].br_type == NA)
       {
-        prediction_table[store_addr_index].taken = true;
+        prediction_table[pred_table_idx].taken = true;
         // std::cout <<"printing tag, value, addr, br_type and branch_bit_mask respectively" << trigger_table[store_pc_index].tag << "\n" << trigger_table[store_pc_index].value << "\n" << trigger_table[store_pc_index].addr << "\n" << trigger_table[store_pc_index].br_type << "\n" << trigger_table[store_pc_index].branch_bit_mask << "\n";
 
         // std::cout << "PROBLEM PROBLEM trigger table setting even without br type set!!!!!\n";
@@ -655,10 +656,10 @@ void notify_agen_complete(uint64_t seq_no, uint8_t piece, uint64_t pc, const Dec
       if (DEBUG_FLAG)
       {
         std::cout << "Trigger Store: Sequence Number: " << seq_no;
-        std::cout << " | PC 0x:" << std::hex << pc << " | Value: 0x" << std::hex << trigger_table[store_pc_index].value << std::dec
-                  << " | Addr: 0x" << std::hex << trigger_table[store_pc_index].addr << std::dec
+        std::cout << " | PC 0x:" << std::hex << pc << " | Value: 0x" << std::hex << dest_val << std::dec
+                  << " | Addr: 0x" << std::hex << mem_va << std::dec
                   << " | BranchType: " << trigger_table[store_pc_index].br_type
-                  << " | Stored Prediction: " << prediction_table[store_addr_index].taken << std::endl;
+                  << " | Stored Prediction: " << prediction_table[pred_table_idx].taken << std::endl;
       }
     }
 
@@ -1035,8 +1036,6 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
           branch_table[pc_index].tag = tag;
           branch_table[pc_index].src_reg = _exec_info.dec_info.src_reg_info[0];
           branch_table[pc_index].sat_ctr = 1;
-          branch_table[pc_index].override_tage_pred = false;
-          branch_table[pc_index].num_triggers = 0;
           branch_table[pc_index].is_linked = false;
         }
       }
@@ -1160,89 +1159,64 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
           uint64_t store_pc_tag = (store_pc & 0xFFF0000) >> 16;
 
           bool store_trigger_found = false;
-          for (int j = 0; j < branch_table[pc_index].num_triggers; j++)
-          {
-            // check if the chain is already made
-            if (branch_table[pc_index].store_triggers[j] == store_pc)
+          if(trigger_table[store_pc_index].tag == store_pc_tag) {
+            // store exists already in trigger table
+            store_trigger_found = true;
+            if (branch_table[pc_index].flag_br)
             {
-              store_trigger_found = true;
-              if (branch_table[pc_index].flag_br)
+              trigger_table[store_pc_index].flag_br = 1;
+              // pc index " << store_pc_index << "setting flag br \n";
+              // std::cout << "before known set\n";
+              for (int k = 0; k < 16; k++)
               {
-                trigger_table[store_pc_index].flag_br = 1;
-                // pc index " << store_pc_index << "setting flag br \n";
-                // std::cout << "before known set\n";
-                for (int k = 0; k < 16; k++)
-                {
-                  trigger_table[store_pc_index].src_flag[k] = branch_table[pc_index].src_flag[k];
-                }
-                trigger_table[store_pc_index].value_prediction_map = branch_table[pc_index].value_prediction_map;
-                // std::cout << "after known set\n";
+                trigger_table[store_pc_index].src_flag[k] = branch_table[pc_index].src_flag[k];
               }
-              else
-              {
-                trigger_table[store_pc_index].br_type = branch_table[pc_index].br_type;
-                trigger_table[store_pc_index].branch_bit_mask = branch_table[pc_index].branch_bit_mask;
-              }
-              break;
+              trigger_table[store_pc_index].value_prediction_map = branch_table[pc_index].value_prediction_map;
+              // std::cout << "after known set\n";
+            }
+            else
+            {
+              trigger_table[store_pc_index].br_type = branch_table[pc_index].br_type;
+              trigger_table[store_pc_index].branch_bit_mask = branch_table[pc_index].branch_bit_mask;
+            }
+          }
+
+          // std::cout << "Making chain with PC: 0x" << std::hex << store_pc << std::dec << " --> Branch PC: 0x" << std::hex << pc <<std::endl;
+
+          // add load to the load table
+          uint64_t load_pc = retire_op.pc;
+          uint64_t load_pc_index = load_pc & 0xFFFF;
+          uint64_t load_pc_tag = (load_pc & 0xFFF0000) >> 16;
+          if (load_table[load_pc_index].state == INVALID)
+          {
+            // add to the load table
+            load_table[load_pc_index].tag = load_pc_tag;
+            load_table[load_pc_index].br_pc = pc;
+            load_table[load_pc_index].last_addr = load_addr;
+            load_table[load_pc_index].stride = -1;
+            load_table[load_pc_index].state = TRAINING;
+            if (LV_DEBUG_FLAG)
+            {
+              std::cout << "Load Table Entry Created: " << std::endl;
+              std::cout << "Load PC: 0x" << std::hex << load_pc << std::dec << " | Load Addr: 0x" << std::hex << load_addr << std::dec
+                        << " | BR PC: 0x" << std::hex << pc << std::dec << " | Stride: " << load_table[load_pc_index].stride << std::endl;
             }
           }
 
           if (!store_trigger_found)
           {
-            if (branch_table[pc_index].num_triggers >= 32)
+            // add to the trigger table
+            trigger_table[store_pc_index].tag = store_pc_tag;
+            //trigger_table[store_pc_index].addr = load_addr;
+            trigger_table[store_pc_index].br_type = branch_table[pc_index].br_type;
+            trigger_table[store_pc_index].branch_bit_mask = branch_table[pc_index].branch_bit_mask;
+            trigger_table[store_pc_index].flag_br = branch_table[pc_index].flag_br;
+            // std::cout << "before unknown set\n";
+            for (int k = 0; k < 16; k++)
             {
-              std::cerr << "ERROR: num_triggers=" << branch_table[pc_index].num_triggers << " for Branch PC: 0x" << std::hex << pc << std::dec << std::endl;
+              trigger_table[store_pc_index].src_flag[k] = branch_table[pc_index].src_flag[k];
             }
-            else
-            {
-              // std::cout << "Making chain with PC: 0x" << std::hex << store_pc << std::dec << " --> Branch PC: 0x" << std::hex << pc <<std::endl;
-              // add the store pc to the chain
-
-              branch_table[pc_index].store_triggers[branch_table[pc_index].num_triggers] = store_pc;
-              branch_table[pc_index].num_triggers += 1;
-
-              // add load to the load table
-              uint64_t load_pc = retire_op.pc;
-              uint64_t load_pc_index = load_pc & 0xFFFF;
-              uint64_t load_pc_tag = (load_pc & 0xFFF0000) >> 16;
-              if (load_table[load_pc_index].state == INVALID)
-              {
-                // add to the load table
-                load_table[load_pc_index].tag = load_pc_tag;
-                load_table[load_pc_index].br_pc = pc;
-                load_table[load_pc_index].last_addr = load_addr;
-                load_table[load_pc_index].stride = -1;
-                load_table[load_pc_index].state = TRAINING;
-                if (LV_DEBUG_FLAG)
-                {
-                  std::cout << "Load Table Entry Created: " << std::endl;
-                  std::cout << "Load PC: 0x" << std::hex << load_pc << std::dec << " | Load Addr: 0x" << std::hex << load_addr << std::dec
-                            << " | BR PC: 0x" << std::hex << pc << std::dec << " | Stride: " << load_table[load_pc_index].stride << std::endl;
-                }
-              }
-
-              if (trigger_table[store_pc_index].tag == 0)
-              {
-                // add to the trigger table
-                trigger_table[store_pc_index].tag = store_pc_tag;
-                trigger_table[store_pc_index].addr = load_addr;
-                trigger_table[store_pc_index].br_type = branch_table[pc_index].br_type;
-                trigger_table[store_pc_index].branch_bit_mask = branch_table[pc_index].branch_bit_mask;
-                trigger_table[store_pc_index].flag_br = branch_table[pc_index].flag_br;
-                // std::cout << "before unknown set\n";
-                for (int k = 0; k < 16; k++)
-                {
-                  trigger_table[store_pc_index].src_flag[k] = branch_table[pc_index].src_flag[k];
-                }
-                // std::cout << "after  unknown set\n";
-              }
-              else
-              {
-                // update the trigger table
-                trigger_table[store_pc_index].tag = store_pc_tag;
-                trigger_table[store_pc_index].addr = load_addr;
-              }
-            }
+            // std::cout << "after  unknown set\n";
           }
 
           branch_table[pc_index].is_linked = true;
