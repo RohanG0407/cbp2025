@@ -37,7 +37,7 @@ BranchTableEntry branch_table[BT_SIZE]; // 2^16 entries - 1
 std::unordered_set<uint64_t> high_mispred_pc;
 
 // Store Table Info
-StoreTableEntry store_table[ST_SIZE]; // 2^16 entries - 1
+StoreTableEntry store_table[ST_SIZE]; // 4096 entries * (64 bits for pc + 16 bits tag) = 40 KB
 
 // Store Chain Info
 TriggerTableEntry trigger_table[SC_SIZE]; // 2^16 entries - 1
@@ -121,15 +121,14 @@ void beginCondDirPredictor()
   }
 
   // initial store_table setup
-  for (int i = 0; i < SC_SIZE; i++)
+  for (int i = 0; i < ST_SIZE; i++)
   {
     store_table[i].tag = 0;
     store_table[i].pc = 0;
-    store_table[i].value = 0;
   }
 
   // initial trigger_table setup
-  for (int i = 0; i < ST_SIZE; i++)
+  for (int i = 0; i < SC_SIZE; i++)
   {
     trigger_table[i].tag = 0;
     trigger_table[i].value = 0;
@@ -663,9 +662,10 @@ void notify_agen_complete(uint64_t seq_no, uint8_t piece, uint64_t pc, const Dec
       }
     }
 
-    store_table[store_addr_index].tag = store_addr_tag;
-    store_table[store_addr_index].pc = store_pc;
-    store_table[store_addr_index].value = dest_val;
+    //store_table[store_addr_index].tag = store_addr_tag;
+    uint64_t store_table_addr_idx = (store_addr >> 2) & ST_MASK;
+    store_table[store_table_addr_idx].tag = ((store_addr >> 2) & ST_TAG_MASK) >> ST_BITS;
+    store_table[store_table_addr_idx].pc = store_pc;
   }
 
   updateLoadPredictor(seq_no, piece, pc, _decode_info, mem_va, mem_sz, agen_cycle);
@@ -1152,12 +1152,10 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
         //           << " | Prediction: " << _resolve_dir << std::endl;
 
         // check if address is in store table
-        uint64_t addr_index = load_addr & 0xFFFF;
-        uint64_t addr_tag = (load_addr & 0xFFF0000) >> 16;
-        if (store_table[addr_index].tag == addr_tag)
-        {
-          uint64_t store_pc = store_table[addr_index].pc;
-          uint64_t store_value = store_table[addr_index].value;
+        uint64_t store_table_addr_idx = (load_addr >> 2) & ST_MASK;
+        uint64_t store_table_tag = ((load_addr >> 2) & ST_TAG_MASK) >> ST_BITS;
+        if (store_table[store_table_addr_idx].tag == store_table_tag) {
+          uint64_t store_pc = store_table[store_table_addr_idx].pc;
           uint64_t store_pc_index = store_pc & 0xFFFF;
           uint64_t store_pc_tag = (store_pc & 0xFFF0000) >> 16;
 
@@ -1193,7 +1191,7 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
           {
             if (branch_table[pc_index].num_triggers >= 32)
             {
-              std::cerr << "ERROR: num_triggers=" << branch_table[pc_index].num_triggers << " at pc_index=" << pc_index << "\n";
+              std::cerr << "ERROR: num_triggers=" << branch_table[pc_index].num_triggers << " for Branch PC: 0x" << std::hex << pc << std::dec << std::endl;
             }
             else
             {
@@ -1227,7 +1225,6 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
               {
                 // add to the trigger table
                 trigger_table[store_pc_index].tag = store_pc_tag;
-                trigger_table[store_pc_index].value = store_value;
                 trigger_table[store_pc_index].addr = load_addr;
                 trigger_table[store_pc_index].br_type = branch_table[pc_index].br_type;
                 trigger_table[store_pc_index].branch_bit_mask = branch_table[pc_index].branch_bit_mask;

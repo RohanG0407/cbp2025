@@ -51,7 +51,6 @@ struct StoreTableEntry
 {
   uint64_t tag;
   uint64_t pc;
-  uint64_t value;
 };
 
 struct TriggerTableEntry
@@ -120,14 +119,19 @@ struct SpeculativeInfo
 };
 
 // Branch Table Info
-#define BT_SIZE 65535
+#define BT_BITS 16
+#define BT_SIZE 1 << BT_BITS
 #define BT_SAT_COUNTER_MAX 31
 extern BranchTableEntry branch_table[BT_SIZE]; // 2^16 entries - 1
 extern std::unordered_set<uint64_t> high_mispred_pc;
 
 // Store Table Info
-#define ST_SIZE 65535
-extern StoreTableEntry store_table[ST_SIZE]; // 2^16 entries - 1
+#define ST_BITS 12
+#define ST_TAG_BITS 16
+#define ST_SIZE 1 << ST_BITS
+#define ST_MASK ((1 << ST_BITS) - 1)
+#define ST_TAG_MASK ((1 << ST_TAG_BITS) - 1) << ST_BITS
+extern StoreTableEntry store_table[ST_SIZE]; // 4096 entries * (64 bits for pc + 16 bits tag) = 40 KB
 
 // Store Chain Info
 #define SC_SIZE 65535
