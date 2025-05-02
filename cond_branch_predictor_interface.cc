@@ -32,6 +32,7 @@
 #define STUPID_VALUE 8898
 #define SUPPORT_ALU_OPS true
 #define ALU_OVERRIDE true
+#define INC_VAL 1
 // Branch Table Info
 BranchTableEntry branch_table[BT_SIZE];
 std::unordered_set<uint64_t> high_mispred_pc;
@@ -1641,6 +1642,7 @@ void value_correlator(uint64_t pc_index, uint64_t load_val, const bool _resolve_
 //
 // For the sample predictor implementation, we do not leverage commit information
 uint64_t branch_inst_count = 0; // max to 1000
+uint64_t branch_count = 0;
 void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool pred_dir, const ExecuteInfo &_exec_info, const uint64_t commit_cycle)
 {
   if (is_cond_br(_exec_info.dec_info.insn_class))
@@ -1659,7 +1661,7 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
         {
           if (branch_table[branch_table_idx].sat_ctr < BT_SAT_COUNTER_MAX)
           {
-            branch_table[branch_table_idx].sat_ctr += 1;
+            branch_table[branch_table_idx].sat_ctr += INC_VAL;
           }
         }
         else
@@ -1672,7 +1674,15 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
 
         if (branch_table[branch_table_idx].sat_ctr == BT_SAT_COUNTER_MAX)
         {
+	  if(ALU_OVERRIDE && !(branch_table[branch_table_idx].override_alu) && branch_table[branch_table_idx].is_alu)
+	  {
+		branch_table[branch_table_idx].sat_ctr	= 0;
+        	branch_table[branch_table_idx].override_alu = true;
+	  }
+	  else
+	  {
           branch_table[branch_table_idx].override_tage = false;
+	  }
         }
       }
       else
