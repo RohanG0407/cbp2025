@@ -585,6 +585,7 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
       // prediction_table[pred_table_idx].tag = store_addr_tag;
       // std::cout << " the trigger table prediction is \n" << trigger_table[store_pc_index].br_type << "\n";
       //
+	    //std::cout << "before prediction store \n";
       if (trigger_table[trigger_table_idx].is_alu && !(trigger_table[trigger_table_idx].override_alu))
       {
         if (trigger_table[trigger_table_idx].alu_type == EQ)
@@ -752,12 +753,20 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
       }
       else if (trigger_table[trigger_table_idx].flag_br)
       {
+	//std::cout << "before dest_val \n";
         if (dest_val >= 16)
         {
-          // // std::cout << "ERROR ERROR flag values going above 16\n";
-          // uint64_t dest_module_val = dest_val % 16;
+         // std::cout << "ERROR ERROR flag values going above 16\n";
+           dest_val = 15;
           // prediction_table[store_addr_index].taken = trigger_table[store_pc_index].src_flag[dest_module_val];
-          assert(dest_val);
+ 
+        }
+	if (dest_val < 0)
+        {
+          //std::cout << "ERROR ERROR flag values going above 16\n";
+           dest_val = 0;
+          // prediction_table[store_addr_index].taken = trigger_table[store_pc_index].src_flag[dest_module_val];
+
         }
         if (_exec_info.mem_sz.value() == 16)
         {
@@ -791,6 +800,7 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
       }
       else if (trigger_table[trigger_table_idx].br_type == CBZ)
       {
+	 //std::cout << "before cbz \n";
         if (_exec_info.mem_sz.value() == 16)
         {
           for (uint64_t i = 0; i < 16; i += 4)
@@ -847,6 +857,8 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
       }
       else if (trigger_table[trigger_table_idx].br_type == TBZ)
       {
+	      //std::cout << "before tbz \n";
+
         if (_exec_info.mem_sz.value() == 16)
         {
           for (uint64_t i = 0; i < 16; i += 4)
@@ -903,6 +915,8 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
       }
       else if (trigger_table[trigger_table_idx].br_type == NA)
       {
+	  //std::cout << "before NA \n";
+
         if (_exec_info.mem_sz.value() == 16)
         {
           for (uint64_t i = 0; i < 16; i += 4)
@@ -929,6 +943,8 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
         // std::cout << "PROBLEM PROBLEM trigger table setting even without br type set!!!!!\n";
         // exit(0);
       }
+      //std::cout << "after prediction set \n";
+
 
       if (DEBUG_FLAG)
       {
@@ -946,6 +962,7 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
       // if(_exec_info.mem_va.value() == 0xffffef6b9000) {
       //   std::cout << "IMPORTANT: PC 0x: " << std::hex << store_pc << " | store addr is 0xffffef6b9000" << std::dec << std::endl;
       // }
+     //std::cout << "before prediction store table mask \n";
       for (uint64_t i = 0; i < 16; i += 4)
       {
         store_table_addr_idx = ((store_addr + i) >> 2) & ST_MASK;
@@ -969,6 +986,7 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
       store_table[store_table_addr_idx].pc = store_pc;
     }
   }
+  //std::cout << "before is branch \n";
   const bool is_branch = is_br(_exec_info.dec_info.insn_class);
   if (is_branch)
   {
@@ -977,21 +995,23 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
       const bool _resolve_dir = _exec_info.taken.value();
       const uint64_t _next_pc = _exec_info.next_pc;
       cbp2016_tage_sc_l.update(seq_no, piece, pc, _resolve_dir, pred_dir, _next_pc);
+      //std::cout << "tage called \n";
       cond_predictor_impl.update(seq_no, piece, pc, _resolve_dir, pred_dir, _next_pc);
-
+      //std::cout << "cond_predicted called \n";
       uint64_t branch_table_idx = (pc >> 2) & BT_MASK;
       uint64_t branch_table_tag = ((pc >> 2) & BT_TAG_MASK) >> BT_BITS;
+      //std::cout << "before inbetween \n";
       if (branch_table[branch_table_idx].tag == branch_table_tag)
       {
         if (branch_table[branch_table_idx].is_linked)
         {
           if (pred_dir == _resolve_dir)
           {
-            branch_table[branch_table_idx].correct_counter += 1;
+            //branch_table[branch_table_idx].correct_counter += 1;
           }
           else
           {
-            branch_table[branch_table_idx].incorrect_counter += 1;
+            //branch_table[branch_table_idx].incorrect_counter += 1;
             // if (pc_index == 33084 || 54540 || 12080 || 11912)
           }
           if (branch_table[branch_table_idx].incorrect_counter > 1000)
@@ -1004,6 +1024,7 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
     }
     else
     {
+	 //std::cout << "before assertion \n";
       assert(pred_dir);
     }
   }
@@ -1013,7 +1034,7 @@ void get_branch_bit_direction(uint16_t branch_table_idx, uint64_t dest_reg_val, 
 {
   if (branch_table[branch_table_idx].br_type > 5)
   {
-    std::cout << "ERROR ERROR " << dest_reg_val << "\n";
+    //std::cout << "ERROR ERROR " << dest_reg_val << "\n";
     // exit(0);
   }
   // std::cout << "branch bit drection started for pc_index:" << pc_index <<" val : "<< dest_reg_val << "dir: "<< _resolve_dir << " \n";
@@ -1288,12 +1309,12 @@ ALU_Operation reverse_engineer_aluOp(const uint64_t pc, const ExecuteInfo &exec_
   return aluOp;
 }
 
-void value_correlator(uint16_t pc_index, uint64_t load_val, const bool _resolve_dir, const bool pred_dir)
+void value_correlator(uint64_t pc_index, uint64_t load_val, const bool _resolve_dir, const bool pred_dir)
 {
 
   int count = branch_table[pc_index].alu_result_entries[0].valid + branch_table[pc_index].alu_result_entries[1].valid + branch_table[pc_index].alu_result_entries[2].valid + branch_table[pc_index].alu_result_entries[3].valid;
   // std::cout << "pc index : " << pc_index << "count : " << count << "\n";
-
+  //std::cout << "before count 0 \n";
   if (count == 0)
   {
     branch_table[pc_index].alu_type = (_resolve_dir) ? EQ : ENQ;
@@ -1314,8 +1335,11 @@ void value_correlator(uint16_t pc_index, uint64_t load_val, const bool _resolve_
       branch_table[pc_index].threshold = load_val;
     }
   }
+  //std::cout << "before count 1 \n";
+
   else if (count == 1)
-  { // we just bother assigning threshold and alu type here
+  { //std::cout << "before count 1 \n";
+	  // we just bother assigning threshold and alu type here
     if (branch_table[pc_index].alu_result_entries[4].valid && _resolve_dir)
     {
       if (load_val != branch_table[pc_index].alu_result_entries[0].value)
@@ -1349,8 +1373,11 @@ void value_correlator(uint16_t pc_index, uint64_t load_val, const bool _resolve_
       branch_table[pc_index].alu_result_entries[4].value = load_val;
     }
   }
+ // std::cout << "before count 2 \n";
+
   else if (count == 2)
   {
+	  //std::cout << "before count 2 \n";
     if (branch_table[pc_index].alu_result_entries[4].valid && branch_table[pc_index].alu_result_entries[5].valid) // case where there is one entry in both
     {
       if (_resolve_dir)
@@ -1408,8 +1435,11 @@ void value_correlator(uint16_t pc_index, uint64_t load_val, const bool _resolve_
       // exit(0);
     }
   }
+ // std::cout << "before count 3 \n";
+
   else if (count == 3)
   {
+	  //std::cout << "before count 3 \n";
     if (pc_index == 58464 || pc_index == 33084 || pc_index == 56364)
     {
       // std::cout << "NOTE lets understand learning behaivour valid bits one after other" << branch_table[pc_index].alu_result_entries[0].valid << branch_table[pc_index].alu_result_entries[1].valid << branch_table[pc_index].alu_result_entries[2].valid << branch_table[pc_index].alu_result_entries[3].valid << branch_table[pc_index].alu_result_entries[4].valid << branch_table[pc_index].alu_result_entries[5].valid << "\n";
@@ -1482,8 +1512,11 @@ void value_correlator(uint16_t pc_index, uint64_t load_val, const bool _resolve_
       branch_table[pc_index].override_alu = true;
     }
   }
+ // std::cout << "before count 4 \n";
+
   else if (count == 4)
   {
+	  //std::cout << "before count 4 \n";
     if (pc_index == 58464 || pc_index == 33084 || pc_index == 56364)
     {
       // std::cout << "the resolved and pred dir respectively are: " << _resolve_dir << " " << pred_dir << "the value is  " << load_val << " threshold is " << branch_table[pc_index].threshold << "\n";
@@ -1494,7 +1527,7 @@ void value_correlator(uint16_t pc_index, uint64_t load_val, const bool _resolve_
       if (!(branch_table[pc_index].alu_result_entries[5].valid) || !(branch_table[pc_index].alu_result_entries[4].valid) || !(branch_table[pc_index].alu_result_entries[3].valid) || !(branch_table[pc_index].alu_result_entries[2].valid) || !(branch_table[pc_index].alu_result_entries[1].valid) || !(branch_table[pc_index].alu_result_entries[0].valid))
       {
         // std::cout << "something didnt get learnt!!!" << branch_table[pc_index].alu_result_entries[0].valid << branch_table[pc_index].alu_result_entries[1].valid << branch_table[pc_index].alu_result_entries[2].valid << branch_table[pc_index].alu_result_entries[3].valid << branch_table[pc_index].alu_result_entries[4].valid << branch_table[pc_index].alu_result_entries[5].valid << "\n";
-        exit(0);
+        //exit(0);
       }
 
       uint64_t pivot = 0;
@@ -1586,6 +1619,8 @@ void value_correlator(uint16_t pc_index, uint64_t load_val, const bool _resolve_
   {
     branch_table[pc_index].override_alu = true;
   }
+  //std::cout << "a count 4 \n";
+
 
   // if(pc_index == 11752)
   //{
