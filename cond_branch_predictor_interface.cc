@@ -84,7 +84,7 @@ std::deque<RetireOp> retire_op_queue;
 
 // Register File
 uint64_t RegFile[66];
-
+//Initialialzing load address predictor
 void beginLoadAddrPredictor()
 {
   // initial load_table setup
@@ -609,6 +609,7 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
       // std::cout << " the trigger table prediction is \n" << trigger_table[store_pc_index].br_type << "\n";
       //
       // std::cout << "before prediction store \n";
+      // Precomputing prediction values based on different ALU types and branch types. Note ALU types is not used, since flag is off.
       if (trigger_table[trigger_table_idx].is_alu && !(trigger_table[trigger_table_idx].override_alu))
       {
         if (trigger_table[trigger_table_idx].alu_type == EQ)
@@ -1043,7 +1044,7 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
     }
   }
 }
-
+// Trying to reverse engineer the branch type 
 void get_branch_bit_direction(uint16_t branch_table_idx, uint64_t dest_reg_val, const bool _resolve_dir)
 {
   if (branch_table[branch_table_idx].br_type > 5)
@@ -1207,7 +1208,7 @@ void get_branch_bit_direction(uint16_t branch_table_idx, uint64_t dest_reg_val, 
     }
   }
 }
-
+// If branch has src as r64, we know its flag based branch
 void learn_src_branch_behaivour(uint16_t branch_table_idx, uint64_t dest_reg_val, const bool _resolve_dir)
 {
   if (dest_reg_val >= 16)
@@ -1322,7 +1323,7 @@ ALU_Operation reverse_engineer_aluOp(const uint64_t pc, const ExecuteInfo &exec_
 
   return aluOp;
 }
-
+// Trying to learn the ALU OP, again flag is off, not used in final submission.
 void value_correlator(uint64_t pc_index, uint64_t load_val, const bool _resolve_dir, const bool pred_dir)
 {
 
