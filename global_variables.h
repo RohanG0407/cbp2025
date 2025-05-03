@@ -109,7 +109,7 @@ enum AddrPredictorState
 };
 
 constexpr int LAP_SHIFT_BITS = 4;
-constexpr int LAP_HISTORY_LENGTH = 4;
+constexpr int LAP_HISTORY_LENGTH = 3;
 constexpr int LAP_HISTORY_BITS = LAP_HISTORY_LENGTH * LAP_SHIFT_BITS;
 constexpr uint64_t LAP_HISTORY_MASK = (1 << LAP_HISTORY_BITS) - 1;
 constexpr uint8_t LAP_STRIDE_MAX_CONFIDENCE = 3;
@@ -156,7 +156,7 @@ extern BranchLearningEntry branch_learning_table[BLT_SIZE]; // 4096 entries * (1
 #define BT_SIZE 16
 #define BT_TAG_MASK ((1 << BT_TAG_BITS) - 1)
 #define BT_SAT_COUNTER_MAX 31
-extern BranchTableEntry branch_table[BT_SIZE];  // 32 entries * (16 bits for tag
+extern BranchTableEntry branch_table[BT_SIZE];  // 16 entries * (16 bits for tag
                                                 //                 1 bit for valid
                                                 //                 5 bits for saturation counter
                                                 //                 1 bit for override tag
@@ -175,7 +175,7 @@ extern BranchTableEntry branch_table[BT_SIZE];  // 32 entries * (16 bits for tag
                                                 //                 6 * (65 bits for alu result entries)
                                                 //                 3 bits for alu type
                                                 //                 64 bits for threshold
-                                                //                 1 bit for override alu) = 699 bits * 32 entries = 2.8 KB
+                                                //                 1 bit for override alu) = 699 bits * 32 entries = 1.5 KB
 
 // Store Table Info
 #define ST_BITS 12
@@ -210,19 +210,19 @@ extern std::deque<RetireOp> retire_op_queue; // 16 entires * (136 bytes per entr
 #define LDT_TAG_BITS 16
 #define LDT_SIZE 16
 #define LDT_TAG_MASK ((1 << LDT_TAG_BITS) - 1)
-extern LoadTableEntry load_table[LDT_SIZE]; // 32 entries * (16 bits for tag
+extern LoadTableEntry load_table[LDT_SIZE]; // 16 entries * (16 bits for tag
                                             //                 64 bits branch pc
                                             //                 64 bits for last addr        
                                             //                 16 bits for stride
                                             //                 8 bits for inflight loads
                                             //                 2 bits for confidence ctr
                                             //                 2 bits for state
-                                            //                 16 bits for addr history reg) = 172 bits * 32 entries = .67 KB
+                                            //                 16 bits for addr history reg) = 172 bits * 32 entries = .33 KB
                                         
 
-#define LKT_BITS 16
+#define LKT_BITS 12
 #define LKT_SIZE 1 << LKT_BITS
-extern LinkTable link_table[LKT_SIZE]; // X entries * (64 bits for address) = 64 bits * X entries
+extern LinkTable link_table[LKT_SIZE]; // X entries * (64 bits for address) = 64 bits * 4096 entries = 32 KB
 extern std::unordered_map<uint64_t, SpeculativeInfo> speculation_map; // speculative history not counted to total budget
 
 
