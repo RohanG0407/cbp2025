@@ -142,7 +142,7 @@ void beginCondDirPredictor()
 // This function is called when any instructions(not just branches) gets fetched.
 // Along with the unique identifying ids(seq_no, piece), PC of the instruction and fetch_cycle are also provided as inputs
 //
-void notify_instr_fetch(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t fetch_cycle, uint64_t load_addr)
+void notify_instr_fetch(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t fetch_cycle)
 {
   uint64_t predicted_addr = 0xdeadbeef;
   uint64_t load_pc_index = pc & 0xFFFF;

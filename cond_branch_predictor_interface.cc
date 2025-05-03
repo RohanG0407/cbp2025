@@ -28,7 +28,7 @@
 
 #define DEBUG_FLAG false
 #define LV_DEBUG_FLAG false
-#define PERFECT_ADDR_PRED true
+#define PERFECT_ADDR_PRED false
 #define STUPID_VALUE 8898
 #define SUPPORT_ALU_OPS false
 #define ALU_OVERRIDE false
@@ -202,7 +202,7 @@ void beginCondDirPredictor()
   }
 }
 
-void predictLoadAddr(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t fetch_cycle, uint64_t oracle_load_addr)
+void predictLoadAddr(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t fetch_cycle)
 {
   uint64_t predicted_addr = 0xdeadbeef;
   uint64_t load_table_idx = get_load_table_idx(pc);
@@ -218,7 +218,7 @@ void predictLoadAddr(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t
   {
     if (PERFECT_ADDR_PRED)
     {
-      predicted_addr = oracle_load_addr;
+      predicted_addr = 0xdeadbeef;
       branch_table[branch_table_idx].predicted_load_addr = predicted_addr;
       return;
     }
@@ -280,9 +280,9 @@ void predictLoadAddr(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t
 // This function is called when any instructions(not just branches) gets fetched.
 // Along with the unique identifying ids(seq_no, piece), PC of the instruction and fetch_cycle are also provided as inputs
 //
-void notify_instr_fetch(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t fetch_cycle, uint64_t load_addr)
+void notify_instr_fetch(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t fetch_cycle)
 {
-  predictLoadAddr(seq_no, piece, pc, fetch_cycle, load_addr);
+  predictLoadAddr(seq_no, piece, pc, fetch_cycle);
 }
 
 //

@@ -681,7 +681,7 @@ void uarchsim_t::step(db_t *inst)
    activity_observed = true;
    assert(window.size() <= window_capacity);
 
-   notify_instr_fetch(seq_no, piece, inst->pc, fetch_cycle, inst->is_load ? inst->addr : 0xDEADBEEF);
+   notify_instr_fetch(seq_no, piece, inst->pc, fetch_cycle);
 
    DQ.push_back(std::make_tuple(seq_no, piece, decode_cycle));
    if(is_mem(inst->insn_class))

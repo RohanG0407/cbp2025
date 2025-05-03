@@ -141,13 +141,13 @@ struct SpeculativeInfo
 };
 
 // Branch Learning Table Info
-#define BLT_BITS 12
+#define BLT_BITS 11
 #define BLT_TAG_BITS 16
 #define BLT_SIZE 1 << BLT_BITS
 #define BLT_MASK ((1 << BLT_BITS) - 1)
 #define BLT_TAG_MASK ((1 << BLT_TAG_BITS) - 1) << BLT_BITS
 #define BLT_SAT_COUNTER_MAX 31
-extern BranchLearningEntry branch_learning_table[BLT_SIZE]; // 4096 entries * (16 bits for tag
+extern BranchLearningEntry branch_learning_table[BLT_SIZE]; // 2048 entries * (16 bits for tag
                                                             //                 5 bits saturation counter) = 10.5 KB
 
 // Branch Table Info
@@ -186,16 +186,16 @@ extern BranchTableEntry branch_table[BT_SIZE];  // 16 entries * (16 bits for tag
 extern StoreTableEntry store_table[ST_SIZE]; // 4096 entries * (64 bits for pc + 16 bits tag) = 40 KB
 
 // Store Trigger  Info
-#define TT_BITS 12
+#define TT_BITS 11
 #define TT_TAG_BITS 16
 #define TT_SIZE 1 << TT_BITS
 #define TT_MASK ((1 << TT_BITS) - 1)
 #define TT_TAG_MASK ((1 << TT_TAG_BITS) - 1) << TT_BITS
-extern TriggerTableEntry trigger_table[TT_SIZE]; // 4096 entries * (16 bits for tag
+extern TriggerTableEntry trigger_table[TT_SIZE]; // 2048 entries * (16 bits for tag
                                                  //                 3 bits branch type
                                                  //                 64 bits for branch bit mask        
                                                  //                 16 bits for src flag
-                                                 //                 1 bit for flag br) = 50 KB
+                                                 //                 1 bit for flag br) = 25 KB
 // Prediction Table Info
 #define PT_BITS 16
 #define PT_SIZE 1 << PT_BITS
