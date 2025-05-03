@@ -30,12 +30,27 @@
 #define LV_DEBUG_FLAG false
 #define PERFECT_ADDR_PRED true
 #define STUPID_VALUE 8898
-#define SUPPORT_ALU_OPS true
-#define ALU_OVERRIDE true
+#define SUPPORT_ALU_OPS false
+#define ALU_OVERRIDE false
 #define INC_VAL 4
 // Branch Table Info
 BranchTableEntry branch_table[BT_SIZE];
-std::unordered_set<uint64_t> high_mispred_pc;
+int get_branch_table_idx(uint64_t bpc)
+{
+  int idx = -1;
+  uint64_t branch_table_tag = ((bpc >> 2) & BT_TAG_MASK);
+  for (int i = 0; i < BT_SIZE; i++)
+  {
+    if (branch_table[i].valid && (branch_table[i].tag == branch_table_tag))
+    {
+      return i;
+    }
+  }
+  return idx;
+}
+
+// Branch Learning Table Info
+BranchLearningEntry branch_learning_table[BLT_SIZE];
 
 // Store Table Info
 StoreTableEntry store_table[ST_SIZE];
@@ -102,6 +117,7 @@ void beginCondDirPredictor()
       branch_table[i].src_flag[k] = 0;
     }
     branch_table[i].is_linked = false;
+    branch_table[i].valid = false;
     branch_table[i].br_type = NA;
     branch_table[i].predicted_load_addr = 0;
     branch_table[i].prev_value = STUPID_VALUE;
@@ -121,6 +137,13 @@ void beginCondDirPredictor()
     branch_table[i].threshold = 0;
     branch_table[i].override_alu = false;
     branch_table[i].override_tage = false;
+  }
+
+  // initial branch_learning_table setup
+  for (int i = 0; i < BLT_SIZE; i++)
+  {
+    branch_learning_table[i].tag = 0;
+    branch_learning_table[i].sat_ctr = 0;
   }
 
   // initial store_table setup
@@ -174,8 +197,9 @@ void predictLoadAddr(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t
 
   uint64_t branch_pc = load_table[load_table_idx].br_pc;
 
-  uint64_t branch_table_idx = (branch_pc >> 2) & BT_MASK;
-  uint64_t branch_table_tag = ((branch_pc >> 2) & BT_TAG_MASK) >> BT_BITS;
+  uint64_t branch_table_idx = get_branch_table_idx(branch_pc);
+  if(branch_table_idx == -1) return;
+  assert(branch_table_idx != -1);
   if (load_table[load_table_idx].tag == load_table_tag)
   {
     if (PERFECT_ADDR_PRED)
@@ -259,9 +283,8 @@ bool get_cond_dir_prediction(uint64_t seq_no, uint8_t piece, uint64_t pc, const 
   const bool tage_sc_l_pred = cbp2016_tage_sc_l.predict(seq_no, piece, pc);
   bool my_prediction = cond_predictor_impl.predict(seq_no, piece, pc, tage_sc_l_pred);
 
-  uint64_t branch_table_idx = (pc >> 2) & BT_MASK;
-  uint64_t branch_table_tag = ((pc >> 2) & BT_TAG_MASK) >> BT_BITS;
-  if (branch_table[branch_table_idx].tag == branch_table_tag && branch_table[branch_table_idx].is_linked)
+  uint64_t branch_table_idx = get_branch_table_idx(pc);
+  if ((branch_table_idx != -1) && branch_table[branch_table_idx].is_linked)
   {
     if (DEBUG_FLAG)
     {
@@ -342,21 +365,6 @@ void spec_update(uint64_t seq_no, uint8_t piece, uint64_t pc, InstClass inst_cla
   {
     cbp2016_tage_sc_l.history_update(seq_no, piece, pc, br_type, pred_dir, resolve_dir, next_pc);
     cond_predictor_impl.history_update(seq_no, piece, pc, resolve_dir, next_pc);
-
-    uint64_t branch_table_idx = (pc >> 2) & BT_MASK;
-    uint64_t branch_table_tag = ((pc >> 2) & BT_TAG_MASK) >> BT_BITS;
-
-    if (branch_table[branch_table_idx].tag == branch_table_tag && branch_table[branch_table_idx].is_linked)
-    {
-      if (DEBUG_FLAG)
-      {
-        std::cout << "Branch Prediction Results: Sequence Number: " << seq_no
-                  << " | Resolved Dir: " << resolve_dir
-                  << " | Predicted Dir: " << pred_dir
-                  << std::endl;
-        std::cout << "--------------------------------------------------" << std::endl;
-      }
-    }
   }
   else
   {
@@ -401,7 +409,8 @@ void updateLoadPredictor(uint64_t seq_no, uint8_t piece, uint64_t pc, const Deco
 
             load_table[spec_load_table_idx].last_addr = mem_va + (load_table[spec_load_table_idx].stride * load_table[spec_load_table_idx].inflight_loads);
             uint64_t branch_pc = load_table[spec_load_table_idx].br_pc;
-            uint64_t branch_table_idx = (branch_pc >> 2) & BT_MASK;
+            uint64_t branch_table_idx = get_branch_table_idx(branch_pc);
+            assert(branch_table_idx != -1);
             branch_table[branch_table_idx].predicted_load_addr = load_table[spec_load_table_idx].last_addr + load_table[spec_load_table_idx].stride;
             if (LV_DEBUG_FLAG)
             {
@@ -502,8 +511,8 @@ void updateLoadPredictor(uint64_t seq_no, uint8_t piece, uint64_t pc, const Deco
         {
           load_table[load_table_idx].state = VALID_STRIDE;
           uint64_t branch_pc = load_table[load_table_idx].br_pc;
-          uint64_t branch_pc_index = (branch_pc >> 2) & 0xFFFF;
-          branch_table[branch_pc_index].predicted_load_addr = mem_va + load_table[load_table_idx].stride;
+          uint64_t branch_table_idx = get_branch_table_idx(branch_pc);
+          branch_table[branch_table_idx].predicted_load_addr = mem_va + load_table[load_table_idx].stride;
           if (LV_DEBUG_FLAG)
           {
             std::cout << "LAP Stride Training Complete: Sequence Number: " << seq_no
@@ -996,10 +1005,9 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
       // std::cout << "tage called \n";
       cond_predictor_impl.update(seq_no, piece, pc, _resolve_dir, pred_dir, _next_pc);
       // std::cout << "cond_predicted called \n";
-      uint64_t branch_table_idx = (pc >> 2) & BT_MASK;
-      uint64_t branch_table_tag = ((pc >> 2) & BT_TAG_MASK) >> BT_BITS;
+      uint64_t branch_table_idx = get_branch_table_idx(pc);
       // std::cout << "before inbetween \n";
-      if (branch_table[branch_table_idx].tag == branch_table_tag)
+      if (branch_table_idx != -1)
       {
         if (branch_table[branch_table_idx].is_linked)
         {
@@ -1644,67 +1652,99 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
   {
     const bool _resolve_dir = _exec_info.taken.value();
 
-    uint64_t branch_table_idx = (pc >> 2) & BT_MASK;
-    uint64_t branch_table_tag = ((pc >> 2) & BT_TAG_MASK) >> BT_BITS;
+    uint64_t branch_table_tag = (pc >> 2) & BT_TAG_MASK;
+    uint64_t learning_branch_table_idx = (pc >> 2) & BLT_MASK;
+    uint64_t learning_branch_table_tag = ((pc >> 2) & BLT_TAG_MASK) >> BLT_BITS;
 
-    // mechanism to find highly mispredicted branches
+    // learn Hard To Predict branches
     if (_exec_info.dec_info.src_reg_info.size() > 0)
     {
-      if (branch_table[branch_table_idx].tag == branch_table_tag)
+      if (branch_learning_table[learning_branch_table_idx].tag == learning_branch_table_tag)
       {
         if (_resolve_dir != pred_dir)
         {
-          if (branch_table[branch_table_idx].is_linked)
+          if (branch_learning_table[learning_branch_table_idx].sat_ctr < BLT_SAT_COUNTER_MAX)
           {
-            if (branch_table[branch_table_idx].sat_ctr < (BT_SAT_COUNTER_MAX - INC_VAL))
-            {
-              branch_table[branch_table_idx].sat_ctr += INC_VAL;
-            }
-          } else {
-            if (branch_table[branch_table_idx].sat_ctr < BT_SAT_COUNTER_MAX)
-            {
-              branch_table[branch_table_idx].sat_ctr += 1;
-            }
-          }
-        }
-        else
-        {
-          if (branch_table[branch_table_idx].sat_ctr > 0 && (branch_table[branch_table_idx].is_linked))
-          {
-            branch_table[branch_table_idx].sat_ctr -= 1;
-          }
-        }
-
-        if (branch_table[branch_table_idx].sat_ctr == BT_SAT_COUNTER_MAX)
-        {
-          if (ALU_OVERRIDE && !(branch_table[branch_table_idx].override_alu) && branch_table[branch_table_idx].is_alu)
-          {
-            branch_table[branch_table_idx].sat_ctr = 0;
-            branch_table[branch_table_idx].override_alu = true;
-          }
-          else
-          {
-            branch_table[branch_table_idx].override_tage = false;
+            branch_learning_table[learning_branch_table_idx].sat_ctr += 1;
           }
         }
       }
       else
       {
-        if (branch_table[branch_table_idx].sat_ctr == 0 && !(branch_table[branch_table_idx].is_linked))
+        if (branch_learning_table[learning_branch_table_idx].sat_ctr == 0)
         {
-          branch_table[branch_table_idx].tag = branch_table_tag;
-          // branch_table[pc_index].src_reg = _exec_info.dec_info.src_reg_info[0];
-          branch_table[branch_table_idx].sat_ctr = 1;
-          branch_table[branch_table_idx].is_linked = false;
+          branch_learning_table[learning_branch_table_idx].tag = learning_branch_table_tag;
+          branch_learning_table[learning_branch_table_idx].sat_ctr = 1;
         }
       }
     }
 
-    // append to misprediction list of pc's where entry saturation counter = max
-    if (branch_table[branch_table_idx].tag == branch_table_tag && (branch_table[branch_table_idx].sat_ctr == BT_SAT_COUNTER_MAX || branch_table[branch_table_idx].is_linked))
+    int branch_table_idx = get_branch_table_idx(pc);
+    // disable custom predictor if counter saturates
+    if (branch_table_idx != -1)
+    {
+      if (_exec_info.dec_info.src_reg_info.size() > 0)
+      {
+        if (branch_table[branch_table_idx].is_linked)
+        {
+          if (_resolve_dir != pred_dir)
+          {
+            if (branch_table[branch_table_idx].sat_ctr < (BT_SAT_COUNTER_MAX - INC_VAL))
+            {
+              branch_table[branch_table_idx].sat_ctr += INC_VAL;
+            }
+          }
+          else
+          {
+            if (branch_table[branch_table_idx].sat_ctr > 0)
+            {
+              branch_table[branch_table_idx].sat_ctr -= 1;
+            }
+          }
+
+          if (branch_table[branch_table_idx].sat_ctr == BT_SAT_COUNTER_MAX)
+          {
+            branch_table[branch_table_idx].override_tage = false;
+          }
+        }
+      }
+    }
+
+    // if highly mispredicted branch add to misprediction list
+    if (branch_learning_table[learning_branch_table_idx].tag == learning_branch_table_tag && branch_learning_table[learning_branch_table_idx].sat_ctr == BLT_SAT_COUNTER_MAX)
     {
       // append full 64-bit pc to misprediction list
-      high_mispred_pc.insert(pc);
+      // find next available entry in the branch table
+      if(branch_table_idx == -1) {
+        uint64_t new_branch_table_idx = -1;
+        for(int i = 0; i < BT_SIZE; i++)
+        {
+          if(branch_table[i].valid == false) {
+            new_branch_table_idx = i;
+            break;
+          }
+        }
+        //assert(new_branch_table_idx != -1);
+        
+        if(new_branch_table_idx != -1) {
+          std::cout << "NOTE: Adding new entry to branch table for pc: 0x" << std::hex << pc << std::dec << " | at index: " << new_branch_table_idx << "\n";
+          branch_table[new_branch_table_idx].tag = branch_table_tag;
+          branch_table[new_branch_table_idx].sat_ctr = 0;
+          branch_table[new_branch_table_idx].valid = true;
+          branch_table[new_branch_table_idx].is_linked = false;
+          branch_table[new_branch_table_idx].override_tage = false;
+          branch_table[new_branch_table_idx].br_type = NA;
+          branch_table[new_branch_table_idx].predicted_load_addr = 0xDEADBEAF;
+        }
+
+      }
+    }
+    
+    branch_table_idx = get_branch_table_idx(pc);
+
+    if (branch_table_idx != -1)
+    {
+      // append full 64-bit pc to misprediction list
       uint64_t dest_reg_val = RegFile[_exec_info.dec_info.src_reg_info[0]];
       // if(pc_index == 37824 )
       //{
@@ -1907,22 +1947,15 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
     // periodic reset of saturation counter
     if (branch_inst_count == 1000)
     {
-      // std::cout << "\nFinal unique PC list:\n";
-      // for (uint64_t pc : high_mispred_pc) {
-      //     std::cout << "0x" << std::hex << std::uppercase << pc << std::endl;
-      // }
-      for (int i = 0; i < BT_SIZE; i++)
+      for (int i = 0; i < BLT_SIZE; i++)
       {
-        if (!branch_table[i].is_linked)
+        if (branch_learning_table[i].sat_ctr < 15)
         {
-          if (branch_table[i].sat_ctr < 10)
-          {
-            branch_table[i].sat_ctr = 0;
-          }
-          else
-          {
-            branch_table[i].sat_ctr -= 10;
-          }
+          branch_learning_table[i].sat_ctr = 0;
+        }
+        else
+        {
+          branch_learning_table[i].sat_ctr -= 15;
         }
       }
       branch_inst_count = 0;

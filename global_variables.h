@@ -38,10 +38,16 @@ struct alu_reverse_table
 	uint64_t value;
 	bool valid;
 };
+
+struct BranchLearningEntry {
+  uint64_t tag;
+  uint8_t sat_ctr;
+};
+
 struct BranchTableEntry
 {
   uint64_t tag;
-  // uint64_t src_reg;
+  bool valid;
   uint64_t sat_ctr;
   bool override_tage;
   bool is_linked;
@@ -137,15 +143,24 @@ struct SpeculativeInfo
   bool valid;
 };
 
+// Branch Learning Table Info
+#define BLT_BITS 12
+#define BLT_TAG_BITS 16
+#define BLT_SIZE 1 << BLT_BITS
+#define BLT_MASK ((1 << BLT_BITS) - 1)
+#define BLT_TAG_MASK ((1 << BLT_TAG_BITS) - 1) << BLT_BITS
+#define BLT_SAT_COUNTER_MAX 31
+extern BranchLearningEntry branch_learning_table[BLT_SIZE]; // 4096 entries * (16 bits for tag
+                                                            //                 5 bits saturation counter) = 10.5 KB
+
 // Branch Table Info
-#define BT_BITS 16
+// #define BT_BITS 16
 #define BT_TAG_BITS 16
-#define BT_SIZE 1 << BT_BITS
-#define BT_MASK ((1 << BT_BITS) - 1)
-#define BT_TAG_MASK ((1 << BT_TAG_BITS) - 1) << BT_BITS
+#define BT_SIZE 32
+#define BT_TAG_MASK ((1 << BT_TAG_BITS) - 1)
 #define BT_SAT_COUNTER_MAX 31
 extern BranchTableEntry branch_table[BT_SIZE];  // X entries * (16 bits for tag
-                                                //                 10 bits saturation counter
+                                                //                 5 bits saturation counter
                                                 //                 1 bits for is linked       
                                                 //                 64 bits for predicted load addr
                                                 //                 64 bits for prev value
@@ -155,8 +170,8 @@ extern BranchTableEntry branch_table[BT_SIZE];  // X entries * (16 bits for tag
                                                 //                 1 bit for direction zero match
                                                 //                 1 bit for bit flag
                                                 //                 16 bits for src flag
-                                                //                 1 bit for flag br) = 224 bits * X entries
-  extern std::unordered_set<uint64_t> high_mispred_pc;
+                                                //                 1 bit for flag br) = 224 bits * 32 entries = 
+extern std::unordered_set<uint64_t> high_mispred_pc;
 
 // Store Table Info
 #define ST_BITS 12
