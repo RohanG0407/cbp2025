@@ -32,7 +32,7 @@
 #define STUPID_VALUE 8898
 #define SUPPORT_ALU_OPS false
 #define ALU_OVERRIDE false
-#define INC_VAL 4
+#define INC_VAL 8
 // Branch Table Info
 BranchTableEntry branch_table[BT_SIZE];
 int get_branch_table_idx(uint64_t bpc)
@@ -63,6 +63,19 @@ PredictionTableEntry prediction_table[PT_SIZE];
 
 // Value Predictor Load Table
 LoadTableEntry load_table[LDT_SIZE];
+int get_load_table_idx(uint64_t lpc)
+{
+  int idx = -1;
+  uint64_t load_table_tag = ((lpc >> 2) & LDT_TAG_MASK);
+  for (int i = 0; i < BT_SIZE; i++)
+  {
+    if (load_table[i].state != INVALID && (load_table[i].tag == load_table_tag))
+    {
+      return i;
+    }
+  }
+  return idx;
+}
 std::unordered_map<uint64_t, SpeculativeInfo> speculation_map;
 LinkTable link_table[LKT_SIZE];
 
@@ -192,15 +205,16 @@ void beginCondDirPredictor()
 void predictLoadAddr(uint64_t seq_no, uint8_t piece, uint64_t pc, const uint64_t fetch_cycle, uint64_t oracle_load_addr)
 {
   uint64_t predicted_addr = 0xdeadbeef;
-  uint64_t load_table_idx = (pc >> 2) & LDT_MASK;
-  uint64_t load_table_tag = ((pc >> 2) & LDT_TAG_MASK) >> LDT_BITS;
+  uint64_t load_table_idx = get_load_table_idx(pc);
 
+  if (load_table_idx == -1)
+    return;
   uint64_t branch_pc = load_table[load_table_idx].br_pc;
-
   uint64_t branch_table_idx = get_branch_table_idx(branch_pc);
-  if(branch_table_idx == -1) return;
+  if (branch_table_idx == -1)
+    return;
   assert(branch_table_idx != -1);
-  if (load_table[load_table_idx].tag == load_table_tag)
+  if (load_table_idx != -1)
   {
     if (PERFECT_ADDR_PRED)
     {
@@ -386,17 +400,16 @@ void notify_instr_decode(uint64_t seq_no, uint8_t piece, uint64_t pc, const Deco
 void updateLoadPredictor(uint64_t seq_no, uint8_t piece, uint64_t pc, const DecodeInfo &_decode_info, const uint64_t mem_va, const uint64_t mem_sz, const uint64_t agen_cycle)
 {
   // updates load predictor table when addr is ready
-  uint64_t load_table_idx = (pc >> 2) & LDT_MASK;
-  uint64_t load_table_tag = ((pc >> 2) & LDT_TAG_MASK) >> LDT_BITS;
-  if (load_table[load_table_idx].tag == load_table_tag)
+  uint64_t load_table_idx = get_load_table_idx(pc);
+  if (load_table_idx != -1)
   {
     if (load_table[load_table_idx].state == VALID_STRIDE)
     {
       if (speculation_map[seq_no].valid)
       {
         uint64_t spec_pc = speculation_map[seq_no].pc;
-        uint64_t spec_load_table_idx = (spec_pc >> 2) & LDT_MASK;
-        uint64_t spec_load_table_tag = ((spec_pc >> 2) & LDT_TAG_MASK) >> LDT_BITS;
+        uint64_t spec_load_table_idx = get_load_table_idx(spec_pc);
+        assert(spec_load_table_idx != -1);
         if (load_table[spec_load_table_idx].inflight_loads != 0)
         {
           load_table[spec_load_table_idx].inflight_loads -= 1;
@@ -404,7 +417,7 @@ void updateLoadPredictor(uint64_t seq_no, uint8_t piece, uint64_t pc, const Deco
         // check if the predicted address is correct
         if (speculation_map[seq_no].predicted_addr != mem_va)
         {
-          if (load_table[spec_load_table_idx].tag == spec_load_table_tag)
+          if (spec_load_table_idx != -1)
           {
 
             load_table[spec_load_table_idx].last_addr = mem_va + (load_table[spec_load_table_idx].stride * load_table[spec_load_table_idx].inflight_loads);
@@ -1019,11 +1032,6 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
           {
             // branch_table[branch_table_idx].incorrect_counter += 1;
             //  if (pc_index == 33084 || 54540 || 12080 || 11912)
-          }
-          if (branch_table[branch_table_idx].incorrect_counter > 1000)
-          {
-            // std::cout << " pc_index" << pc_index << " correct counter " << branch_table[pc_index].correct_counter << " incorrect counter " << branch_table[pc_index].incorrect_counter << "branch type " << branch_table[pc_index].br_type << "\n";
-            // std::cout << " _resolve dir " << _resolve_dir << " pred_dir " << pred_dir << "\n";
           }
         }
       }
@@ -1715,18 +1723,21 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
     {
       // append full 64-bit pc to misprediction list
       // find next available entry in the branch table
-      if(branch_table_idx == -1) {
+      if (branch_table_idx == -1)
+      {
         uint64_t new_branch_table_idx = -1;
-        for(int i = 0; i < BT_SIZE; i++)
+        for (int i = 0; i < BT_SIZE; i++)
         {
-          if(branch_table[i].valid == false) {
+          if (branch_table[i].valid == false)
+          {
             new_branch_table_idx = i;
             break;
           }
         }
-        //assert(new_branch_table_idx != -1);
-        
-        if(new_branch_table_idx != -1) {
+        // assert(new_branch_table_idx != -1);
+
+        if (new_branch_table_idx != -1)
+        {
           std::cout << "NOTE: Adding new entry to branch table for pc: 0x" << std::hex << pc << std::dec << " | at index: " << new_branch_table_idx << "\n";
           branch_table[new_branch_table_idx].tag = branch_table_tag;
           branch_table[new_branch_table_idx].sat_ctr = 0;
@@ -1736,10 +1747,9 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
           branch_table[new_branch_table_idx].br_type = NA;
           branch_table[new_branch_table_idx].predicted_load_addr = 0xDEADBEAF;
         }
-
       }
     }
-    
+
     branch_table_idx = get_branch_table_idx(pc);
 
     if (branch_table_idx != -1)
@@ -1894,21 +1904,35 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
 
           // add load to the load table
           uint64_t load_pc = retire_op.pc;
-          uint64_t load_table_idx = (load_pc >> 2) & LDT_MASK;
-          uint64_t load_table_tag = ((load_pc >> 2) & LDT_TAG_MASK) >> LDT_BITS;
-          if (load_table[load_table_idx].state == INVALID)
+          uint64_t load_table_idx = get_load_table_idx(load_pc);
+          uint64_t load_table_tag = (load_pc >> 2) & LDT_TAG_MASK;
+          if (load_table_idx == -1)
           {
-            // add to the load table
-            load_table[load_table_idx].tag = load_table_tag;
-            load_table[load_table_idx].br_pc = pc;
-            load_table[load_table_idx].last_addr = load_addr;
-            load_table[load_table_idx].stride = -1;
-            load_table[load_table_idx].state = TRAINING;
-            if (LV_DEBUG_FLAG)
+            uint64_t new_load_table_idx = -1;
+            for (int i = 0; i < LDT_SIZE; i++)
             {
-              std::cout << "Load Table Entry Created: " << std::endl;
-              std::cout << "Load PC: 0x" << std::hex << load_pc << std::dec << " | Load Addr: 0x" << std::hex << load_addr << std::dec
-                        << " | BR PC: 0x" << std::hex << pc << std::dec << " | Stride: " << load_table[load_table_idx].stride << std::endl;
+              if (load_table[i].state == INVALID)
+              {
+                new_load_table_idx = i;
+                break;
+              }
+            }
+
+            // assert(new_load_table_idx != -1);
+            if (new_load_table_idx != -1)
+            {
+              std::cout << "NOTE: Adding new entry to load table for pc: 0x" << std::hex << load_pc << std::dec << " | at index: " << new_load_table_idx << "\n";
+              load_table[new_load_table_idx].tag = load_table_tag;
+              load_table[new_load_table_idx].br_pc = pc;
+              load_table[new_load_table_idx].last_addr = load_addr;
+              load_table[new_load_table_idx].stride = -1;
+              load_table[new_load_table_idx].state = TRAINING;
+              if (LV_DEBUG_FLAG)
+              {
+                std::cout << "Load Table Entry Created: " << std::endl;
+                std::cout << "Load PC: 0x" << std::hex << load_pc << std::dec << " | Load Addr: 0x" << std::hex << load_addr << std::dec
+                          << " | BR PC: 0x" << std::hex << pc << std::dec << " | Stride: " << load_table[load_table_idx].stride << std::endl;
+              }
             }
           }
 

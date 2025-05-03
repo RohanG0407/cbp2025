@@ -59,11 +59,8 @@ struct BranchTableEntry
   bool bit_position_matters;
   bool direction_zero_match;
   bool bit_flag;
-  long long int correct_counter = 0;
-  long long int incorrect_counter = 0;
   bool src_flag[16];
   bool flag_br;
- // std::unordered_map<uint64_t, bool> value_prediction_map;
  bool is_alu;
  alu_reverse_table alu_result_entries[6];
  aluop alu_type;
@@ -156,12 +153,15 @@ extern BranchLearningEntry branch_learning_table[BLT_SIZE]; // 4096 entries * (1
 // Branch Table Info
 // #define BT_BITS 16
 #define BT_TAG_BITS 16
-#define BT_SIZE 32
+#define BT_SIZE 16
 #define BT_TAG_MASK ((1 << BT_TAG_BITS) - 1)
 #define BT_SAT_COUNTER_MAX 31
-extern BranchTableEntry branch_table[BT_SIZE];  // X entries * (16 bits for tag
-                                                //                 5 bits saturation counter
-                                                //                 1 bits for is linked       
+extern BranchTableEntry branch_table[BT_SIZE];  // 32 entries * (16 bits for tag
+                                                //                 1 bit for valid
+                                                //                 5 bits for saturation counter
+                                                //                 1 bit for override tag
+                                                //                 1 bits for is linked 
+                                                //                 3 bits for branch type      
                                                 //                 64 bits for predicted load addr
                                                 //                 64 bits for prev value
                                                 //                 1 bit for prev taken
@@ -170,8 +170,12 @@ extern BranchTableEntry branch_table[BT_SIZE];  // X entries * (16 bits for tag
                                                 //                 1 bit for direction zero match
                                                 //                 1 bit for bit flag
                                                 //                 16 bits for src flag
-                                                //                 1 bit for flag br) = 224 bits * 32 entries = 
-extern std::unordered_set<uint64_t> high_mispred_pc;
+                                                //                 1 bit for flag br
+                                                //                 1 bit for is alu
+                                                //                 6 * (65 bits for alu result entries)
+                                                //                 3 bits for alu type
+                                                //                 64 bits for threshold
+                                                //                 1 bit for override alu) = 699 bits * 32 entries = 2.8 KB
 
 // Store Table Info
 #define ST_BITS 12
@@ -203,19 +207,17 @@ extern std::deque<RetireOp> retire_op_queue; // 16 entires * (136 bytes per entr
 #define RETIRE_OP_QUEUE_SIZE 16
 
 // Value Predictor Load Table
-#define LDT_BITS 16
 #define LDT_TAG_BITS 16
-#define LDT_SIZE 1 << LDT_BITS
-#define LDT_MASK ((1 << LDT_BITS) - 1)
-#define LDT_TAG_MASK ((1 << LDT_TAG_BITS) - 1) << LDT_BITS
-extern LoadTableEntry load_table[LDT_SIZE]; // X entries * (16 bits for tag
+#define LDT_SIZE 16
+#define LDT_TAG_MASK ((1 << LDT_TAG_BITS) - 1)
+extern LoadTableEntry load_table[LDT_SIZE]; // 32 entries * (16 bits for tag
                                             //                 64 bits branch pc
                                             //                 64 bits for last addr        
                                             //                 16 bits for stride
                                             //                 8 bits for inflight loads
                                             //                 2 bits for confidence ctr
                                             //                 2 bits for state
-                                            //                 16 bits for addr history reg) = 172 bits * X entries
+                                            //                 16 bits for addr history reg) = 172 bits * 32 entries = .67 KB
                                         
 
 #define LKT_BITS 16
