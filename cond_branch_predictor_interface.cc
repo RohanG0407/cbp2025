@@ -1040,7 +1040,9 @@ void get_branch_bit_direction(uint16_t branch_table_idx, uint64_t dest_reg_val, 
     // exit(0);
   }
   if(branch_table_idx == branch_table_id)
-          { //std::cout << "Have entered tbz test for branch pc_index " << branch_table_idx << "branch bit mask is" << branch_table[branch_table_idx].branch_bit_mask << "\n";}
+  {
+    //std::cout << "Have entered tbz test for branch pc_index " << branch_table_idx << "branch bit mask is" << branch_table[branch_table_idx].branch_bit_mask << "\n";
+  }
   // std::cout << "branch bit drection started for pc_index:" << pc_index <<" val : "<< dest_reg_val << "dir: "<< _resolve_dir << " \n";
   if (branch_table[branch_table_idx].bit_position_matters == false)
   {
@@ -1126,7 +1128,9 @@ void get_branch_bit_direction(uint16_t branch_table_idx, uint64_t dest_reg_val, 
   if (branch_table[branch_table_idx].bit_position_matters == true)
   {
 	  if(branch_table_idx == branch_table_id)
-	  { //std::cout << "Have entered tbz test for branch pc_index " << branch_table_idx << "branch bit mask is" << branch_table[branch_table_idx].branch_bit_mask << "\n";}
+	  {
+      //std::cout << "Have entered tbz test for branch pc_index " << branch_table_idx << "branch bit mask is" << branch_table[branch_table_idx].branch_bit_mask << "\n";
+    }
     if (branch_table[branch_table_idx].prev_value != STUPID_VALUE)
     {
       uint64_t changed_bits = branch_table[branch_table_idx].prev_value ^ dest_reg_val;
