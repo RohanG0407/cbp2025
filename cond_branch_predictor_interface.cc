@@ -502,7 +502,8 @@ void updateLoadPredictor(uint64_t seq_no, uint8_t piece, uint64_t pc, const Deco
         {
           load_table[load_table_idx].state = VALID_STRIDE;
           uint64_t branch_pc = load_table[load_table_idx].br_pc;
-          uint64_t branch_pc_index = (branch_pc >> 2) & 0xFFFF;
+          //uint64_t branch_pc_index = (branch_pc >> 2) & 0xFFFF;
+          uint64_t branch_pc_index = (branch_pc >> 2) & BT_MASK;
           branch_table[branch_pc_index].predicted_load_addr = mem_va + load_table[load_table_idx].stride;
           if (LV_DEBUG_FLAG)
           {
