@@ -32,7 +32,7 @@
 #define STUPID_VALUE 8898
 #define SUPPORT_ALU_OPS false
 #define ALU_OVERRIDE false
-#define INC_VAL 8
+#define INC_VAL 1000
 // Branch Table Info
 BranchTableEntry branch_table[BT_SIZE];
 int get_branch_table_idx(uint64_t bpc)
@@ -1701,6 +1701,7 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
             if (branch_table[branch_table_idx].sat_ctr < (BT_SAT_COUNTER_MAX - INC_VAL))
             {
               branch_table[branch_table_idx].sat_ctr += INC_VAL;
+	      std::cout << "hi i am called\n"; 
             }
           }
           else
@@ -1711,9 +1712,10 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
             }
           }
 
-          if (branch_table[branch_table_idx].sat_ctr == BT_SAT_COUNTER_MAX)
+          if (branch_table[branch_table_idx].sat_ctr >= BT_SAT_COUNTER_MAX)
           {
             branch_table[branch_table_idx].override_tage = false;
+	    std::cout << " IMPORTANT tage false amde\n";
           }
         }
       }
