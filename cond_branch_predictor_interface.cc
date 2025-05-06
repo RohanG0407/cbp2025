@@ -1031,13 +1031,15 @@ void notify_instr_execute_resolve(uint64_t seq_no, uint8_t piece, uint64_t pc, c
   }
 }
 
-void get_branch_bit_direction(uint16_t branch_table_idx, uint64_t dest_reg_val, const bool _resolve_dir)
+void get_branch_bit_direction(uint16_t branch_table_idx, uint64_t dest_reg_val, const bool _resolve_dir, uint64_t branch_table_id)
 {
   if (branch_table[branch_table_idx].br_type > 5)
   {
     //std::cout << "ERROR ERROR " << dest_reg_val << "\n";
     // exit(0);
   }
+  if(branch_table_idx == branch_table_id)
+          { std::cout << "Have entered tbz test for branch pc_index " << branch_table_idx << "branch bit mask is" << branch_table[branch_table_idx].branch_bit_mask << "\n";}
   // std::cout << "branch bit drection started for pc_index:" << pc_index <<" val : "<< dest_reg_val << "dir: "<< _resolve_dir << " \n";
   if (branch_table[branch_table_idx].bit_position_matters == false)
   {
@@ -1122,7 +1124,8 @@ void get_branch_bit_direction(uint16_t branch_table_idx, uint64_t dest_reg_val, 
   }
   if (branch_table[branch_table_idx].bit_position_matters == true)
   {
-    //	 std::cout << "Have entered tbz test for branch pc_index " << pc_index << "branch bit mask is" << branch_table[pc_index].branch_bit_mask << "\n";
+	  if(branch_table_idx == branch_table_id)
+	  { std::cout << "Have entered tbz test for branch pc_index " << branch_table_idx << "branch bit mask is" << branch_table[branch_table_idx].branch_bit_mask << "\n";}
     if (branch_table[branch_table_idx].prev_value != STUPID_VALUE)
     {
       uint64_t changed_bits = branch_table[branch_table_idx].prev_value ^ dest_reg_val;
@@ -1195,8 +1198,12 @@ void get_branch_bit_direction(uint16_t branch_table_idx, uint64_t dest_reg_val, 
   }
 }
 
-void learn_src_branch_behaivour(uint16_t branch_table_idx, uint64_t dest_reg_val, const bool _resolve_dir)
+void learn_src_branch_behaivour(uint16_t branch_table_idx, uint64_t dest_reg_val, const bool _resolve_dir, uint64_t branch_table_id)
 {
+	 if(branch_table_idx == branch_table_id)
+	 {
+		 std::cout << " Its a src branch\n";
+	 }
   if (dest_reg_val >= 16)
   {
     // std::cout << "SOMETHING IS WRONG, this is not src branch, cant have value more than 16!!! \n";
@@ -1643,15 +1650,22 @@ void value_correlator(uint64_t pc_index, uint64_t load_val, const bool _resolve_
 // For the sample predictor implementation, we do not leverage commit information
 uint64_t branch_inst_count = 0; // max to 1000
 uint64_t branch_count = 0;
+bool switching_valid = false;
 void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool pred_dir, const ExecuteInfo &_exec_info, const uint64_t commit_cycle)
 {
   if (is_cond_br(_exec_info.dec_info.insn_class))
   {
     const bool _resolve_dir = _exec_info.taken.value();
+    uint64_t branch_table_id;
 
     uint64_t branch_table_idx = (pc >> 2) & BT_MASK;
     uint64_t branch_table_tag = ((pc >> 2) & BT_TAG_MASK) >> BT_BITS;
 
+    if(pc == 0xaaaab1a14cf4)
+    {
+	    //std::cout << "br called\n";
+            branch_table_id = branch_table_idx;
+    }
     // mechanism to find highly mispredicted branches
     if (_exec_info.dec_info.src_reg_info.size() > 0)
     {
@@ -1672,7 +1686,7 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
           }
         }
 
-        if (branch_table[branch_table_idx].sat_ctr == BT_SAT_COUNTER_MAX)
+        if (branch_table[branch_table_idx].sat_ctr >= BT_SAT_COUNTER_MAX)
         {
 	  if(ALU_OVERRIDE && !(branch_table[branch_table_idx].override_alu) && branch_table[branch_table_idx].is_alu)
 	  {
@@ -1709,12 +1723,22 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
       // }
       if (_exec_info.dec_info.src_reg_info[0] != 64)
       {
-        get_branch_bit_direction(branch_table_idx, dest_reg_val, _resolve_dir);
+        get_branch_bit_direction(branch_table_idx, dest_reg_val, _resolve_dir, branch_table_id);
         // std::cout << " debug br type " << branch_table[pc_index].br_type;
+	 if(pc == 0xaaaab1a14cf4)
+    {
+            std::cout << "br bit called\n";
+            //branch_table_id = branch_table_idx;
+    }
       }
       else
       {
-        learn_src_branch_behaivour(branch_table_idx, dest_reg_val, _resolve_dir);
+	      if(pc == 0xaaaab1a14cf4)
+    {
+            //std::cout << "br src called\n";
+     //       branch_table_id = branch_table_idx;
+    }
+        learn_src_branch_behaivour(branch_table_idx, dest_reg_val, _resolve_dir, branch_table_id);
         branch_table[branch_table_idx].flag_br = 1;
       }
       // learning branch direction and bit (TBZ vs CBZ)
@@ -1908,6 +1932,12 @@ void notify_instr_commit(uint64_t seq_no, uint8_t piece, uint64_t pc, const bool
       // for (uint64_t pc : high_mispred_pc) {
       //     std::cout << "0x" << std::hex << std::uppercase << pc << std::endl;
       // }
+      ++branch_count;
+      if(branch_count == 10)
+      {
+	      switching_valid = true;
+	      branch_count = 0;
+      }
       for (int i = 0; i < BT_SIZE; i++)
       {
         if (!branch_table[i].is_linked)
